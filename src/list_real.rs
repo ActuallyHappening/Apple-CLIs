@@ -1,20 +1,44 @@
-use anyhow::Context;
 use tracing::debug;
 
 use crate::Device;
 
-pub fn list_real() -> anyhow::Result<impl Iterator<Item = Device>> {
+#[derive(thiserror::Error, Debug)]
+pub enum IosDeployDetectError {
+    #[error("Failed to parse `ios-deploy --detect` output, line {line_num}: {line}")]
+    ParseError { line_num: usize, line: String },
+    #[error("An error occured while executing `ios-deploy --detect`: {0}")]
+    ExecuteError(#[from] bossy::Error),
+}
+
+pub fn list_real() -> Result<Vec<Device>, IosDeployDetectError> {
     let output = bossy::Command::pure("ios-deploy")
         .with_arg("--detect")
-        .run_and_wait_for_string()
-        .context("ios-deploy --detect failed")?;
+        .run_and_wait_for_string()?;
 
-    for line in output.lines() {
+    let mut devices = Vec::new();
+    for (line_num, line) in output.lines().enumerate() {
         if line.starts_with("[....] Found ") {
-            let device = line.split("Found ").last().context("Failed to parse")?;
-            debug!("Found device: {}", device);
+            let device = line
+                .split("Found ")
+                .last()
+                .ok_or(IosDeployDetectError::ParseError {
+                    line_num,
+                    line: line.into(),
+                })?;
+            debug!("Found device raw: {}", device);
+            let id = device
+                .split_whitespace()
+                .next()
+                .ok_or(IosDeployDetectError::ParseError {
+                    line_num,
+                    line: line.into(),
+                })?
+                .to_string();
+            let device = Device::new(id);
+						debug!("Found device: {:?}", device);
+            devices.push(device);
         }
     }
 
-    todo!()
+    Ok(devices)
 }
