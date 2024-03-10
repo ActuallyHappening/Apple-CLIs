@@ -6,12 +6,13 @@ use crate::Device;
 pub enum IosDeployDetectError {
     #[error("Failed to parse `ios-deploy --detect` output, line {line_num}: {line}")]
     ParseError { line_num: usize, line: String },
+
     #[error("An error occured while executing `ios-deploy --detect`: {0}")]
     ExecuteError(#[from] bossy::Error),
 }
 
 pub fn list_real() -> Result<Vec<Device>, IosDeployDetectError> {
-    let output = bossy::Command::pure("ios-deploy")
+    let output = bossy::Command::pure("/opt/homebrew/bin/ios-deploy")
         .with_arg("--detect")
         .run_and_wait_for_string()?;
 
