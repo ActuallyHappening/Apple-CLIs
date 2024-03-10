@@ -1,5 +1,10 @@
-
+use apple_clis::Args;
+use clap::Parser;
+use tracing::*;
 
 fn main() {
-    println!("Hello, world!");
+		tracing_subscriber::fmt::init();
+    let config = Args::parse();
+
+		trace!("Config: {:?}", config);
 }

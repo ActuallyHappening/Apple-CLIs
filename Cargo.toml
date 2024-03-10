@@ -7,7 +7,10 @@ edition = "2021"
 
 [dependencies]
 anyhow = "1.0.80"
-clap = { version = "4.5.2", features = ["derive"] }
+bossy = "0.2.1"
+camino = "1.1.6"
+clap = { version = "4.5.2", features = ["derive", "env"] }
 thiserror = "1.0.57"
+toml = "0.8.10"
 tracing = "0.1.40"
 tracing-subscriber = { version = "0.3.18", features = ["fmt", "env-filter"] }
