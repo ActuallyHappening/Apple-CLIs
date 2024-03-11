@@ -1,5 +1,5 @@
-use apple_clis::ios_deploy::IosDeployCLIInstance;
-use camino::Utf8PathBuf;
+use apple_clis::{cargo_bundle, ios_deploy::IosDeployCLIInstance};
+use camino::{Utf8Path, Utf8PathBuf};
 use clap::{Args, Parser, Subcommand};
 use tracing::*;
 
@@ -47,6 +47,46 @@ enum CargoBundle {
 	Ios,
 }
 
+#[derive(thiserror::Error, Debug)]
+pub enum TopLevelArgsError {
+	#[error("Error getting current working directory")]
+	CwdDoesNotExist(std::io::Error),
+
+	#[error("Error converting CWD path to UTF-8: {0}")]
+	PathNotUtf8(#[from] camino::FromPathBufError),
+
+	#[error("The CWD does not contain a `Cargo.toml` file")]
+	CargoTomlDoesNotExist,
+
+	#[error("Error running `which cargo`: {0}")]
+	CannotWhichCargo(#[from] which::Error),
+}
+
+impl TopLevelCliArgs {
+	fn try_get_manifest_path(&self) -> Result<Utf8PathBuf, TopLevelArgsError> {
+		match &self.manifest_path {
+			Some(p) => Ok(p.clone()),
+			None => match std::env::current_dir() {
+				Ok(p) => {
+					if p.join("Cargo.toml").exists() {
+						Ok(Utf8PathBuf::try_from(p)?)
+					} else {
+						Err(TopLevelArgsError::CargoTomlDoesNotExist)
+					}
+				}
+				Err(err) => Err(TopLevelArgsError::CwdDoesNotExist(err)),
+			},
+		}
+	}
+
+	fn try_get_cargo_path(&self) -> Result<Utf8PathBuf, TopLevelArgsError> {
+		match &self.cargo {
+			Some(p) => Ok(p.clone()),
+			None => Ok(Utf8PathBuf::try_from(which::which("cargo")?)?),
+		}
+	}
+}
+
 fn main() -> anyhow::Result<()> {
 	let config = CliArgs::parse();
 	if config.human_output() {
@@ -69,10 +109,10 @@ fn main() -> anyhow::Result<()> {
 			}
 		}
 		Commands::CargoBundle(cargo_bundle) => {
-			let cargo_bundle_instance = match config.args.cargo {
-				Some(p) => apple_clis::cargo_bundle::CargoBundleInstance::new(p),
-				None => apple_clis::cargo_bundle::CargoBundleInstance::try_new_from_which()?,
-			};
+			let cargo_bundle_instance = cargo_bundle::CargoBundleInstance::new(
+				config.args.try_get_cargo_path()?,
+				config.args.try_get_manifest_path()?,
+			);
 			match cargo_bundle {
 				CargoBundle::Ios => {
 					cargo_bundle_instance.bundle_ios()?;
