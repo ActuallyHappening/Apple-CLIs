@@ -36,3 +36,6 @@ cd ..
 # example command
 cargo r -- codesign display
 ```
+
+### Todo/Features:
+- [] simctl
