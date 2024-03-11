@@ -1,14 +1,16 @@
-use serde::Serialize;
+use std::str::FromStr;
+
+use serde::{Deserialize, Serialize};
 
 pub mod ios_deploy;
 
-#[derive(Debug, Serialize)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct Device {
-	id: String,
-}
+	device_identifier: String,
 
-impl Device {
-	pub fn new(id: impl Into<String>) -> Self {
-		Device { id: id.into() }
-	}
+	device_name: String,
+
+	model_name: String,
+
+	interface: String,
 }
