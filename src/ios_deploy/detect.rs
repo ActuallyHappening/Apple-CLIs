@@ -1,7 +1,7 @@
 use crate::Device;
 use serde::Deserialize;
 
-use super::IosDeployInstance;
+use super::IosDeployCLIInstance;
 
 #[derive(thiserror::Error, Debug)]
 pub enum IosDeployDetectError {
@@ -27,7 +27,7 @@ impl Default for DetectDevicesConfig {
 	}
 }
 
-impl IosDeployInstance {
+impl IosDeployCLIInstance {
 	/// Uses default [DetectDevicesConfig].
 	pub fn detect_devices(&self) -> Result<Vec<Device>, IosDeployDetectError> {
 		self.detect_devices_with_config(&DetectDevicesConfig::default())

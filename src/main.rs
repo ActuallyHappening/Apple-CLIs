@@ -1,4 +1,4 @@
-use apple_clis::ios_deploy::IosDeployInstance;
+use apple_clis::ios_deploy::IosDeployCLIInstance;
 use camino::Utf8PathBuf;
 use clap::{Args, Parser, Subcommand};
 use tracing::*;
@@ -45,7 +45,7 @@ fn main() -> anyhow::Result<()> {
 
 	match config.command {
 		Commands::IosDeploy(ios_deploy) => {
-			let ios_deploy_instance = IosDeployInstance::try_new_from_which()?;
+			let ios_deploy_instance = IosDeployCLIInstance::try_new_from_which()?;
 			match ios_deploy {
 				IosDeploy::Detect => {
 					let devices = ios_deploy_instance.detect_devices()?;

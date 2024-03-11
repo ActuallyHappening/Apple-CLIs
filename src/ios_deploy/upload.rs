@@ -2,7 +2,7 @@ use camino::Utf8Path;
 
 use crate::Device;
 
-use super::IosDeployInstance;
+use super::IosDeployCLIInstance;
 
 #[derive(thiserror::Error, Debug)]
 pub enum UploadBundleError {
@@ -13,7 +13,7 @@ pub enum UploadBundleError {
 	ExecuteError(#[from] bossy::Error),
 }
 
-impl IosDeployInstance {
+impl IosDeployCLIInstance {
 	pub fn upload_bundle(
 		&self,
 		device: &Device,
