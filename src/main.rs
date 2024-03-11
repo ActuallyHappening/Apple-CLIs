@@ -53,6 +53,7 @@ enum CargoBundle {
 #[derive(Subcommand, Debug)]
 enum Security {
 	Teams,
+	Pems,
 }
 
 #[derive(thiserror::Error, Debug)]
@@ -137,6 +138,13 @@ fn main() -> anyhow::Result<()> {
 					println!("{} development teams found with `security`:", teams.len());
 					for team in teams {
 						println!("Team: {:?}", team);
+					}
+				}
+				Security::Pems => {
+					let pems = security_instance.get_developer_pems()?;
+					println!("{} development pems found with `security`:", pems.len());
+					for pem in pems {
+						println!("Pem: {:#?}", pem);
 					}
 				}
 			}
