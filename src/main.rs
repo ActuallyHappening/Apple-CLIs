@@ -1,112 +1,18 @@
-use apple_clis::{cargo_bundle, ios_deploy::IosDeployCLIInstance, security, spctl};
-use camino::{Utf8Path, Utf8PathBuf};
-use clap::{Args, Parser, Subcommand};
+use apple_clis::cli::{self, Commands, IosDeploy, Security, Spctl};
+use apple_clis::{ios_deploy::IosDeployCLIInstance, security, spctl};
+use camino::Utf8PathBuf;
+use clap::Parser;
 use tracing::*;
-
-#[derive(Parser, Debug)]
-#[command(version, about, long_about = None)]
-#[command(propagate_version = true)]
-struct CliArgs {
-	#[command(flatten)]
-	args: TopLevelCliArgs,
-
-	#[command(subcommand)]
-	pub command: Commands,
-}
-
-#[derive(Args, Debug)]
-struct TopLevelCliArgs {
-	#[arg(long, env = "CARGO_MANIFEST_DIR")]
-	manifest_path: Option<Utf8PathBuf>,
-
-	#[arg(long, env = "CARGO")]
-	cargo: Option<Utf8PathBuf>,
-
-	#[arg(long)]
-	json: bool,
-}
-
-#[derive(Subcommand, Debug)]
-enum Commands {
-	#[clap(subcommand)]
-	IosDeploy(IosDeploy),
-
-	// #[clap(subcommand)]
-	// CargoBundle(CargoBundle),
-	#[clap(subcommand)]
-	Security(Security),
-
-	#[clap(subcommand)]
-	Spctl(Spctl),
-}
-
-#[derive(Subcommand, Debug)]
-enum IosDeploy {
-	/// Spends 5 seconds to detect any already connected devices
-	Detect,
-}
-
-#[derive(Subcommand, Debug)]
-enum CargoBundle {
-	/// Bundles the iOS app
-	Ios,
-}
-
-#[derive(Subcommand, Debug)]
-enum Security {
-	Teams,
-	Pems,
-}
-
-#[derive(Subcommand, Debug)]
-enum Spctl {
-	AssessApp { app_path: Option<Utf8PathBuf> },
-}
-
-#[derive(thiserror::Error, Debug)]
-pub enum TopLevelArgsError {
-	#[error("Error getting current working directory")]
-	CwdDoesNotExist(std::io::Error),
-
-	#[error("Error converting CWD path to UTF-8: {0}")]
-	PathNotUtf8(#[from] camino::FromPathBufError),
-
-	#[error("The CWD does not contain a `Cargo.toml` file")]
-	CargoTomlDoesNotExist,
-
-	#[error("Error running `which cargo`: {0}")]
-	CannotWhichCargo(#[from] which::Error),
-}
-
-impl TopLevelCliArgs {
-	fn try_get_manifest_path(&self) -> Result<Utf8PathBuf, TopLevelArgsError> {
-		match &self.manifest_path {
-			Some(p) => Ok(p.clone()),
-			None => match std::env::current_dir() {
-				Ok(p) => {
-					if p.join("Cargo.toml").exists() {
-						Ok(Utf8PathBuf::try_from(p)?)
-					} else {
-						Err(TopLevelArgsError::CargoTomlDoesNotExist)
-					}
-				}
-				Err(err) => Err(TopLevelArgsError::CwdDoesNotExist(err)),
-			},
-		}
-	}
-
-	fn try_get_cargo_path(&self) -> Result<Utf8PathBuf, TopLevelArgsError> {
-		match &self.cargo {
-			Some(p) => Ok(p.clone()),
-			None => Ok(Utf8PathBuf::try_from(which::which("cargo")?)?),
-		}
-	}
-}
+use tracing_subscriber::filter::LevelFilter;
+use tracing_subscriber::EnvFilter;
 
 fn main() -> anyhow::Result<()> {
-	let config = CliArgs::parse();
+	let config = cli::CliArgs::parse();
 	if config.human_output() {
-		tracing_subscriber::fmt::init();
+		let env_filter = EnvFilter::builder()
+			.with_default_directive(LevelFilter::INFO.into())
+			.from_env_lossy();
+		tracing_subscriber::fmt().with_env_filter(env_filter).init();
 	}
 
 	trace!("Config: {:?}", config);
@@ -190,14 +96,4 @@ fn main() -> anyhow::Result<()> {
 	}
 
 	Ok(())
-}
-
-impl CliArgs {
-	pub fn machine_output(&self) -> bool {
-		self.args.json
-	}
-
-	pub fn human_output(&self) -> bool {
-		!self.machine_output()
-	}
 }

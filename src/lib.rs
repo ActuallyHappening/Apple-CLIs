@@ -1,5 +1,6 @@
 use serde::{Deserialize, Serialize};
 
+pub mod cli;
 pub mod ios_deploy;
 pub mod security;
 pub mod cargo_bundle;
