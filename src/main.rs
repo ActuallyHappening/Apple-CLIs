@@ -19,6 +19,9 @@ struct TopLevelCliArgs {
 	#[arg(long, env = "CARGO_MANIFEST_DIR")]
 	manifest_path: Option<Utf8PathBuf>,
 
+	#[arg(long, env = "CARGO")]
+	cargo: Option<Utf8PathBuf>,
+
 	#[arg(long)]
 	json: bool,
 }
@@ -27,12 +30,21 @@ struct TopLevelCliArgs {
 enum Commands {
 	#[clap(subcommand)]
 	IosDeploy(IosDeploy),
+
+	#[clap(subcommand)]
+	CargoBundle(CargoBundle),
 }
 
 #[derive(Subcommand, Debug)]
 enum IosDeploy {
 	/// Spends 5 seconds to detect any already connected devices
 	Detect,
+}
+
+#[derive(Subcommand, Debug)]
+enum CargoBundle {
+	/// Bundles the iOS app
+	Ios,
 }
 
 fn main() -> anyhow::Result<()> {
@@ -53,6 +65,17 @@ fn main() -> anyhow::Result<()> {
 					for device in devices {
 						println!("Device: {:?}", device);
 					}
+				}
+			}
+		}
+		Commands::CargoBundle(cargo_bundle) => {
+			let cargo_bundle_instance = match config.args.cargo {
+				Some(p) => apple_clis::cargo_bundle::CargoBundleInstance::new(p),
+				None => apple_clis::cargo_bundle::CargoBundleInstance::try_new_from_which()?,
+			};
+			match cargo_bundle {
+				CargoBundle::Ios => {
+					cargo_bundle_instance.bundle_ios()?;
 				}
 			}
 		}

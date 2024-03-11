@@ -2,6 +2,8 @@ use serde::{Deserialize, Serialize};
 
 pub mod ios_deploy;
 pub mod security;
+pub mod cargo_bundle;
+pub mod xcodebuild;
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Device {
