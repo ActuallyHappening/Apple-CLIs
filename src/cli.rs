@@ -14,8 +14,8 @@ pub enum GlobError {
 	#[error("Error running glob: {0}")]
 	GlobError(#[from] glob::PatternError),
 
-	#[error("No matched files / directories found")]
-	NoMatchedFiles,
+	#[error("No matched files / directories found for pattern: {0}")]
+	NoMatchedFiles(String),
 }
 
 pub fn glob(pattern: &'static str) -> Result<Utf8PathBuf, GlobError> {
@@ -40,7 +40,7 @@ pub fn glob(pattern: &'static str) -> Result<Utf8PathBuf, GlobError> {
 				Ok(p.clone())
 			}
 		}
-		None => Err(GlobError::NoMatchedFiles),
+		None => Err(GlobError::NoMatchedFiles(pattern.into())),
 	}
 }
 
@@ -89,9 +89,7 @@ pub enum IosDeploy {
 	/// Spends a second to detect any already connected devices
 	Detect,
 	/// Uploads an app to a real device
-	Upload {
-		app_path: Option<Utf8PathBuf>,
-	},
+	Upload { app_path: Option<Utf8PathBuf> },
 }
 
 #[derive(Subcommand, Debug)]

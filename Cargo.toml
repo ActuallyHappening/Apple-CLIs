@@ -2,6 +2,7 @@
 name = "apple-clis"
 version = "0.0.4"
 edition = "2021"
+default-run = "apple-clis"
 description = "A collection of Apple command-line tool wrappers, library and CLI"
 authors = ["Caleb Yates <actuallyhappening42@gmail.com"]
 license = "MIT OR Apache-2.0"
