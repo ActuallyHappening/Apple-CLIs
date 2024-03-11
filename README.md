@@ -38,4 +38,4 @@ cargo r -- codesign display
 ```
 
 ### Todo/Features:
-- [] simctl
+- [ ] simctl
