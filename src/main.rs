@@ -1,4 +1,4 @@
-use apple_clis::{cargo_bundle, ios_deploy::IosDeployCLIInstance};
+use apple_clis::{cargo_bundle, ios_deploy::IosDeployCLIInstance, security};
 use camino::{Utf8Path, Utf8PathBuf};
 use clap::{Args, Parser, Subcommand};
 use tracing::*;
@@ -31,8 +31,11 @@ enum Commands {
 	#[clap(subcommand)]
 	IosDeploy(IosDeploy),
 
+	// #[clap(subcommand)]
+	// CargoBundle(CargoBundle),
+
 	#[clap(subcommand)]
-	CargoBundle(CargoBundle),
+	Security(Security)
 }
 
 #[derive(Subcommand, Debug)]
@@ -45,6 +48,11 @@ enum IosDeploy {
 enum CargoBundle {
 	/// Bundles the iOS app
 	Ios,
+}
+
+#[derive(Subcommand, Debug)]
+enum Security {
+	Teams,
 }
 
 #[derive(thiserror::Error, Debug)]
@@ -108,14 +116,28 @@ fn main() -> anyhow::Result<()> {
 				}
 			}
 		}
-		Commands::CargoBundle(cargo_bundle) => {
-			let cargo_bundle_instance = cargo_bundle::CargoBundleInstance::new(
-				config.args.try_get_cargo_path()?,
-				config.args.try_get_manifest_path()?,
-			);
-			match cargo_bundle {
-				CargoBundle::Ios => {
-					cargo_bundle_instance.bundle_ios()?;
+		// Commands::CargoBundle(cargo_bundle) => {
+		// 	let cargo_bundle_instance = cargo_bundle::CargoBundleInstance::new(
+		// 		config.args.try_get_cargo_path()?,
+		// 		// config.args.try_get_manifest_path()?,
+		// 	);
+		// 	// set cwd to manifest dir
+		// 	std::env::set_current_dir(config.args.try_get_manifest_path()?)?;
+		// 	match cargo_bundle {
+		// 		CargoBundle::Ios => {
+		// 			cargo_bundle_instance.bundle_ios()?;
+		// 		}
+		// 	}
+		// }
+		Commands::Security(security) => {
+			let security_instance = security::SecurityCLIInstance::try_new_from_which()?;
+			match security {
+				Security::Teams => {
+					let teams = security_instance.list_teams()?;
+					println!("{} development teams found with `security`:", teams.len());
+					for team in teams {
+						println!("Team: {:?}", team);
+					}
 				}
 			}
 		}
