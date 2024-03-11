@@ -1,3 +1,5 @@
+//! See https://developer.apple.com/documentation/xcode/creating-distribution-signed-code-for-the-mac
+
 use camino::{Utf8Path, Utf8PathBuf};
 
 use crate::CreateInstanceError;

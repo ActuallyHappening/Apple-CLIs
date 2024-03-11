@@ -38,4 +38,5 @@ cargo r -- codesign display
 ```
 
 ### Todo/Features:
+Split into different crates for documentation purposes.
 - [ ] simctl

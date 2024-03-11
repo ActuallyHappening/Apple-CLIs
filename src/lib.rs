@@ -7,6 +7,10 @@ pub mod cargo_bundle;
 pub mod xcodebuild;
 pub mod spctl;
 pub mod codesign;
+pub mod productbuild;
+pub mod productsign;
+pub mod pkgbuild;
+pub mod pkgutil;
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Device {

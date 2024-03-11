@@ -10,7 +10,8 @@ pub enum CodeSignError {
 
 impl CodesignCLIInstance {
 	pub fn display(&self, path: impl AsRef<Utf8Path>) -> Result<String, CodeSignError> {
-		let output = self.bossy_command()
+		let output = self
+			.bossy_command()
 			.with_arg("-d")
 			.with_arg(path.as_ref())
 			.run_and_wait_for_output()?;
