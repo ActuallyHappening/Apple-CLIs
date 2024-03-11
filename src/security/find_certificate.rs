@@ -1,4 +1,8 @@
+use once_cell_regex::regex;
 use openssl::x509::X509;
+use openssl::{error::ErrorStack as OpenSslError, nid::Nid, x509::X509NameRef};
+use std::collections::BTreeSet;
+use thiserror::Error;
 use tracing::{error, info, warn};
 
 use super::SecurityCLIInstance;
@@ -13,46 +17,51 @@ pub enum FindCertificatesError {
 }
 
 impl SecurityCLIInstance {
-	pub fn list_teams(&self) -> Result<Vec<Team>, FindCertificatesError> {
-		// let mut command = self
-		// 	.bossy_command()
-		// 	.with_arg("find-certificate")
-		// 	.with_arg("-a")
-		// 	.with_arg("-p");
-		// let output = command.run_and_wait_for_output()?;
+	const DEVELOPER_NAME_SCHEMAS: [&'static str; 2] = ["Developer:", "Development:"];
 
-		// let mut certs = X509::stack_from_pem(output.stdout())?;
-
-		// Ok(())
-
-		Ok(find_development_teams().unwrap())
+	fn get_pem_list(&self, name_substr: &str) -> bossy::Result<bossy::Output> {
+		self
+			.bossy_command()
+			.with_args(["find-certificate", "-p", "-a", "-c", name_substr])
+			.run_and_wait_for_output()
 	}
-}
 
-use openssl::{error::ErrorStack as OpenSslError, nid::Nid, x509::X509NameRef};
-use std::collections::BTreeSet;
-use thiserror::Error;
+	fn get_developer_pem_list(&self) -> bossy::Result<Vec<bossy::Output>> {
+		Self::DEVELOPER_NAME_SCHEMAS
+			.iter()
+			.map(|name| self.get_pem_list(name))
+			.collect()
+	}
 
-pub fn get_pem_list(name_substr: &str) -> bossy::Result<bossy::Output> {
-	bossy::Command::impure("security")
-		.with_args(&["find-certificate", "-p", "-a", "-c", name_substr])
-		.run_and_wait_for_output()
-}
+	pub fn get_developer_pems(&self) -> Result<Vec<X509>, FindCertificatesError> {
+		let certs = self
+			.get_developer_pem_list()?
+			.into_iter()
+			.map(|output| {
+				X509::stack_from_pem(output.stdout()).map_err(FindCertificatesError::X509ParseFailed)
+			})
+			.collect::<Result<Vec<_>, _>>()?;
+		let certs = certs.into_iter().flatten();
+		Ok(certs.collect())
+	}
 
-pub fn get_pem_list_old_name_scheme() -> bossy::Result<bossy::Output> {
-	get_pem_list("Developer:")
-}
-
-pub fn get_pem_list_new_name_scheme() -> bossy::Result<bossy::Output> {
-	get_pem_list("Development:")
-}
-
-#[derive(Debug, Error)]
-pub enum Error {
-	#[error("Failed to call `security` command: {0}")]
-	SecurityCommandFailed(#[from] bossy::Error),
-	#[error("Failed to parse X509 cert: {0}")]
-	X509ParseFailed(#[source] OpenSslError),
+	pub fn get_developer_teams(&self) -> Result<Vec<Team>, FindCertificatesError> {
+		let certs = self.get_developer_pems()?;
+		Ok(
+			certs
+				.into_iter()
+				.flat_map(|cert| {
+					Team::from_x509(cert).map_err(|err| {
+						error!("{}", err);
+						err
+					})
+				})
+				// Silly way to sort this and ensure no dupes
+				.collect::<BTreeSet<_>>()
+				.into_iter()
+				.collect(),
+		)
+	}
 }
 
 #[derive(Debug, Error)]
@@ -70,7 +79,7 @@ pub fn get_x509_field(
 ) -> Result<String, X509FieldError> {
 	subject_name
 		.entries_by_nid(field_nid)
-		.nth(0)
+		.next()
 		.ok_or(X509FieldError::FieldMissing {
 			name: field_name,
 			id: field_nid,
@@ -115,14 +124,13 @@ impl Team {
 				"found cert {:?} but failed to get organization; falling back to displaying common name",
 				common_name
 			);
-			// regex!(r"Apple Develop\w+: (.*) \(.+\)")
-			//           .captures(&common_name)
-			//           .map(|caps| caps[1].to_owned())
-			//           .unwrap_or_else(|| {
-			//               log::warn!("regex failed to capture nice part of name in cert {:?}; falling back to displaying full name", common_name);
-			//               common_name.clone()
-			//           })
-			unimplemented!()
+			regex!(r"Apple Develop\w+: (.*) \(.+\)")
+			          .captures(&common_name)
+			          .map(|caps| caps[1].to_owned())
+			          .unwrap_or_else(|| {
+			              warn!("regex failed to capture nice part of name in cert {:?}; falling back to displaying full name", common_name);
+			              common_name.clone()
+			          })
 		};
 		let id = get_x509_field(subj, "Organizational Unit", Nid::ORGANIZATIONALUNITNAME).map_err(
 			|source| FromX509Error::OrganizationalUnitMissing {
@@ -132,28 +140,4 @@ impl Team {
 		)?;
 		Ok(Self { name, id })
 	}
-}
-
-pub fn find_development_teams() -> Result<Vec<Team>, Error> {
-	let certs = {
-		let new = get_pem_list_new_name_scheme().map_err(Error::SecurityCommandFailed)?;
-		let mut certs = X509::stack_from_pem(new.stdout()).map_err(Error::X509ParseFailed)?;
-		let old = get_pem_list_old_name_scheme().map_err(Error::SecurityCommandFailed)?;
-		certs.append(&mut X509::stack_from_pem(old.stdout()).map_err(Error::X509ParseFailed)?);
-		certs
-	};
-	Ok(
-		certs
-			.into_iter()
-			.flat_map(|cert| {
-				Team::from_x509(cert).map_err(|err| {
-					error!("{}", err);
-					err
-				})
-			})
-			// Silly way to sort this and ensure no dupes
-			.collect::<BTreeSet<_>>()
-			.into_iter()
-			.collect(),
-	)
 }

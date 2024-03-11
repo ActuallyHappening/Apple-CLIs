@@ -133,7 +133,7 @@ fn main() -> anyhow::Result<()> {
 			let security_instance = security::SecurityCLIInstance::try_new_from_which()?;
 			match security {
 				Security::Teams => {
-					let teams = security_instance.list_teams()?;
+					let teams = security_instance.get_developer_teams()?;
 					println!("{} development teams found with `security`:", teams.len());
 					for team in teams {
 						println!("Team: {:?}", team);
