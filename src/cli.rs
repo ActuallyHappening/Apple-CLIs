@@ -1,8 +1,44 @@
 use camino::Utf8PathBuf;
 use clap::{Args, Parser, Subcommand};
+use tracing::{info, warn};
 
 pub mod prelude {
 	pub use super::*;
+}
+
+#[derive(thiserror::Error, Debug)]
+pub enum GlobError {
+	#[error("Error converting path to UTF-8: {0}")]
+	NonUtf8Paths(#[from] camino::FromPathBufError),
+
+	#[error("Error running glob: {0}")]
+	GlobError(#[from] glob::PatternError),
+
+	#[error("No matched files / directories found")]
+	NoMatchedFiles,
+}
+
+pub fn glob(pattern: &'static str) -> Result<Utf8PathBuf, GlobError> {
+	let matches = glob::glob(pattern)?
+		.filter_map(|p| p.ok())
+		.filter_map(|p| Utf8PathBuf::try_from(p).ok())
+		.collect::<Vec<_>>();
+
+	match matches.first() {
+		Some(p) => {
+			if matches.len() > 1 {
+				warn!(
+					"More than one file / directory matched the pattern {:?}, using the first match: {:?}",
+					pattern, p
+				);
+				Ok(p.clone())
+			} else {
+				info!("Implicitly using the only matched file / directory: {:?}", p);
+				Ok(p.clone())
+			}
+		}
+		None => Err(GlobError::NoMatchedFiles),
+	}
 }
 
 #[derive(Parser, Debug)]

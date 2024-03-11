@@ -70,23 +70,7 @@ fn main() -> anyhow::Result<()> {
 						Some(p) => p,
 						None => {
 							// find directory/file ending in .app
-							let paths = glob::glob("**/*.app")?;
-							let apps = paths
-								.filter_map(|p| p.ok())
-								.filter_map(|p| Utf8PathBuf::try_from(p).ok())
-								.collect::<Vec<_>>();
-							if apps.len() > 1 {
-								warn!("More than one .app found in the current directory");
-							}
-							let app = apps
-								.first()
-								.ok_or_else(|| anyhow::anyhow!("No .app found in the current directory"))?
-								.clone();
-							info!(
-								"Since no *.app directory / file was passed, implicitly using: {:?}",
-								app
-							);
-							app
+							cli::glob("**/*.app")?
 						}
 					};
 					spctl_instance.assess_app(path)?;
