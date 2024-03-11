@@ -98,7 +98,7 @@ pub enum CargoBundle {
 
 #[derive(Subcommand, Debug)]
 pub enum Security {
-	Teams,
+	Certs,
 	Pems,
 }
 

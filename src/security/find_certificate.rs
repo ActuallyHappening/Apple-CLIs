@@ -45,23 +45,23 @@ impl SecurityCLIInstance {
 		Ok(certs.collect())
 	}
 
-	pub fn get_developer_teams(&self) -> Result<Vec<Team>, FindCertificatesError> {
-		let certs = self.get_developer_pems()?;
+	pub fn get_developer_certs(&self) -> Result<Vec<Certificate>, FindCertificatesError> {
 		Ok(
-			certs
+			self
+				.get_developer_pems()?
 				.into_iter()
-				.flat_map(|cert| {
-					Team::from_x509(cert).map_err(|err| {
-						error!("{}", err);
-						err
-					})
-				})
-				// Silly way to sort this and ensure no dupes
-				.collect::<BTreeSet<_>>()
-				.into_iter()
+				.filter_map(|cert| Certificate::try_from_x509(cert).ok())
 				.collect(),
 		)
 	}
+}
+
+#[derive(Debug)]
+pub struct Certificate {
+	/// e.g. "Apple Development: johnsmith@hotmail.com (UIOH89JLHGF)"
+	pub common_name: String,
+	// e.g. "John Smith"
+	pub organization_name: Option<String>,
 }
 
 #[derive(Debug, Error)]
@@ -72,7 +72,7 @@ pub enum X509FieldError {
 	FieldNotValidUtf8(#[source] OpenSslError),
 }
 
-pub fn get_x509_field(
+fn get_x509_field(
 	subject_name: &X509NameRef,
 	field_name: &'static str,
 	field_nid: Nid,
@@ -90,54 +90,105 @@ pub fn get_x509_field(
 		.map(|s| s.to_string())
 }
 
-#[derive(Debug, Error)]
+#[derive(Debug, thiserror::Error)]
 pub enum FromX509Error {
-	#[error("skipping cert: {0}")]
-	CommonNameMissing(#[source] X509FieldError),
-	#[error("skipping cert {common_name:?}: {source}")]
-	OrganizationalUnitMissing {
-		common_name: String,
-		source: X509FieldError,
-	},
+	#[error("Common Name missing in cert: {0}")]
+	CommonNameMissing(#[from] X509FieldError),
 }
 
-#[derive(Debug, Eq, Ord, PartialEq, PartialOrd)]
-pub struct Team {
-	pub name: String,
-	pub id: String,
+impl Certificate {
+	pub fn try_from_x509(cert: X509) -> Result<Self, FromX509Error> {
+		let subject = cert.subject_name();
+		let common_name = get_x509_field(subject, "Common Name", Nid::COMMONNAME)?;
+		let organization_name = get_x509_field(subject, "Organization", Nid::ORGANIZATIONNAME).ok();
+		Ok(Certificate {
+			common_name,
+			organization_name,
+		})
+	}
 }
 
-impl Team {
-	pub fn from_x509(cert: X509) -> Result<Self, FromX509Error> {
-		let subj = cert.subject_name();
-		let common_name = get_x509_field(subj, "Common Name", Nid::COMMONNAME)
-			.map_err(FromX509Error::CommonNameMissing)?;
-		let organization = get_x509_field(subj, "Organization", Nid::ORGANIZATIONNAME);
-		let name = if let Ok(organization) = organization {
-			info!(
-				"found cert {:?} with organization {:?}",
-				common_name, organization
-			);
-			organization
-		} else {
-			warn!(
-				"found cert {:?} but failed to get organization; falling back to displaying common name",
-				common_name
-			);
-			regex!(r"Apple Develop\w+: (.*) \(.+\)")
+mod teams {
+	use std::collections::BTreeSet;
+
+	use once_cell_regex::regex;
+	use openssl::{nid::Nid, x509::X509};
+	use tracing::{error, info, warn};
+
+	use crate::security::SecurityCLIInstance;
+
+	use super::{get_x509_field, FindCertificatesError, X509FieldError};
+
+	impl SecurityCLIInstance {
+		#[deprecated(note = "Use `get_developer_certs` instead")]
+		pub fn get_developer_teams(&self) -> Result<Vec<Team>, FindCertificatesError> {
+			let certs = self.get_developer_pems()?;
+			Ok(
+				certs
+					.into_iter()
+					.flat_map(|cert| {
+						Team::from_x509(cert).map_err(|err| {
+							error!("{}", err);
+							err
+						})
+					})
+					// Silly way to sort this and ensure no dupes
+					.collect::<BTreeSet<_>>()
+					.into_iter()
+					.collect(),
+			)
+		}
+	}
+
+	#[derive(Debug, thiserror::Error)]
+	pub enum FromX509Error {
+		#[error("skipping cert: {0}")]
+		CommonNameMissing(#[source] X509FieldError),
+		#[error("skipping cert {common_name:?}: {source}")]
+		OrganizationalUnitMissing {
+			common_name: String,
+			source: X509FieldError,
+		},
+	}
+
+	#[derive(Debug, Eq, Ord, PartialEq, PartialOrd)]
+	pub struct Team {
+		pub name: String,
+		pub id: String,
+	}
+
+	impl Team {
+		pub fn from_x509(cert: X509) -> Result<Self, FromX509Error> {
+			let subj = cert.subject_name();
+			let common_name = get_x509_field(subj, "Common Name", Nid::COMMONNAME)
+				.map_err(FromX509Error::CommonNameMissing)?;
+			let organization = get_x509_field(subj, "Organization", Nid::ORGANIZATIONNAME);
+			let name = if let Ok(organization) = organization {
+				info!(
+					"found cert {:?} with organization {:?}",
+					common_name, organization
+				);
+				organization
+			} else {
+				warn!(
+					"found cert {:?} but failed to get organization; falling back to displaying common name",
+					common_name
+				);
+				regex!(r"Apple Develop\w+: (.*) \(.+\)")
 			          .captures(&common_name)
 			          .map(|caps| caps[1].to_owned())
 			          .unwrap_or_else(|| {
 			              warn!("regex failed to capture nice part of name in cert {:?}; falling back to displaying full name", common_name);
 			              common_name.clone()
 			          })
-		};
-		let id = get_x509_field(subj, "Organizational Unit", Nid::ORGANIZATIONALUNITNAME).map_err(
-			|source| FromX509Error::OrganizationalUnitMissing {
-				common_name,
-				source,
-			},
-		)?;
-		Ok(Self { name, id })
+			};
+			let id = get_x509_field(subj, "Organizational Unit", Nid::ORGANIZATIONALUNITNAME).map_err(
+				|source| FromX509Error::OrganizationalUnitMissing {
+					common_name,
+					source,
+				},
+			)?;
+			Ok(Self { name, id })
+		}
 	}
 }

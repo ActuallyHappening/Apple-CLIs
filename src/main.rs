@@ -47,8 +47,8 @@ fn main() -> anyhow::Result<()> {
 		Commands::Security(security) => {
 			let security_instance = security::SecurityCLIInstance::try_new_from_which()?;
 			match security {
-				Security::Teams => {
-					let teams = security_instance.get_developer_teams()?;
+				Security::Certs => {
+					let teams = security_instance.get_developer_certs()?;
 					println!("{} development teams found with `security`:", teams.len());
 					for team in teams {
 						println!("Team: {:?}", team);
