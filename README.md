@@ -28,4 +28,11 @@ PRs welcome!
 ### Developing
 ```sh
 cargo install --git https://github.com/ActuallyHappening/cargo-bundle.git
+brew install ios-deploy
+cd example-bundle
+nu test-bundle
+cd ..
+
+# example command
+cargo r -- codesign display
 ```

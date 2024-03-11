@@ -108,6 +108,7 @@ pub enum Security {
 pub enum CodeSign {
 	/// Displays the code signature of the given file
 	Display { app_path: Option<Utf8PathBuf> },
+	Sign { app_path: Option<Utf8PathBuf> },
 }
 
 #[derive(Subcommand, Debug)]

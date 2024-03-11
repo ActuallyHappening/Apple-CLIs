@@ -109,6 +109,24 @@ fn main() -> anyhow::Result<()> {
 					let output = codesign_instance.display(path)?;
 					println!("{}", output);
 				}
+				CodeSign::Sign { app_path } => {
+					let path = match app_path {
+						Some(p) => p,
+						None => {
+							// find directory/file ending in .app
+							cli::glob("**/*.app")?
+						}
+					};
+					let security_instance = security::SecurityCLIInstance::try_new_from_which()?;
+					let certs = security_instance.get_developer_certs()?;
+					let cert = match certs.first() {
+						Some(c) => c,
+						None => {
+							anyhow::bail!("No developer certs found to sign with")
+						}
+					};
+					codesign_instance.sign(cert, path)?;
+				}
 			}
 		}
 	}
