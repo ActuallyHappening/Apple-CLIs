@@ -1,4 +1,4 @@
-use apple_clis::{cargo_bundle, ios_deploy::IosDeployCLIInstance, security};
+use apple_clis::{cargo_bundle, ios_deploy::IosDeployCLIInstance, security, spctl};
 use camino::{Utf8Path, Utf8PathBuf};
 use clap::{Args, Parser, Subcommand};
 use tracing::*;
@@ -33,9 +33,11 @@ enum Commands {
 
 	// #[clap(subcommand)]
 	// CargoBundle(CargoBundle),
+	#[clap(subcommand)]
+	Security(Security),
 
 	#[clap(subcommand)]
-	Security(Security)
+	Spctl(Spctl),
 }
 
 #[derive(Subcommand, Debug)]
@@ -54,6 +56,11 @@ enum CargoBundle {
 enum Security {
 	Teams,
 	Pems,
+}
+
+#[derive(Subcommand, Debug)]
+enum Spctl {
+	AssessApp { app_path: Option<Utf8PathBuf> },
 }
 
 #[derive(thiserror::Error, Debug)]
@@ -146,6 +153,37 @@ fn main() -> anyhow::Result<()> {
 					for pem in pems {
 						println!("Pem: {:#?}", pem);
 					}
+				}
+			}
+		}
+		Commands::Spctl(spctl) => {
+			let spctl_instance = spctl::SpctlCLIInstance::try_new_from_which()?;
+			match spctl {
+				Spctl::AssessApp { app_path } => {
+					let path = match app_path {
+						Some(p) => p,
+						None => {
+							// find directory/file ending in .app
+							let paths = glob::glob("**/*.app")?;
+							let apps = paths
+								.filter_map(|p| p.ok())
+								.filter_map(|p| Utf8PathBuf::try_from(p).ok())
+								.collect::<Vec<_>>();
+							if apps.len() > 1 {
+								warn!("More than one .app found in the current directory");
+							}
+							let app = apps
+								.first()
+								.ok_or_else(|| anyhow::anyhow!("No .app found in the current directory"))?
+								.clone();
+							info!(
+								"Since no *.app directory / file was passed, implicitly using: {:?}",
+								app
+							);
+							app
+						}
+					};
+					spctl_instance.assess_app(path)?;
 				}
 			}
 		}

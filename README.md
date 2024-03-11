@@ -7,8 +7,10 @@ This is heavily a work in progress, and will be added to as I need more function
 `cargo install apple-clis`
 
 ## Examples
-
-`cargo run --example ios-deploy-detect`
+```sh
+cargo run --example ios-deploy-detect
+cargo run --example security-find-certificates
+```
 
 ![Example `ios-deploy --detect`](docs/ios-deploy-detect.png)
 
