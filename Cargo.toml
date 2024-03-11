@@ -1,6 +1,6 @@
 [package]
 name = "apple-clis"
-version = "0.0.3"
+version = "0.0.4"
 edition = "2021"
 description = "A collection of Apple command-line tool wrappers, library and CLI"
 authors = ["Caleb Yates <actuallyhappening42@gmail.com"]

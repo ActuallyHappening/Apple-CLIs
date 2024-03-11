@@ -86,7 +86,7 @@ pub enum Commands {
 
 #[derive(Subcommand, Debug)]
 pub enum IosDeploy {
-	/// Spends 5 seconds to detect any already connected devices
+	/// Spends a second to detect any already connected devices
 	Detect,
 }
 

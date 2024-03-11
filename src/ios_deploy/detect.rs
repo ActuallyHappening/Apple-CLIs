@@ -1,5 +1,6 @@
 use crate::Device;
 use serde::Deserialize;
+use tracing::trace;
 
 use super::IosDeployCLIInstance;
 
@@ -48,8 +49,11 @@ impl IosDeployCLIInstance {
 		}
 
 		let output = command.run_and_wait_for_string()?;
-		// wraps in [] so that bunch of json objects can be deserialized
+
+		// after every } close brace, adds a comma
+		// this is to handle { .. } \n { ... } even style messages
 		let output = format!("[{}]", output);
+		let output = output.replace("}{", "},{");
 
 		#[derive(Debug, Deserialize)]
 		struct Event {
