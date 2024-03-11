@@ -5,10 +5,14 @@ This is heavily a work in progress, and will be added to as I need more function
 
 ## CLI
 Latest released version:
-`cargo install apple-clis`
+```sh
+cargo install apple-clis
+```
 
 Install from source:
-`cargo install --git https://github.com/ActuallyHappening/Apple-CLIs.git`
+```sh
+cargo install --git https://github.com/ActuallyHappening/Apple-CLIs.git apple-clis
+```
 
 ## Examples
 ```sh
