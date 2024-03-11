@@ -88,6 +88,10 @@ pub enum Commands {
 pub enum IosDeploy {
 	/// Spends a second to detect any already connected devices
 	Detect,
+	/// Uploads an app to a real device
+	Upload {
+		app_path: Option<Utf8PathBuf>,
+	},
 }
 
 #[derive(Subcommand, Debug)]

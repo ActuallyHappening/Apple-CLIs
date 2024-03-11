@@ -6,9 +6,6 @@ use super::IosDeployCLIInstance;
 
 #[derive(thiserror::Error, Debug)]
 pub enum UploadBundleError {
-	#[error("No real devices were found. Try running `ios-deploy --detect`.")]
-	NoDevicesFound,
-
 	#[error("An error occured while executing `ios-deploy`: {0}")]
 	ExecuteError(#[from] bossy::Error),
 }

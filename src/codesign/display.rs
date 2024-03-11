@@ -13,7 +13,9 @@ impl CodesignCLIInstance {
 		let output = self.bossy_command()
 			.with_arg("-d")
 			.with_arg(path.as_ref())
-			.run_and_wait_for_string()?;
-		Ok(output)
+			.run_and_wait_for_output()?;
+		let stdout = output.stdout_str()?;
+		let stderr = output.stderr_str()?;
+		Ok(format!("Stdout: {}\nStderr: {}", stdout, stderr))
 	}
 }

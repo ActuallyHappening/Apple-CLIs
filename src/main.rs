@@ -29,6 +29,23 @@ fn main() -> anyhow::Result<()> {
 						println!("Device: {:?}", device);
 					}
 				}
+				IosDeploy::Upload { app_path } => {
+					let path = match app_path {
+						Some(p) => p,
+						None => {
+							// find directory/file ending in .app
+							cli::glob("**/*.app")?
+						}
+					};
+					let devices = ios_deploy_instance.detect_devices()?;
+					let device = match devices.first() {
+						Some(d) => d,
+						None => {
+							anyhow::bail!("No devices found to upload to")
+						}
+					};
+					ios_deploy_instance.upload_bundle(device, path)?;
+				}
 			}
 		}
 		// Commands::CargoBundle(cargo_bundle) => {
