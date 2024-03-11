@@ -1,77 +1,109 @@
-use camino::Utf8Path;
-use clap::Args;
-use tracing::{info, warn};
+use camino::{Utf8Path, Utf8PathBuf};
 
-use crate::{
-	list_real::{list_real, IosDeployDetectError},
-	Device,
-};
+mod detect;
+mod upload;
+
+#[derive(Debug)]
+pub struct IosDeployInstance {
+	exec_path: Utf8PathBuf,
+}
 
 #[derive(thiserror::Error, Debug)]
-pub enum IosDeployBundleError {
-	#[error("No device ID was passed, and an error occurred trying to list the real devices: {0}")]
-	ErrorInferringDevices(#[from] IosDeployDetectError),
+pub enum FindIosDeployError {
+	#[error("Error running `which ios-deploy`: {0}")]
+	CommandExecution(#[from] which::Error),
 
-	#[error("No real devices were found. Try running `ios-deploy --detect`.")]
-	NoDevicesFound,
-
-	#[error("An error occured while executing `ios-deploy`: {0}")]
-	ExecuteError(#[from] bossy::Error),
+	#[error("Error converting path to UTF-8: {0}")]
+	PathNotUtf8(#[from] camino::FromPathBufError),
 }
 
-/// Deploy an iOS app bundle to a real device
-#[derive(Args, Debug)]
-pub struct IosDeploy {
-	#[arg(long)]
-	debug: bool,
-
-	/// The ID of the device you are connected to, e.g.
-	/// 00008693-0517604C71E3421F.
-	///
-	/// Will try to infer the device ID from the environment if not provided.
-	device: Option<String>,
-}
-
-impl IosDeploy {
-	fn infer_device(&self) -> Result<Device, IosDeployBundleError> {
-		match &self.device {
-			Some(id) => Ok(Device::new(id)),
-			None => {
-				let devices = list_real()?;
-				let len = devices.len();
-				match devices.into_iter().next() {
-					None => Err(IosDeployBundleError::NoDevicesFound),
-					Some(device) => {
-						if len > 1 {
-							warn!(
-								"More than one device found. Using the first one: {:?}",
-								device
-							);
-						} else {
-							info!(
-								"Since no device ID was passed, using found device: {:?}",
-								device
-							);
-						}
-						Ok(device)
-					}
-				}
-			}
+impl IosDeployInstance {
+	pub fn new(exec_path: impl AsRef<Utf8Path>) -> IosDeployInstance {
+		IosDeployInstance {
+			exec_path: exec_path.as_ref().to_path_buf(),
 		}
 	}
 
-	pub fn execute(&self, bundle_path: &Utf8Path) -> Result<(), IosDeployBundleError> {
-		let device = self.infer_device()?;
-		let mut command = bossy::Command::pure("ios-deploy")
-			.with_args(["--id", &device.id])
-			.with_args(["--bundle", bundle_path.as_str()]);
+	pub fn try_new_from_which() -> Result<IosDeployInstance, FindIosDeployError> {
+		let path = which::which("ios-deploy")?;
+		Ok(IosDeployInstance::new(Utf8PathBuf::try_from(path)?))
+	}
 
-		if self.debug {
-			command.add_arg("--debug");
-		}
-
-		command.run_and_wait()?;
-
-		Ok(())
+	fn bossy_command(&self) -> bossy::Command {
+		bossy::Command::pure(&self.exec_path)
 	}
 }
+
+// use crate::{
+// 	list_real::{list_real, IosDeployDetectError},
+// 	Device,
+// };
+
+// #[derive(thiserror::Error, Debug)]
+// pub enum IosDeployBundleError {
+// 	#[error("No device ID was passed, and an error occurred trying to list the real devices: {0}")]
+// 	ErrorInferringDevices(#[from] IosDeployDetectError),
+
+// 	#[error("No real devices were found. Try running `ios-deploy --detect`.")]
+// 	NoDevicesFound,
+
+// 	#[error("An error occured while executing `ios-deploy`: {0}")]
+// 	ExecuteError(#[from] bossy::Error),
+// }
+
+// /// Deploy an iOS app bundle to a real device
+// #[derive(Args, Debug)]
+// pub struct IosDeploy {
+// 	#[arg(long)]
+// 	debug: bool,
+
+// 	/// The ID of the device you are connected to, e.g.
+// 	/// 00008693-0517604C71E3421F.
+// 	///
+// 	/// Will try to infer the device ID from the environment if not provided.
+// 	device: Option<String>,
+// }
+
+// impl IosDeploy {
+// 	fn infer_device(&self) -> Result<Device, IosDeployBundleError> {
+// 		match &self.device {
+// 			Some(id) => Ok(Device::new(id)),
+// 			None => {
+// 				let devices = list_real()?;
+// 				let len = devices.len();
+// 				match devices.into_iter().next() {
+// 					None => Err(IosDeployBundleError::NoDevicesFound),
+// 					Some(device) => {
+// 						if len > 1 {
+// 							warn!(
+// 								"More than one device found. Using the first one: {:?}",
+// 								device
+// 							);
+// 						} else {
+// 							info!(
+// 								"Since no device ID was passed, using found device: {:?}",
+// 								device
+// 							);
+// 						}
+// 						Ok(device)
+// 					}
+// 				}
+// 			}
+// 		}
+// 	}
+
+// 	pub fn execute(&self, bundle_path: &Utf8Path) -> Result<(), IosDeployBundleError> {
+// 		let device = self.infer_device()?;
+// 		let mut command = bossy::Command::pure("ios-deploy")
+// 			.with_args(["--id", &device.id])
+// 			.with_args(["--bundle", bundle_path.as_str()]);
+
+// 		if self.debug {
+// 			command.add_arg("--debug");
+// 		}
+
+// 		command.run_and_wait()?;
+
+// 		Ok(())
+// 	}
+// }

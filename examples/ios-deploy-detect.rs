@@ -1,5 +1,9 @@
-fn main() {
-	let real_devices = apple_clis::list_real::list_real();
+use apple_clis::ios_deploy::IosDeployInstance;
 
-	println!("Devices: {:?}", real_devices);
+fn main() {
+	tracing_subscriber::fmt::init();
+	let ios_deploy = IosDeployInstance::try_new_from_which().expect("Couldn't find ios-deploy executable");
+	let detected_devices = ios_deploy.detect_devices().expect("Couldn't detect devices");
+
+	println!("Devices: {:?}", detected_devices);
 }

@@ -12,6 +12,7 @@ include = ["src/", "LICENSE-APACHE", "LICENSE-MIT", "/examples"]
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+anyhow = "1.0.80"
 bossy = "0.2.1"
 camino = "1.1.6"
 clap = { version = "4.5.2", features = ["derive", "env"] }
@@ -22,3 +23,4 @@ thiserror = "1.0.57"
 toml = "0.8.10"
 tracing = "0.1.40"
 tracing-subscriber = { version = "0.3.18", features = ["fmt", "env-filter"] }
+which = "6.0.0"

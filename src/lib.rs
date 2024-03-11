@@ -1,7 +1,6 @@
 use serde::Serialize;
 
 pub mod ios_deploy;
-pub mod list_real;
 
 #[derive(Debug, Serialize)]
 pub struct Device {
