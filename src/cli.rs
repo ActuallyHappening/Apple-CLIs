@@ -33,7 +33,10 @@ pub fn glob(pattern: &'static str) -> Result<Utf8PathBuf, GlobError> {
 				);
 				Ok(p.clone())
 			} else {
-				info!("Implicitly using the only matched file / directory: {:?}", p);
+				info!(
+					"Implicitly using the only matched file / directory: {:?}",
+					p
+				);
 				Ok(p.clone())
 			}
 		}
@@ -76,6 +79,9 @@ pub enum Commands {
 
 	#[clap(subcommand)]
 	Spctl(Spctl),
+
+	#[clap(subcommand, name = "codesign")]
+	CodeSign(CodeSign),
 }
 
 #[derive(Subcommand, Debug)]
@@ -94,6 +100,12 @@ pub enum CargoBundle {
 pub enum Security {
 	Teams,
 	Pems,
+}
+
+#[derive(Subcommand, Debug)]
+pub enum CodeSign {
+	/// Displays the code signature of the given file
+	Display { app_path: Option<Utf8PathBuf> },
 }
 
 #[derive(Subcommand, Debug)]

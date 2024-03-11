@@ -6,6 +6,7 @@ pub mod security;
 pub mod cargo_bundle;
 pub mod xcodebuild;
 pub mod spctl;
+pub mod codesign;
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Device {

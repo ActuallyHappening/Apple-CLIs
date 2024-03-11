@@ -1,4 +1,5 @@
-use apple_clis::cli::{self, Commands, IosDeploy, Security, Spctl};
+use apple_clis::cli::{self, CodeSign, Commands, IosDeploy, Security, Spctl};
+use apple_clis::codesign;
 use apple_clis::{ios_deploy::IosDeployCLIInstance, security, spctl};
 use camino::Utf8PathBuf;
 use clap::Parser;
@@ -74,6 +75,22 @@ fn main() -> anyhow::Result<()> {
 						}
 					};
 					spctl_instance.assess_app(path)?;
+				}
+			}
+		}
+		Commands::CodeSign(codesign) => {
+			let codesign_instance = codesign::CodesignCLIInstance::try_new_from_which()?;
+			match codesign {
+				CodeSign::Display { app_path } => {
+					let path = match app_path {
+						Some(p) => p,
+						None => {
+							// find directory/file ending in .app
+							cli::glob("**/*.app")?
+						}
+					};
+					let output = codesign_instance.display(path)?;
+					println!("{}", output);
 				}
 			}
 		}
