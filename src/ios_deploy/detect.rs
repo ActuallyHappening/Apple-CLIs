@@ -14,8 +14,8 @@ pub enum IosDeployDetectError {
 
 #[derive(Debug)]
 pub struct DetectDevicesConfig {
-	timeout: u8,
-	wifi: bool,
+	pub timeout: u8,
+	pub wifi: bool,
 }
 
 impl Default for DetectDevicesConfig {
@@ -48,6 +48,8 @@ impl IosDeployInstance {
 		}
 
 		let output = command.run_and_wait_for_string()?;
+		// wraps in [] so that bunch of json objects can be deserialized
+		let output = format!("[{}]", output);
 
 		#[derive(Debug, Deserialize)]
 		struct Event {
