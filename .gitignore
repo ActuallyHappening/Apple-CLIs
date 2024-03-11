@@ -1,4 +1,5 @@
 /*
+**/target
 
 !docs
 !examples
@@ -10,3 +11,5 @@
 !.rustfmt.toml
 !LICENSE-*
 !Apple-CLIs.code-workspace
+!test-bundle.nu
+!example-bundle

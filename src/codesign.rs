@@ -3,6 +3,7 @@ use camino::{Utf8Path, Utf8PathBuf};
 use crate::CreateInstanceError;
 
 pub mod display;
+pub mod sign;
 
 pub struct CodesignCLIInstance {
 	exec_path: Utf8PathBuf,

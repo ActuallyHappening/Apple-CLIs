@@ -1,0 +1,11 @@
+[package]
+name = "example-bundle"
+version = "0.1.0"
+edition = "2021"
+description = "An example bundle"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[package.metadata.bundle]
+
+[dependencies]
