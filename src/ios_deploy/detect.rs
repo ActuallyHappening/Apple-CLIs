@@ -1,7 +1,5 @@
-use serde::Deserialize;
-use tracing::debug;
-
 use crate::Device;
+use serde::Deserialize;
 
 use super::IosDeployInstance;
 
@@ -10,17 +8,46 @@ pub enum IosDeployDetectError {
 	#[error("Failed to parse `ios-deploy --detect --json` output: {0}")]
 	ParseError(#[from] serde_json::Error),
 
-	#[error("An error occured while executing `ios-deploy --detect`: {0}")]
+	#[error("An error occurred while executing `ios-deploy --detect`: {0}")]
 	ExecuteError(#[from] bossy::Error),
 }
 
+#[derive(Debug)]
+pub struct DetectDevicesConfig {
+	timeout: u8,
+	wifi: bool,
+}
+
+impl Default for DetectDevicesConfig {
+	fn default() -> Self {
+		DetectDevicesConfig {
+			timeout: 1,
+			wifi: true,
+		}
+	}
+}
+
 impl IosDeployInstance {
+	/// Uses default [DetectDevicesConfig].
 	pub fn detect_devices(&self) -> Result<Vec<Device>, IosDeployDetectError> {
-		let output = self
+		self.detect_devices_with_config(&DetectDevicesConfig::default())
+	}
+
+	pub fn detect_devices_with_config(
+		&self,
+		config: &DetectDevicesConfig,
+	) -> Result<Vec<Device>, IosDeployDetectError> {
+		let mut command = self
 			.bossy_command()
 			.with_arg("--detect")
 			.with_arg("--json")
-			.run_and_wait_for_string()?;
+			.with_args(["--timeout", config.timeout.to_string().as_str()]);
+
+		if !config.wifi {
+			command.add_arg("--wifi");
+		}
+
+		let output = command.run_and_wait_for_string()?;
 
 		#[derive(Debug, Deserialize)]
 		struct Event {
