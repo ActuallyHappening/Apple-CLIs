@@ -11,8 +11,8 @@ pub mod device_name {
 		branch::alt,
 		bytes::complete::{tag, take_till, take_until},
 		character::complete::{alpha0, alpha1, digit1, space0, space1},
-		combinator::value,
-		sequence::{delimited, preceded},
+		combinator::{success, value},
+		sequence::{delimited, preceded, terminated},
 		IResult,
 	};
 	use tracing::debug;
@@ -36,13 +36,17 @@ pub mod device_name {
 	}
 
 	fn parse_iphone_discriminate(input: &str) -> IResult<&str, bool> {
-		value(true, tag("iPhone"))(input)
+		alt((value(true, tag("iPhone")), success(false)))(input)
 	}
 
 	#[derive(Debug)]
 	pub enum IPhoneVariant {
-		SE { generation: Generation },
+		SE {
+			generation: Generation,
+		},
 		Num(NonZeroU8),
+		#[doc = include_str!("../../docs/TODO.md")]
+		UnImplemented,
 	}
 
 	#[derive(Debug)]
@@ -89,21 +93,25 @@ pub mod device_name {
 					}
 				}
 			}
-			(_, false) => {
+			(_remaining, false) => {
 				// MARK: Handle non-iphone device parsing here
-				Err(nom::Err::Error(nom::error::Error::new(
-					input,
-					nom::error::ErrorKind::Tag,
-				)))
+				Ok(("", IPhoneVariant::UnImplemented))
 			}
 		}
 	}
 
 	fn parse_device_name(input: &str) -> IResult<&str, DeviceName> {
 		let (remaining, device) = parse_iphone_variant(input)?;
-		let plus = tag::<&str, &str, nom::error::Error<_>>("Plus")(remaining).is_ok();
-		let pro = tag::<&str, &str, nom::error::Error<_>>("Pro")(remaining).is_ok();
-		let max = tag::<&str, &str, nom::error::Error<_>>("Max")(remaining).is_ok();
+		if let IPhoneVariant::UnImplemented = device {
+			return Ok(("", DeviceName::UnImplemented(input.to_string())));
+		}
+
+		let (remaining, _) = space0(remaining)?;
+		let (remaining, plus) = alt((value(true, tag("Plus")), success(false)))(remaining)?;
+		let (remaining, pro) =
+			alt((value(true, terminated(tag("Pro"), space0)), success(false)))(remaining)?;
+		let (remaining, max) =
+			alt((value(true, terminated(tag("Max"), space0)), success(false)))(remaining)?;
 		Ok((
 			remaining,
 			DeviceName::IPhone {
@@ -179,12 +187,23 @@ pub mod device_name {
 		}
 
 		#[test]
-		fn parse_device_name() {
+		fn test_parse_device_name() {
 			let examples = include!("../../tests/names.json");
 			for example in examples.iter() {
-				let output = example.parse::<DeviceName>();
+				let output = parse_device_name(example);
 				match output {
-					Ok(d) => debug!("Parsed device: {:?} from {}", d, example),
+					Ok((remaining, device)) => {
+						debug!(
+							"Parsed device: {:?} from {} [remaining: {}]",
+							device, example, remaining
+						);
+						assert!(
+							remaining.is_empty(),
+							"Remaining was not empty: {:?} (already parsed {:?})",
+							remaining,
+							device
+						);
+					}
 					Err(e) => panic!("Failed to parse {:?}: {}", example, e),
 				}
 			}
