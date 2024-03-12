@@ -7,6 +7,7 @@ pub struct RuntimeIdentifier(String);
 pub mod device_name {
 	use std::{num::NonZeroU8, str::FromStr};
 
+	#[allow(unused_imports)]
 	use nom::{
 		branch::alt,
 		bytes::complete::{tag, take_till, take_until},
@@ -20,7 +21,7 @@ pub mod device_name {
 	#[derive(thiserror::Error, Debug)]
 	pub enum DeviceNameParseError {
 		#[error("Failed to parse device name")]
-		ParsingFailed,
+		ParsingFailed(#[source] nom::error::Error<String>),
 	}
 
 	#[derive(Debug)]
@@ -127,13 +128,14 @@ pub mod device_name {
 		type Err = DeviceNameParseError;
 
 		fn from_str(s: &str) -> Result<Self, Self::Err> {
-			let (remaining, device) = parse_device_name(s).map_err(|e| {
+			let (_remaining, device) = parse_device_name(s).map_err(|e| {
 				debug!("Failed to parse device name: {:?}", e);
-				DeviceNameParseError::ParsingFailed
+				// DeviceNameParseError::ParsingFailed(e.to_owned())
+				match e.to_owned() {
+					nom::Err::Error(e) | nom::Err::Failure(e) => DeviceNameParseError::ParsingFailed(e),
+					nom::Err::Incomplete(_e) => unreachable!(),
+				}
 			})?;
-			if !remaining.is_empty() {
-				return Err(DeviceNameParseError::ParsingFailed);
-			}
 
 			Ok(device)
 		}
