@@ -1,6 +1,6 @@
 use camino::Utf8Path;
 
-use crate::Device;
+use crate::shared::Device;
 
 use super::IosDeployCLIInstance;
 

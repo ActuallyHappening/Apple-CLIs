@@ -1,30 +1,17 @@
-use serde::{Deserialize, Serialize};
+pub mod prelude {
+	pub use crate::shared::*;
+}
 
-pub mod cli;
-pub mod ios_deploy;
-pub mod security;
+pub mod shared;
 pub mod cargo_bundle;
-pub mod xcodebuild;
-pub mod spctl;
+pub mod cli;
 pub mod codesign;
-pub mod productbuild;
-pub mod productsign;
+pub mod ios_deploy;
 pub mod pkgbuild;
 pub mod pkgutil;
-
-#[derive(Debug, Serialize, Deserialize)]
-pub struct Device {
-	pub device_identifier: String,
-	pub device_name: String,
-	pub model_name: String,
-	pub interface: String,
-}
-
-#[derive(thiserror::Error, Debug)]
-pub enum CreateInstanceError {
-	#[error("Error running `which ios-deploy`: {0}")]
-	CommandExecution(#[from] which::Error),
-
-	#[error("Error converting path to UTF-8: {0}")]
-	PathNotUtf8(#[from] camino::FromPathBufError),
-}
+pub mod productbuild;
+pub mod productsign;
+pub mod security;
+pub mod spctl;
+pub mod xcodebuild;
+pub mod xcrun;

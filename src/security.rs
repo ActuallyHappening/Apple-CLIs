@@ -1,9 +1,9 @@
 use camino::{Utf8Path, Utf8PathBuf};
 
-use crate::CreateInstanceError;
-
 pub mod find_certificate;
 pub use find_certificate::Certificate;
+
+use crate::shared::CreateInstanceError;
 
 pub struct SecurityCLIInstance {
 	exec_path: Utf8PathBuf,

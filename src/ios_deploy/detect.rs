@@ -1,4 +1,4 @@
-use crate::Device;
+use crate::shared::Device;
 use serde::Deserialize;
 use tracing::trace;
 
