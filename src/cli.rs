@@ -82,6 +82,9 @@ pub enum Commands {
 
 	#[clap(subcommand, name = "codesign")]
 	CodeSign(CodeSign),
+
+	#[clap(subcommand, name = "xcrun")]
+	XcRun(XcRun),
 }
 
 #[derive(Subcommand, Debug)]
@@ -114,6 +117,17 @@ pub enum CodeSign {
 #[derive(Subcommand, Debug)]
 pub enum Spctl {
 	AssessApp { app_path: Option<Utf8PathBuf> },
+}
+
+#[derive(Subcommand, Debug)]
+pub enum XcRun {
+	#[clap(subcommand)]
+	Simctl(Simctl),
+}
+
+#[derive(Subcommand, Debug)]
+pub enum Simctl {
+	List
 }
 
 #[derive(thiserror::Error, Debug)]

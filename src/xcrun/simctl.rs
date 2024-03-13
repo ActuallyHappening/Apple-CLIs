@@ -1,4 +1,4 @@
-use crate::shared::{Device, ExecCommand};
+use crate::prelude::ExecInstance;
 
 use super::XcRunInstance;
 
@@ -16,13 +16,8 @@ impl XcRunInstance {
 	}
 }
 
-impl ExecCommand for XcRunSimctlInstance<'_> {
-	const COMMAND_SUFFIX: &'static str = "simctl";
-
+impl XcRunSimctlInstance<'_> {
 	fn bossy_command(&self) -> bossy::Command {
-		self
-			.xc_run_instance
-			.bossy_command()
-			.with_arg(Self::COMMAND_SUFFIX)
+		self.xc_run_instance.bossy_command().with_arg("simctl")
 	}
 }

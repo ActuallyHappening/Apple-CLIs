@@ -1,5 +1,7 @@
-use apple_clis::cli::{self, CodeSign, Commands, IosDeploy, Security, Spctl};
+use apple_clis::cli::{self, CodeSign, Commands, IosDeploy, Security, Simctl, Spctl, XcRun};
 use apple_clis::codesign;
+use apple_clis::shared::ExecInstance;
+use apple_clis::xcrun::{simctl, XcRunInstance};
 use apple_clis::{ios_deploy::IosDeployCLIInstance, security, spctl};
 use camino::Utf8PathBuf;
 use clap::Parser;
@@ -126,6 +128,23 @@ fn main() -> anyhow::Result<()> {
 						}
 					};
 					codesign_instance.sign(cert, path)?;
+				}
+			}
+		}
+		Commands::XcRun(xcrun) => {
+			let xcrun_instance = XcRunInstance::try_new_from_which()?;
+			match xcrun {
+				XcRun::Simctl(simctl) => {
+					let simctl_instance = xcrun_instance.simctl();
+					match simctl {
+						Simctl::List => {
+							let devices = simctl_instance.list()?;
+							println!("{} devices found with `xcrun simctl list`:", devices.len());
+							for device in devices {
+								println!("Device: {:?}", device);
+							}
+						}
+					}
 				}
 			}
 		}

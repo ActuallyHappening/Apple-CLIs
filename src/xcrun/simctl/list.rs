@@ -2,7 +2,7 @@ use std::collections::HashMap;
 
 use serde::Deserialize;
 
-use crate::shared::{identifiers::RuntimeIdentifier, Device, ExecCommand};
+use crate::shared::{identifiers::RuntimeIdentifier, Device};
 
 use super::XcRunSimctlInstance;
 
@@ -58,6 +58,8 @@ impl<'src> XcRunSimctlInstance<'src> {
 			.run_and_wait_for_string()?;
 
 		let data: ListOutput = serde_json::from_str(&output)?;
+
+		println!("Data: {:?}", data);
 
 		todo!();
 	}

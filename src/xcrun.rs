@@ -12,7 +12,7 @@ pub struct XcRunInstance {
 impl ExecInstance for XcRunInstance {
 	const BINARY_NAME: &'static str = "xcrun";
 
-	unsafe fn new_from_exec_path(exec_path: impl AsRef<Utf8Path>) -> Self {
+	unsafe fn new_unchecked(exec_path: impl AsRef<Utf8Path>) -> Self {
 		XcRunInstance {
 			exec_path: exec_path.as_ref().to_path_buf(),
 		}
