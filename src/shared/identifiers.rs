@@ -161,24 +161,23 @@ pub mod device_name {
 		}
 	}
 
-	impl FromStr for DeviceName {
-		type Err = DeviceNameParseError;
-
-		fn from_str(s: &str) -> Result<Self, Self::Err> {
+	impl NomFromStr for DeviceName {
+		fn nom_from_str(s: &str) -> IResult<&str, Self> {
 			let mut input = String::from(s);
 			input.retain(char::is_whitespace);
 			let input: &str = &input;
 
-			let (_remaining, device) = parse_device_name(input).map_err(|e| {
-				debug!("Failed to parse device name: {:?}", e);
-				// DeviceNameParseError::ParsingFailed(e.to_owned())
-				match e.to_owned() {
-					nom::Err::Error(e) | nom::Err::Failure(e) => DeviceNameParseError::ParsingFailed(e),
-					nom::Err::Incomplete(_e) => unreachable!(),
-				}
-			})?;
+			// let (_remaining, device) = parse_device_name(input).map_err(|e| {
+			// 	debug!("Failed to parse device name: {:?}", e);
+			// 	// DeviceNameParseError::ParsingFailed(e.to_owned())
+			// 	match e.to_owned() {
+			// 		nom::Err::Error(e) | nom::Err::Failure(e) => DeviceNameParseError::ParsingFailed(e),
+			// 		nom::Err::Incomplete(_e) => unreachable!(),
+			// 	}
+			// })?;
 
-			Ok(device)
+			// Ok(device)
+			todo!()
 		}
 	}
 
@@ -211,7 +210,7 @@ pub mod device_name {
 				"(4th generation)",
 			];
 			for example in examples.iter() {
-				let output = parse_generation(example);
+				let output = Generation::nom_from_str(example);
 				match output {
 					Ok((remaining, generation)) => {
 						debug!(
@@ -233,7 +232,7 @@ pub mod device_name {
 		fn test_parse_device_name() {
 			let examples = include!("../../tests/names.json");
 			for example in examples.iter() {
-				let output = parse_device_name(example);
+				let output = DeviceName::nom_from_str(example);
 				match output {
 					Ok((remaining, device)) => {
 						debug!(
