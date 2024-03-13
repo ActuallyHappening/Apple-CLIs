@@ -97,9 +97,9 @@ pub trait ExecInstance: Sized {
 
 #[macro_export]
 macro_rules! impl_exec_instance {
-	($t:ty) => {
+	($t:ty, $name:expr) => {
 		impl $crate::shared::ExecInstance for $t {
-			const BINARY_NAME: &'static str = "ios-deploy";
+			const BINARY_NAME: &'static str = $name;
 
 			unsafe fn new_unchecked(exec_path: impl AsRef<::camino::Utf8Path>) -> Self {
 				Self {

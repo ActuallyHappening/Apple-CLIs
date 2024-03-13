@@ -8,4 +8,4 @@ pub struct IosDeployCLIInstance {
 	exec_path: Utf8PathBuf,
 }
 
-impl_exec_instance!(IosDeployCLIInstance);
+impl_exec_instance!(IosDeployCLIInstance, "ios-deploy");

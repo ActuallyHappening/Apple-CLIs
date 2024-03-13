@@ -9,4 +9,4 @@ pub struct CodesignCLIInstance {
 	exec_path: Utf8PathBuf,
 }
 
-impl_exec_instance!(CodesignCLIInstance);
+impl_exec_instance!(CodesignCLIInstance, "codesign");
