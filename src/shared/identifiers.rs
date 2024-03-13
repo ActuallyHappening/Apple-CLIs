@@ -1,6 +1,13 @@
 use std::num::NonZeroU8;
 
-use nom::{character::complete::digit1, number::complete::float, IResult};
+use nom::{
+	character::complete::{digit1, space0},
+	combinator::map_res,
+	error::ParseError,
+	number::complete::float,
+	sequence::delimited,
+	IResult,
+};
 use serde::Deserialize;
 
 /// e.g. "com.apple.CoreSimulator.SimRuntime.iOS-16-4"
@@ -13,31 +20,40 @@ trait NomFromStr: Sized {
 
 impl NomFromStr for NonZeroU8 {
 	fn nom_from_str(input: &str) -> IResult<&str, Self> {
-		let (remaining, number) = digit1(input)?;
-		let number: NonZeroU8 = number.parse().map_err(|_err| {
-			nom::Err::Error(nom::error::Error::new(input, nom::error::ErrorKind::Digit))
-		})?;
-		Ok((remaining, number))
+		map_res(digit1, |s: &str| s.parse())(input)
 	}
 }
 
-pub mod device_name {
-	use std::{num::NonZeroU8, str::FromStr};
+/// A combinator that takes a parser `inner` and produces a parser that also consumes both leading and
+/// trailing whitespace, returning the output of `inner`.
+fn ws<'a, F: 'a, O, E: ParseError<&'a str>>(
+	inner: F,
+) -> impl FnMut(&'a str) -> IResult<&'a str, O, E>
+where
+	F: Fn(&'a str) -> IResult<&'a str, O, E>,
+{
+	delimited(space0, inner, space0)
+}
 
+pub mod device_name {
+	use std::num::NonZeroU8;
+
+	use nom::combinator::rest;
 	#[allow(unused_imports)]
 	use nom::{
 		branch::alt,
 		bytes::complete::{tag, take_till, take_until},
 		character::complete::{alpha0, alpha1, digit1, space0, space1},
-		combinator::{success, value},
+		combinator::{map, map_res, success, value},
+		number::complete::float,
+		sequence::tuple,
 		sequence::{delimited, preceded, terminated},
 		IResult,
 	};
-	use nom::{number::complete::float, sequence::tuple};
 	use strum::EnumDiscriminants;
 	use tracing::debug;
 
-	use super::NomFromStr;
+	use super::{ws, NomFromStr};
 
 	#[derive(thiserror::Error, Debug)]
 	pub enum DeviceNameParseError {
@@ -49,20 +65,13 @@ pub mod device_name {
 	pub enum DeviceName {
 		IPhone(IPhoneVariant),
 
-		Ipad {
-			variant: IPadVariant,
-			generation: Generation,
-		},
+		Ipad(IPadVariant),
 
 		#[doc = include_str!("../../docs/TODO.md")]
 		UnImplemented(String),
 	}
 
-	fn parse_iphone_discriminate(input: &str) -> IResult<&str, bool> {
-		alt((value(true, tag("iPhone")), success(false)))(input)
-	}
-
-	#[derive(Debug)]
+	#[derive(Debug, Clone, PartialEq, EnumDiscriminants)]
 	pub enum IPhoneVariant {
 		SE {
 			generation: Generation,
@@ -76,10 +85,12 @@ pub mod device_name {
 		},
 
 		#[doc = include_str!("../../docs/TODO.md")]
-		UnImplemented,
+		UnImplemented {
+			input: String,
+		},
 	}
 
-	#[derive(Debug, Clone, Copy, PartialEq, EnumDiscriminants)]
+	#[derive(Debug, Clone, PartialEq, EnumDiscriminants)]
 	pub enum IPadVariant {
 		Mini {
 			generation: Generation,
@@ -94,6 +105,12 @@ pub mod device_name {
 			size: ScreenSize,
 			generation: Generation,
 		},
+	}
+
+	impl DeviceName {
+		pub fn parsed_successfully(&self) -> bool {
+			!matches!(self, DeviceName::UnImplemented(_))
+		}
 	}
 
 	#[derive(Debug, Clone, Copy, PartialEq)]
@@ -145,6 +162,44 @@ pub mod device_name {
 		}
 	}
 
+	impl NomFromStr for IPhoneVariant {
+		fn nom_from_str(input: &str) -> IResult<&str, Self> {
+			let (remaining, discriminate) = alt((
+				value(IPhoneVariantDiscriminants::SE, ws(tag("SE"))),
+				value(IPhoneVariantDiscriminants::Number, ws(digit1)),
+				success(IPhoneVariantDiscriminants::UnImplemented),
+			))(input)?;
+
+			match discriminate {
+				IPhoneVariantDiscriminants::SE => {
+					let (remaining, generation) = Generation::nom_from_str(remaining)?;
+					Ok((remaining, IPhoneVariant::SE { generation }))
+				}
+				IPhoneVariantDiscriminants::Number => {
+					let (remaining, num) = NonZeroU8::nom_from_str(remaining)?;
+					let (remaining, plus) = alt((value(false, ws(tag("Plus"))), success(true)))(remaining)?;
+					let (remaining, pro) = alt((value(false, ws(tag("Pro"))), success(true)))(remaining)?;
+					let (remaining, max) = alt((value(false, ws(tag("Max"))), success(true)))(remaining)?;
+					Ok((
+						remaining,
+						IPhoneVariant::Number {
+							num,
+							plus,
+							pro,
+							max,
+						},
+					))
+				}
+				IPhoneVariantDiscriminants::UnImplemented => Ok((
+					remaining,
+					IPhoneVariant::UnImplemented {
+						input: remaining.to_owned(),
+					},
+				)),
+			}
+		}
+	}
+
 	#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 	pub struct Generation(NonZeroU8);
 
@@ -155,29 +210,25 @@ pub mod device_name {
 	impl NomFromStr for Generation {
 		fn nom_from_str(input: &str) -> IResult<&str, Self> {
 			let (remaining, number) = delimited(tag("("), NonZeroU8::nom_from_str, ordinal)(input)?;
-			let (remaining, _) = tag("generation)")(remaining)?; // consume the closing parenthesis
+			let (remaining, _) = ws(tag("generation)"))(remaining)?; // consume the closing parenthesis
 
 			Ok((remaining, Generation(number)))
 		}
 	}
 
 	impl NomFromStr for DeviceName {
-		fn nom_from_str(s: &str) -> IResult<&str, Self> {
-			let mut input = String::from(s);
-			input.retain(char::is_whitespace);
-			let input: &str = &input;
-
-			// let (_remaining, device) = parse_device_name(input).map_err(|e| {
-			// 	debug!("Failed to parse device name: {:?}", e);
-			// 	// DeviceNameParseError::ParsingFailed(e.to_owned())
-			// 	match e.to_owned() {
-			// 		nom::Err::Error(e) | nom::Err::Failure(e) => DeviceNameParseError::ParsingFailed(e),
-			// 		nom::Err::Incomplete(_e) => unreachable!(),
-			// 	}
-			// })?;
-
-			// Ok(device)
-			todo!()
+		fn nom_from_str(input: &str) -> IResult<&str, Self> {
+			alt((
+				map(
+					preceded(ws(tag("ipad")), IPadVariant::nom_from_str),
+					DeviceName::Ipad,
+				),
+				map(
+					preceded(ws(tag("iPhone")), IPhoneVariant::nom_from_str),
+					DeviceName::IPhone,
+				),
+				map(rest, |s: &str| DeviceName::UnImplemented(s.to_owned())),
+			))(input)
 		}
 	}
 
@@ -243,6 +294,11 @@ pub mod device_name {
 							remaining.is_empty(),
 							"Remaining was not empty: {:?} (already parsed {:?})",
 							remaining,
+							device
+						);
+						assert!(
+							device.parsed_successfully(),
+							"{:?} was not parsed successfully",
 							device
 						);
 					}
