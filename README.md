@@ -12,6 +12,9 @@ cargo install apple-clis
 Install from source:
 ```sh
 cargo install --git https://github.com/ActuallyHappening/Apple-CLIs.git apple-clis
+
+# if you are using nushell,
+apple-clis init nushell --auto
 ```
 
 ## Examples

@@ -64,9 +64,8 @@ pub struct TopLevelCliArgs {
 
 	#[arg(long, env = "CARGO")]
 	cargo: Option<Utf8PathBuf>,
-
-	#[arg(long)]
-	json: bool,
+	// #[arg(long)]
+	// json: bool,
 }
 
 #[derive(Subcommand, Debug)]
@@ -211,10 +210,13 @@ impl TopLevelCliArgs {
 }
 
 impl CliArgs {
+	#[deprecated]
 	pub fn machine_output(&self) -> bool {
-		self.args.json
+		// self.args.json
+		false
 	}
 
+	#[deprecated]
 	pub fn human_output(&self) -> bool {
 		!self.machine_output()
 	}

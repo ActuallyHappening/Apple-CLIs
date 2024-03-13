@@ -8,7 +8,7 @@ use apple_clis::shared::identifiers::DeviceName;
 use apple_clis::shared::ExecInstance;
 use apple_clis::xcrun::XcRunInstance;
 use apple_clis::{ios_deploy::IosDeployCLIInstance, security, spctl};
-use camino::{Utf8Path, Utf8PathBuf};
+use camino::Utf8PathBuf;
 use clap::{CommandFactory, Parser};
 use tracing::*;
 use tracing_subscriber::filter::LevelFilter;
@@ -55,7 +55,10 @@ fn main() -> anyhow::Result<()> {
 
 					std::fs::write(&path, &completions)
 						.context(format!("Failed to write completion script to {:?}", path))?;
-					info!("Completion script written to {:?}, now attempting to install it", path);
+					info!(
+						"Completion script written to {:?}, now attempting to install it",
+						path
+					);
 				}
 				// add source ~/.apple-clis.nu
 				{
@@ -72,10 +75,11 @@ fn main() -> anyhow::Result<()> {
 						File::open(&path).context(format!("Cannot open config.nu file at {:?}", &path))?;
 					let reader = std::io::BufReader::new(file);
 					// if there is a line that contains "source ~/.apple-clis.nu" then don't add it
-					if reader.lines().map_while(Result::ok).any(|line| {
-						line
-							.contains("source ~/.apple-clis.nu")
-					}) {
+					if reader
+						.lines()
+						.map_while(Result::ok)
+						.any(|line| line.contains("source ~/.apple-clis.nu"))
+					{
 						info!("~/.apple-clis.nu already sourced in your nu config");
 					} else {
 						let mut file = std::fs::OpenOptions::new()
