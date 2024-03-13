@@ -41,7 +41,6 @@ pub struct ListDevice {
 	pub device_type_identifier: String,
 	pub state: State,
 
-	#[serde(deserialize_with = "DeviceName::deserialize")]
 	pub name: DeviceName,
 }
 
