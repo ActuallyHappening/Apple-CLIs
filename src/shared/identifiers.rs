@@ -1,4 +1,4 @@
-use std::num::NonZeroU8;
+use std::{num::NonZeroU8, str::FromStr};
 
 mod prelude {
 	pub(super) use super::{ws, NomFromStr};

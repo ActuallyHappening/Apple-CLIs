@@ -139,6 +139,7 @@ fn main() -> anyhow::Result<()> {
 					match simctl {
 						Simctl::List => {
 							let devices = simctl_instance.list()?;
+							let devices = devices.devices().collect::<Vec<_>>();
 							println!("{} devices found with `xcrun simctl list`:", devices.len());
 							for device in devices {
 								println!("Device: {:?}", device);

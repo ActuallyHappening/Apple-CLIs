@@ -12,5 +12,13 @@
 		{
 			"path": "../cargo-bundle"
 		}
-	]
+	],
+	"settings": {
+		"cSpell.words": [
+			"codesign",
+			"Simctl",
+			"spctl",
+			"xcrun"
+		]
+	}
 }

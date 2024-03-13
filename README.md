@@ -27,8 +27,10 @@ PRs welcome!
 
 ### Developing
 ```sh
-cargo install --git https://github.com/ActuallyHappening/cargo-bundle.git
+# try the crates.io release if it works
+cargo install --git https://github.com/burtonageo/cargo-bundle.git
 brew install ios-deploy
+
 cd example-bundle
 nu test-bundle
 cd ..

@@ -1,6 +1,7 @@
 use super::{generation::Generation, prelude::*, screen_size::ScreenSize};
-use std::num::NonZeroU8;
+use std::{num::NonZeroU8, str::FromStr};
 
+use serde::{Deserialize, Deserializer};
 use strum::EnumDiscriminants;
 
 use super::{ws, NomFromStr};
@@ -8,7 +9,19 @@ use super::{ws, NomFromStr};
 #[derive(thiserror::Error, Debug)]
 pub enum DeviceNameParseError {
 	#[error("Failed to parse device name")]
-	ParsingFailed(#[source] nom::error::Error<String>),
+	ParsingFailed(#[source] nom::Err<nom::error::Error<String>>),
+
+	#[error(
+		"The parsed string was not completely consumed, with {:?} left from {:?}. Parsed: {:?}",
+		input,
+		remaining,
+		parsed
+	)]
+	RemainingNotEmpty {
+		input: String,
+		remaining: String,
+		parsed: DeviceName,
+	},
 }
 
 #[derive(Debug)]
@@ -146,6 +159,39 @@ impl NomFromStr for DeviceName {
 			),
 			map(rest, |s: &str| DeviceName::UnImplemented(s.to_owned())),
 		))(input)
+	}
+}
+
+impl FromStr for DeviceName {
+	type Err = DeviceNameParseError;
+
+	fn from_str(input: &str) -> Result<Self, Self::Err> {
+		match DeviceName::nom_from_str(input) {
+			Ok((remaining, device)) => {
+				if remaining.is_empty() {
+					Ok(device)
+				} else {
+					Err(DeviceNameParseError::RemainingNotEmpty {
+						input: input.to_owned(),
+						remaining: remaining.to_owned(),
+						parsed: device,
+					})
+				}
+			}
+			Err(e) => Err(DeviceNameParseError::ParsingFailed(e.to_owned())),
+		}
+	}
+}
+
+impl DeviceName {
+	pub(crate) fn deserialize<'de, D>(deserializer: D) -> Result<Self, D::Error>
+	where
+		D: Deserializer<'de>,
+	{
+		let buf = String::deserialize(deserializer)?;
+
+		// cron::Schedule::from_str(&buf).map_err(serde::de::Error::custom)
+		DeviceName::from_str(&buf).map_err(serde::de::Error::custom)
 	}
 }
 
