@@ -16,6 +16,7 @@
 	"settings": {
 		"cSpell.words": [
 			"codesign",
+			"nushell",
 			"Simctl",
 			"spctl",
 			"xcrun"

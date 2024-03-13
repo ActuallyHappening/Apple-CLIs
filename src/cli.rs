@@ -71,7 +71,9 @@ pub struct TopLevelCliArgs {
 
 #[derive(Subcommand, Debug)]
 pub enum Commands {
-	GenerateZshCompletions,
+	/// Used for setting up completions
+	#[clap(subcommand)]
+	Init(Init),
 
 	#[clap(subcommand)]
 	IosDeploy(IosDeploy),
@@ -89,6 +91,25 @@ pub enum Commands {
 
 	#[clap(subcommand, name = "xcrun")]
 	XcRun(XcRun),
+}
+
+#[derive(Subcommand, Debug)]
+pub enum Init {
+	#[clap(name = "nushell")]
+	#[group(required = true)]
+	NuShell {
+		/// Automatically adds shell completions to `~/.apple-clis.nu`
+		/// and configures your config.nu file to source it.
+		/// This is the recommended approach.
+		#[arg(long, group = "init")]
+		auto: bool,
+
+		/// Run `apple-clis init nushell --raw-script | save -f ~/.apple-clis.nu`
+		/// Then add `source ~/.apple-clis.nu` to your config.nu file,
+		/// E.g. `"source ~/.apple-clis.nu" | save --append $nu.config-path`
+		#[arg(long, group = "init")]
+		raw_script: bool,
+	},
 }
 
 #[derive(Subcommand, Debug)]
