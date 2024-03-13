@@ -30,7 +30,7 @@ pub enum DeviceName {
 
 	IPad(IPadVariant),
 
-	#[doc = include_str!("../../../docs/TODO.md")]
+	#[doc = include_str!("../../../docs/inline/TODO.md")]
 	UnImplemented(String),
 }
 

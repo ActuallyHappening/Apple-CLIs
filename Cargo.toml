@@ -8,7 +8,7 @@ authors = ["Caleb Yates <actuallyhappening42@gmail.com"]
 license = "MIT OR Apache-2.0"
 repository = "https://github.com/ActuallyHappening/Apple-CLIs"
 publish = true
-include = ["src/", "LICENSE-APACHE", "LICENSE-MIT", "/examples"]
+include = ["src/", "LICENSE-APACHE", "LICENSE-MIT", "/examples", "docs/inline/*"]
 
 [workspace]
 exclude = ["example-bundle"]
