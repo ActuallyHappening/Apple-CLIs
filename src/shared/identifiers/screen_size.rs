@@ -1,7 +1,7 @@
 use std::fmt::Display;
 
-use crate::shared::prelude::*;
 use super::NomFromStr;
+use crate::shared::prelude::*;
 
 #[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
 pub struct ScreenSize {
@@ -9,7 +9,7 @@ pub struct ScreenSize {
 }
 
 impl ScreenSize {
-	fn new(inches: f32) -> Self {
+	pub(crate) fn new(inches: f32) -> Self {
 		Self { inches }
 	}
 }
@@ -30,7 +30,7 @@ impl Display for ScreenSize {
 #[cfg(test)]
 mod tests {
 	use super::*;
-	
+
 	#[test]
 	fn screen_size_ordering() {
 		let small = ScreenSize::new(5.0);

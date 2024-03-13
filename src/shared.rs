@@ -5,6 +5,8 @@ pub mod identifiers;
 
 pub mod prelude {
 	pub(super) use super::{ws, NomFromStr};
+	pub(crate) use super::{CreateInstanceError, ExecInstance};
+	pub(super) use crate::prelude::*;
 	#[allow(unused_imports)]
 	pub(super) use nom::{
 		branch::alt,
@@ -16,11 +18,8 @@ pub mod prelude {
 		sequence::{delimited, preceded, terminated},
 		IResult,
 	};
-	pub(super) use crate::prelude::*;
-	pub(crate) use super::{
-		CreateInstanceError,
-		ExecInstance,
-	};
+	pub(super) use strum::EnumDiscriminants;
+	pub use super::identifiers::*;
 }
 use prelude::*;
 

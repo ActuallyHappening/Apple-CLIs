@@ -2,8 +2,8 @@ use crate::prelude::ExecInstance;
 
 use super::XcRunInstance;
 
-pub mod list;
 pub mod boot;
+pub mod list;
 
 pub struct XcRunSimctlInstance<'src> {
 	xc_run_instance: &'src XcRunInstance,

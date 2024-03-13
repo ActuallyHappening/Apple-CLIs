@@ -27,4 +27,3 @@ impl CodesignCLIInstance {
 		bossy::Command::pure(&self.exec_path).with_arg("-vvvv")
 	}
 }
-

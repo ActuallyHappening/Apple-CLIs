@@ -27,7 +27,11 @@ impl AssessType {
 }
 
 impl SpctlCLIInstance {
-	fn assess(&self, path: impl AsRef<Utf8Path>, assess_type: AssessType) -> Result<String, SpctlAssessError> {
+	fn assess(
+		&self,
+		path: impl AsRef<Utf8Path>,
+		assess_type: AssessType,
+	) -> Result<String, SpctlAssessError> {
 		Ok(
 			self
 				.bossy_command()

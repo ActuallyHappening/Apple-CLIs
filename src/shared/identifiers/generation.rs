@@ -18,6 +18,10 @@ impl Generation {
 			_ => "th",
 		}
 	}
+
+	pub(crate) fn new(number: impl Into<u8>) -> Self {
+		Self(NonZeroU8::new(number.into()).unwrap())
+	}
 }
 
 impl NomFromStr for Generation {

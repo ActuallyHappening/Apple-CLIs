@@ -5,13 +5,13 @@ use crate::shared::CreateInstanceError;
 mod assess;
 
 pub struct SpctlCLIInstance {
-	exec_path: Utf8PathBuf
+	exec_path: Utf8PathBuf,
 }
 
 impl SpctlCLIInstance {
 	pub fn new(exec_path: impl AsRef<Utf8Path>) -> SpctlCLIInstance {
 		SpctlCLIInstance {
-			exec_path: exec_path.as_ref().to_path_buf()
+			exec_path: exec_path.as_ref().to_path_buf(),
 		}
 	}
 

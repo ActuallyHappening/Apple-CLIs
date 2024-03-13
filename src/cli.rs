@@ -2,7 +2,7 @@ use camino::Utf8PathBuf;
 use clap::{Args, Parser, Subcommand};
 use tracing::{info, warn};
 
-use crate::shared::identifiers::device_name::DeviceName;
+use crate::shared::identifiers::DeviceName;
 
 pub mod prelude {
 	pub use super::*;
@@ -114,8 +114,12 @@ pub enum Security {
 #[derive(Subcommand, Debug)]
 pub enum CodeSign {
 	/// Displays the code signature of the given file
-	Display { app_path: Option<Utf8PathBuf> },
-	Sign { app_path: Option<Utf8PathBuf> },
+	Display {
+		app_path: Option<Utf8PathBuf>,
+	},
+	Sign {
+		app_path: Option<Utf8PathBuf>,
+	},
 }
 
 #[derive(Subcommand, Debug)]
@@ -141,7 +145,7 @@ pub enum Simctl {
 
 		#[arg(group = "device_name")]
 		name: Option<DeviceName>,
-	}
+	},
 }
 
 #[derive(thiserror::Error, Debug)]

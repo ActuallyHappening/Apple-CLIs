@@ -1,8 +1,8 @@
 use crate::prelude::*;
-use crate::shared::identifiers::device_name::IPadVariant;
+use crate::shared::identifiers::IPadVariant;
 use crate::shared::{
 	identifiers::{
-		device_name::{DeviceName, IPhoneVariant},
+		DeviceName, IPhoneVariant,
 		RuntimeIdentifier,
 	},
 	Device,

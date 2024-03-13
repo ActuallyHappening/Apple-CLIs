@@ -1,9 +1,10 @@
 pub mod prelude {
 	pub use crate::shared::prelude::*;
-	pub use std::num::NonZeroU8;
-	pub use std::collections::HashMap;
-	pub use serde::Deserialize;
 	pub use camino::{Utf8Path, Utf8PathBuf};
+	pub use serde::Deserialize;
+	pub use std::collections::HashMap;
+	pub use std::num::NonZeroU8;
+	pub use std::fmt::Display;
 }
 
 pub mod cargo_bundle;

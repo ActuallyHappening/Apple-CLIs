@@ -19,8 +19,7 @@ impl CargoBundleInstance {
 		}
 	}
 
-	pub fn try_new_from_which(
-		// manifest_dir: impl AsRef<Utf8Path>,
+	pub fn try_new_from_which(// manifest_dir: impl AsRef<Utf8Path>,
 	) -> Result<CargoBundleInstance, CreateInstanceError> {
 		let path = which::which("cargo-bundle")?;
 		Ok(CargoBundleInstance::new(
@@ -30,8 +29,7 @@ impl CargoBundleInstance {
 	}
 
 	fn bossy_command(&self) -> bossy::Command {
-		bossy::Command::pure(&self.cargo_path)
-			.with_arg("bundle")
+		bossy::Command::pure(&self.cargo_path).with_arg("bundle")
 	}
 }
 
