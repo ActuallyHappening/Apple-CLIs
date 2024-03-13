@@ -2,7 +2,7 @@ use apple_clis::security;
 
 fn main() {
 	let security_instance =
-		security::SecurityCLIInstance::try_new_from_which().expect("Couldn't find security executable");
+		security::SecurityCLIInstance::new().expect("Couldn't find security executable");
 
 	let teams = security_instance
 		.get_developer_certs()
