@@ -3,14 +3,23 @@ use std::fmt::Display;
 use super::NomFromStr;
 use crate::shared::prelude::*;
 
-#[derive(Debug, Clone, Copy, PartialEq, PartialOrd)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
 pub struct ScreenSize {
-	inches: f32,
+	/// divide by 10 to get number of actual inches
+	ten_inches: u16,
 }
 
 impl ScreenSize {
 	pub(crate) fn new(inches: f32) -> Self {
-		Self { inches }
+		let inches = inches * 10.0;
+
+		Self {
+			ten_inches: inches as u16,
+		}
+	}
+
+	pub fn inches(&self) -> f32 {
+		self.ten_inches as f32 / 10.0
 	}
 }
 
@@ -23,7 +32,7 @@ impl NomFromStr for ScreenSize {
 
 impl Display for ScreenSize {
 	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-		write!(f, "({}-inch)", self.inches)
+		write!(f, "({}-inch)", self.inches())
 	}
 }
 

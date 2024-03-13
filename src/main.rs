@@ -1,6 +1,7 @@
+use anyhow::Context;
 use apple_clis::cli::{self, CodeSign, Commands, IosDeploy, Security, Simctl, Spctl, XcRun};
 use apple_clis::codesign;
-use apple_clis::shared::identifiers::device_name::DeviceName;
+use apple_clis::shared::identifiers::DeviceName;
 use apple_clis::shared::ExecInstance;
 use apple_clis::xcrun::XcRunInstance;
 use apple_clis::{ios_deploy::IosDeployCLIInstance, security, spctl};
@@ -159,12 +160,25 @@ fn main() -> anyhow::Result<()> {
 							}
 						}
 						Simctl::Boot { ipad, iphone, name } => {
-							let name: DeviceName = match name {
+							let device_name: DeviceName = match name {
 								Some(n) => n,
 								None => {
-									todo!()
+									let list = simctl_instance.list()?;
+									match (ipad, iphone) {
+										(true, false) => {
+											let latest_ipad = list.ipads().max().context("No simulator iPads found!")?;
+											latest_ipad.clone().into()
+										}
+										(false, true) => {
+											let latest_iphone = list.iphones().max().context("No simulator iPhones found!")?;
+											latest_iphone.clone().into()
+										}
+										_ => unreachable!("Clap arguments should prevent this"),
+									}
 								}
 							};
+							info!("Booting device: {}", device_name);
+							simctl_instance.boot(device_name)?;
 						}
 					}
 				}

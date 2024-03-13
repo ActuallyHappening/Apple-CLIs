@@ -44,6 +44,26 @@ impl DeviceName {
 	pub fn parsed_successfully(&self) -> bool {
 		!matches!(self, DeviceName::UnImplemented(_))
 	}
+
+	pub fn is_iphone(&self) -> bool {
+		matches!(self, DeviceName::IPhone(_))
+	}
+
+	pub fn is_ipad(&self) -> bool {
+		matches!(self, DeviceName::IPad(_))
+	}
+}
+
+impl From<IPhoneVariant> for DeviceName {
+	fn from(variant: IPhoneVariant) -> Self {
+		DeviceName::IPhone(variant)
+	}
+}
+
+impl From<IPadVariant> for DeviceName {
+	fn from(variant: IPadVariant) -> Self {
+		DeviceName::IPad(variant)
+	}
 }
 
 impl NomFromStr for DeviceName {

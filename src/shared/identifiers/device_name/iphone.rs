@@ -1,6 +1,8 @@
-use super::*;
+use crate::shared::prelude::*;
 
-#[derive(Debug, Clone, PartialEq, EnumDiscriminants)]
+/// Ordered from oldest to newest.
+/// newest > oldest
+#[derive(Debug, Clone, PartialEq, Eq, EnumDiscriminants, PartialOrd, Ord)]
 pub enum IPhoneVariant {
 	SE {
 		generation: Generation,
@@ -68,5 +70,24 @@ impl Display for IPhoneVariant {
 				Ok(())
 			}
 		}
+	}
+}
+
+#[cfg(test)]
+mod tests {
+	use super::*;
+
+	#[test]
+	fn iphone_ordering() {
+		let old = IPhoneVariant::SE {
+			generation: Generation::new(1),
+		};
+		let new = IPhoneVariant::Number {
+			num: NonZeroU8::new(69).unwrap(),
+			plus: true,
+			pro: true,
+			max: true,
+		};
+		assert!(new > old);
 	}
 }

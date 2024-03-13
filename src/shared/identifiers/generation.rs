@@ -2,7 +2,7 @@ use std::fmt::Display;
 
 use crate::shared::prelude::*;
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, PartialOrd)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, PartialOrd, Ord)]
 pub struct Generation(NonZeroU8);
 
 fn ordinal(input: &str) -> IResult<&str, &str> {

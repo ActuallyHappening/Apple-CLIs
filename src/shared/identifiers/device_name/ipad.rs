@@ -1,18 +1,20 @@
 use crate::shared::prelude::*;
 
-#[derive(Debug, Clone, PartialEq, EnumDiscriminants, PartialOrd)]
+/// Loosely ordered from oldest to newest.
+/// newest > oldest
+#[derive(Debug, Clone, PartialEq, Eq, EnumDiscriminants, PartialOrd, Ord)]
 pub enum IPadVariant {
-	Pro {
-		size: ScreenSize,
-		generation: Generation,
-	},
-	Plain {
+	Air {
 		generation: Generation,
 	},
 	Mini {
 		generation: Generation,
 	},
-	Air {
+	Plain {
+		generation: Generation,
+	},
+	Pro {
+		size: ScreenSize,
 		generation: Generation,
 	},
 }
