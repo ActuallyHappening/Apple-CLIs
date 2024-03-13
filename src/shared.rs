@@ -3,6 +3,27 @@ use serde::{Deserialize, Serialize};
 
 pub mod identifiers;
 
+pub mod prelude {
+	pub(super) use super::{ws, NomFromStr};
+	#[allow(unused_imports)]
+	pub(super) use nom::{
+		branch::alt,
+		bytes::complete::{tag, take_till, take_until},
+		character::complete::{alpha0, alpha1, digit1, space0, space1},
+		combinator::{map, map_res, peek, rest, success, value},
+		number::complete::float,
+		sequence::tuple,
+		sequence::{delimited, preceded, terminated},
+		IResult,
+	};
+	pub(super) use crate::prelude::*;
+	pub(crate) use super::{
+		CreateInstanceError,
+		ExecInstance,
+	};
+}
+use prelude::*;
+
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Device {
 	pub device_identifier: String,
@@ -72,4 +93,25 @@ pub trait ExecInstance: Sized {
 		let instance = unsafe { Self::new_unchecked(path) };
 		Ok(instance)
 	}
+}
+
+trait NomFromStr: Sized {
+	fn nom_from_str(input: &str) -> IResult<&str, Self>;
+}
+
+impl NomFromStr for NonZeroU8 {
+	fn nom_from_str(input: &str) -> IResult<&str, Self> {
+		map_res(digit1, |s: &str| s.parse())(input)
+	}
+}
+
+/// A combinator that takes a parser `inner` and produces a parser that also consumes both leading and
+/// trailing whitespace, returning the output of `inner`.
+fn ws<'a, F: 'a, O, E: nom::error::ParseError<&'a str>>(
+	inner: F,
+) -> impl FnMut(&'a str) -> IResult<&'a str, O, E>
+where
+	F: Fn(&'a str) -> IResult<&'a str, O, E>,
+{
+	delimited(space0, inner, space0)
 }

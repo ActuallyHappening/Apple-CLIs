@@ -1,4 +1,4 @@
-use super::prelude::*;
+use crate::shared::prelude::*;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub struct Generation(NonZeroU8);

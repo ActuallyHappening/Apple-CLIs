@@ -1,4 +1,4 @@
-use super::prelude::*;
+use crate::shared::prelude::*;
 use super::NomFromStr;
 
 #[derive(Debug, Clone, Copy, PartialEq)]

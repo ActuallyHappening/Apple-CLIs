@@ -3,9 +3,9 @@ use std::{collections::HashMap, str::FromStr};
 use camino::{Utf8Path, Utf8PathBuf};
 use serde::Deserialize;
 
-use crate::{
-	prelude::identifiers::device_name::DeviceName,
-	shared::{identifiers::RuntimeIdentifier, Device},
+use crate::shared::{
+	identifiers::{device_name::DeviceName, RuntimeIdentifier},
+	Device,
 };
 
 use super::XcRunSimctlInstance;

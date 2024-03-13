@@ -1,4 +1,5 @@
-use super::{generation::Generation, prelude::*, screen_size::ScreenSize};
+use super::{generation::Generation, screen_size::ScreenSize};
+use crate::shared::prelude::*;
 use std::{num::NonZeroU8, str::FromStr};
 
 use serde::{Deserialize, Deserializer};
@@ -32,6 +33,11 @@ pub enum DeviceName {
 
 	#[doc = include_str!("../../../docs/TODO.md")]
 	UnImplemented(String),
+}
+
+use iphone::*;
+mod iphone {
+	
 }
 
 #[derive(Debug, Clone, PartialEq, EnumDiscriminants)]
