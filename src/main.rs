@@ -95,7 +95,7 @@ fn main() -> anyhow::Result<()> {
 			_ => unreachable!("Clap arguments should prevent this"),
 		},
 		Commands::IosDeploy(ios_deploy) => {
-			let ios_deploy_instance = IosDeployCLIInstance::try_new_from_which()?;
+			let ios_deploy_instance = IosDeployCLIInstance::new()?;
 			match ios_deploy {
 				IosDeploy::Detect => {
 					let devices = ios_deploy_instance.detect_devices()?;
@@ -137,7 +137,7 @@ fn main() -> anyhow::Result<()> {
 		// 	}
 		// }
 		Commands::Security(security) => {
-			let security_instance = security::SecurityCLIInstance::try_new_from_which()?;
+			let security_instance = security::SecurityCLIInstance::new()?;
 			match security {
 				Security::Certs => {
 					let teams = security_instance.get_developer_certs()?;
@@ -156,7 +156,7 @@ fn main() -> anyhow::Result<()> {
 			}
 		}
 		Commands::Spctl(spctl) => {
-			let spctl_instance = spctl::SpctlCLIInstance::try_new_from_which()?;
+			let spctl_instance = spctl::SpctlCLIInstance::new()?;
 			match spctl {
 				Spctl::AssessApp { app_path } => {
 					let path = match app_path {
@@ -171,7 +171,7 @@ fn main() -> anyhow::Result<()> {
 			}
 		}
 		Commands::CodeSign(codesign) => {
-			let codesign_instance = codesign::CodesignCLIInstance::try_new_from_which()?;
+			let codesign_instance = codesign::CodesignCLIInstance::new()?;
 			match codesign {
 				CodeSign::Display { app_path } => {
 					let path = match app_path {
@@ -192,7 +192,7 @@ fn main() -> anyhow::Result<()> {
 							cli::glob("**/*.app")?
 						}
 					};
-					let security_instance = security::SecurityCLIInstance::try_new_from_which()?;
+					let security_instance = security::SecurityCLIInstance::new()?;
 					let certs = security_instance.get_developer_certs()?;
 					let cert = match certs.first() {
 						Some(c) => c,
@@ -205,7 +205,7 @@ fn main() -> anyhow::Result<()> {
 			}
 		}
 		Commands::XcRun(xcrun) => {
-			let xcrun_instance = XcRunInstance::try_new_from_which()?;
+			let xcrun_instance = XcRunInstance::new()?;
 			match xcrun {
 				XcRun::Simctl(simctl) => {
 					let simctl_instance = xcrun_instance.simctl();

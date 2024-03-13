@@ -1,3 +1,5 @@
+use crate::prelude::*;
+
 use camino::Utf8Path;
 
 use super::CodesignCLIInstance;

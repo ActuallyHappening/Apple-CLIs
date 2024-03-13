@@ -20,3 +20,4 @@ pub mod shared;
 pub mod spctl;
 pub mod xcodebuild;
 pub mod xcrun;
+pub mod open;

@@ -4,6 +4,7 @@ use serde::{Deserialize, Serialize};
 pub mod identifiers;
 
 pub mod prelude {
+	pub use super::identifiers::*;
 	pub(super) use super::{ws, NomFromStr};
 	pub(crate) use super::{CreateInstanceError, ExecInstance};
 	pub(super) use crate::prelude::*;
@@ -19,7 +20,6 @@ pub mod prelude {
 		IResult,
 	};
 	pub(super) use strum::EnumDiscriminants;
-	pub use super::identifiers::*;
 }
 use prelude::*;
 
@@ -70,7 +70,7 @@ pub trait ExecInstance: Sized {
 		self.bossy_command().with_arg("--version")
 	}
 
-	fn new(path: impl AsRef<Utf8Path>) -> Result<Self, CreateInstanceError> {
+	fn from_path(path: impl AsRef<Utf8Path>) -> Result<Self, CreateInstanceError> {
 		// check path exists
 		let path = path.as_ref();
 		match path.try_exists() {
@@ -86,12 +86,39 @@ pub trait ExecInstance: Sized {
 		}
 	}
 
-	fn try_new_from_which() -> Result<Self, CreateInstanceError> {
+	/// Uses `which` to find the binary automatically
+	fn new() -> Result<Self, CreateInstanceError> {
 		let path = which::which(Self::BINARY_NAME)?;
 		let path = Utf8PathBuf::try_from(path)?;
 		let instance = unsafe { Self::new_unchecked(path) };
 		Ok(instance)
 	}
+}
+
+#[macro_export]
+macro_rules! impl_exec_instance {
+	($t:ty) => {
+		impl $crate::shared::ExecInstance for $t {
+			const BINARY_NAME: &'static str = "ios-deploy";
+
+			unsafe fn new_unchecked(exec_path: impl AsRef<::camino::Utf8Path>) -> Self {
+				Self {
+					exec_path: exec_path.as_ref().to_path_buf(),
+				}
+			}
+
+			fn get_inner_exec_path(&self) -> &::camino::Utf8Path {
+				&self.exec_path
+			}
+		}
+
+		impl $t {
+			/// Constructs an instance of `Self` using `which`.
+			pub fn new() -> Result<Self, $crate::shared::CreateInstanceError> {
+				$crate::shared::ExecInstance::new()
+			}
+		}
+	};
 }
 
 trait NomFromStr: Sized {
