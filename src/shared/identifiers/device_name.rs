@@ -96,9 +96,9 @@ impl NomFromStr for ScreenSize {
 impl NomFromStr for IPadVariant {
 	fn nom_from_str(input: &str) -> IResult<&str, Self> {
 		let (remaining, discriminate) = alt((
-			value(IPadVariantDiscriminants::Mini, tag("mini")),
-			value(IPadVariantDiscriminants::Air, tag("Air")),
-			value(IPadVariantDiscriminants::Pro, tag("Pro")),
+			value(IPadVariantDiscriminants::Mini, ws(tag("mini"))),
+			value(IPadVariantDiscriminants::Air, ws(tag("Air"))),
+			value(IPadVariantDiscriminants::Pro, ws(tag("Pro"))),
 			success(IPadVariantDiscriminants::Plain),
 		))(input)?;
 
@@ -116,7 +116,7 @@ impl NomFromStr for IPadVariant {
 				Ok((remaining, IPadVariant::Plain { generation }))
 			}
 			IPadVariantDiscriminants::Pro => {
-				let (remaining, size) = ScreenSize::nom_from_str(remaining)?;
+				let (remaining, size) = ws(ScreenSize::nom_from_str)(remaining)?;
 				let (remaining, generation) = Generation::nom_from_str(remaining)?;
 				Ok((remaining, IPadVariant::Pro { size, generation }))
 			}
@@ -183,7 +183,7 @@ impl NomFromStr for DeviceName {
 	fn nom_from_str(input: &str) -> IResult<&str, Self> {
 		alt((
 			map(
-				preceded(ws(tag("ipad")), IPadVariant::nom_from_str),
+				preceded(ws(tag("iPad")), IPadVariant::nom_from_str),
 				DeviceName::Ipad,
 			),
 			map(
