@@ -1,14 +1,28 @@
 use std::num::NonZeroU8;
 
-use nom::{
-	character::complete::{digit1, space0},
-	combinator::map_res,
-	error::ParseError,
-	number::complete::float,
-	sequence::delimited,
-	IResult,
-};
+mod prelude {
+	pub(super) use super::{ws, NomFromStr};
+	#[allow(unused_imports)]
+	pub(crate) use nom::{
+		branch::alt,
+		bytes::complete::{tag, take_till, take_until},
+		character::complete::{alpha0, alpha1, digit1, space0, space1},
+		combinator::{map, map_res, peek, rest, success, value},
+		number::complete::float,
+		sequence::tuple,
+		sequence::{delimited, preceded, terminated},
+		IResult,
+	};
+	pub(crate) use std::num::NonZeroU8;
+}
+use nom::error::ParseError;
+use prelude::*;
+
 use serde::Deserialize;
+
+pub mod device_name;
+pub mod generation;
+pub mod screen_size;
 
 /// e.g. "com.apple.CoreSimulator.SimRuntime.iOS-16-4"
 #[derive(Deserialize, Debug, Hash, PartialEq, Eq)]
@@ -34,5 +48,3 @@ where
 {
 	delimited(space0, inner, space0)
 }
-
-pub mod device_name;

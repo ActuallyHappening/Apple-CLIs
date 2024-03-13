@@ -1,19 +1,7 @@
+use super::{generation::Generation, prelude::*, screen_size::ScreenSize};
 use std::num::NonZeroU8;
 
-use nom::combinator::{peek, rest};
-#[allow(unused_imports)]
-use nom::{
-	branch::alt,
-	bytes::complete::{tag, take_till, take_until},
-	character::complete::{alpha0, alpha1, digit1, space0, space1},
-	combinator::{map, map_res, success, value},
-	number::complete::float,
-	sequence::tuple,
-	sequence::{delimited, preceded, terminated},
-	IResult,
-};
 use strum::EnumDiscriminants;
-use tracing::debug;
 
 use super::{ws, NomFromStr};
 
@@ -72,24 +60,6 @@ pub enum IPadVariant {
 impl DeviceName {
 	pub fn parsed_successfully(&self) -> bool {
 		!matches!(self, DeviceName::UnImplemented(_))
-	}
-}
-
-#[derive(Debug, Clone, Copy, PartialEq)]
-pub struct ScreenSize {
-	inches: f32,
-}
-
-impl ScreenSize {
-	fn new(inches: f32) -> Self {
-		Self { inches }
-	}
-}
-
-impl NomFromStr for ScreenSize {
-	fn nom_from_str(input: &str) -> IResult<&str, Self> {
-		let (remaining, inches) = delimited(tag("("), float, tag("-inch)"))(input)?;
-		Ok((remaining, ScreenSize::new(inches)))
 	}
 }
 
@@ -163,22 +133,6 @@ impl NomFromStr for IPhoneVariant {
 	}
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
-pub struct Generation(NonZeroU8);
-
-fn ordinal(input: &str) -> IResult<&str, &str> {
-	alt((tag("st"), tag("nd"), tag("rd"), tag("th")))(input)
-}
-
-impl NomFromStr for Generation {
-	fn nom_from_str(input: &str) -> IResult<&str, Self> {
-		let (remaining, number) = delimited(tag("("), NonZeroU8::nom_from_str, ordinal)(input)?;
-		let (remaining, _) = ws(tag("generation)"))(remaining)?; // consume the closing parenthesis
-
-		Ok((remaining, Generation(number)))
-	}
-}
-
 impl NomFromStr for DeviceName {
 	fn nom_from_str(input: &str) -> IResult<&str, Self> {
 		alt((
@@ -200,47 +154,6 @@ mod tests {
 	use tracing::debug;
 
 	use super::*;
-
-	#[test]
-	fn test_parse_ordinal() {
-		let examples = ["st", "nd", "th"];
-		for example in examples.iter() {
-			let output = ordinal(example);
-			match output {
-				Ok((remaining, _)) => {
-					debug!("Parsed ordinal from {}: {:?}", example, remaining)
-				}
-				Err(e) => panic!("Failed to parse {:?}: {}", example, e),
-			}
-		}
-	}
-
-	#[test]
-	fn test_parse_generation() {
-		let examples = [
-			"(1st generation)",
-			"(2nd generation)",
-			"(3rd generation)",
-			"(4th generation)",
-		];
-		for example in examples.iter() {
-			let output = Generation::nom_from_str(example);
-			match output {
-				Ok((remaining, generation)) => {
-					debug!(
-						"Parsed generation: {:?} from {} [remaining: {}]",
-						generation, example, remaining
-					);
-					assert!(
-						remaining.is_empty(),
-						"Remaining was not empty: {}",
-						remaining
-					);
-				}
-				Err(e) => panic!("Failed to parse {:?}: {}", example, e),
-			}
-		}
-	}
 
 	#[test]
 	fn test_parse_device_name() {
