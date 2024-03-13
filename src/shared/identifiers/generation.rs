@@ -1,3 +1,5 @@
+use std::fmt::Display;
+
 use crate::shared::prelude::*;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
@@ -5,6 +7,17 @@ pub struct Generation(NonZeroU8);
 
 fn ordinal(input: &str) -> IResult<&str, &str> {
 	alt((tag("st"), tag("nd"), tag("rd"), tag("th")))(input)
+}
+
+impl Generation {
+	const fn ordinal(&self) -> &str {
+		match self.0.get() {
+			1 => "st",
+			2 => "nd",
+			3 => "rd",
+			_ => "th",
+		}
+	}
 }
 
 impl NomFromStr for Generation {
@@ -16,11 +29,17 @@ impl NomFromStr for Generation {
 	}
 }
 
+impl Display for Generation {
+	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+		write!(f, "({}{} generation)", self.0, self.ordinal())
+	}
+}
+
 #[cfg(test)]
 mod tests {
 	use tracing::debug;
 
-use super::*;
+	use super::*;
 
 	#[test]
 	fn test_parse_ordinal() {
@@ -57,6 +76,7 @@ use super::*;
 						"Remaining was not empty: {}",
 						remaining
 					);
+					assert_eq!(&format!("{}", generation), example);
 				}
 				Err(e) => panic!("Failed to parse {:?}: {}", example, e),
 			}

@@ -142,7 +142,7 @@ fn main() -> anyhow::Result<()> {
 							let devices = devices.devices().collect::<Vec<_>>();
 							println!("{} devices found with `xcrun simctl list`:", devices.len());
 							for device in devices {
-								println!("Device: {:?}", device);
+								println!("Device found: Name = {}, simulator running = {}", device.name, device.ready());
 							}
 						}
 					}

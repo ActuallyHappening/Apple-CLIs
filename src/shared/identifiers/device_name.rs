@@ -1,6 +1,6 @@
 use super::{generation::Generation, screen_size::ScreenSize};
 use crate::shared::prelude::*;
-use std::{num::NonZeroU8, str::FromStr};
+use std::{fmt::Display, num::NonZeroU8, str::FromStr};
 
 use serde::{Deserialize, Deserializer};
 use strum::EnumDiscriminants;
@@ -72,9 +72,9 @@ mod iphone {
 				}
 				IPhoneVariantDiscriminants::Number => {
 					let (remaining, num) = NonZeroU8::nom_from_str(remaining)?;
-					let (remaining, plus) = alt((value(false, ws(tag("Plus"))), success(true)))(remaining)?;
-					let (remaining, pro) = alt((value(false, ws(tag("Pro"))), success(true)))(remaining)?;
-					let (remaining, max) = alt((value(false, ws(tag("Max"))), success(true)))(remaining)?;
+					let (remaining, plus) = alt((value(true, ws(tag("Plus"))), success(false)))(remaining)?;
+					let (remaining, pro) = alt((value(true, ws(tag("Pro"))), success(false)))(remaining)?;
+					let (remaining, max) = alt((value(true, ws(tag("Max"))), success(false)))(remaining)?;
 					Ok((
 						remaining,
 						IPhoneVariant::Number {
@@ -91,6 +91,33 @@ mod iphone {
 						input: remaining.to_owned(),
 					},
 				)),
+			}
+		}
+	}
+
+	impl Display for IPhoneVariant {
+		fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+			match self {
+				IPhoneVariant::UnImplemented { input } => write!(f, "{}", input),
+				IPhoneVariant::SE { generation } => write!(f, "SE {}", generation),
+				IPhoneVariant::Number {
+					num,
+					plus,
+					pro,
+					max,
+				} => {
+					write!(f, "{}", num)?;
+					if *plus {
+						write!(f, " Plus")?;
+					}
+					if *pro {
+						write!(f, " Pro")?;
+					}
+					if *max {
+						write!(f, " Max")?;
+					}
+					Ok(())
+				}
 			}
 		}
 	}
@@ -144,6 +171,17 @@ mod ipad {
 					let (remaining, generation) = Generation::nom_from_str(remaining)?;
 					Ok((remaining, IPadVariant::Pro { size, generation }))
 				}
+			}
+		}
+	}
+
+	impl Display for IPadVariant {
+		fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+			match self {
+				IPadVariant::Mini { generation } => write!(f, "mini {}", generation),
+				IPadVariant::Air { generation } => write!(f, "Air {}", generation),
+				IPadVariant::Plain { generation } => write!(f, "{}", generation),
+				IPadVariant::Pro { size, generation } => write!(f, "Pro {} {}", size, generation),
 			}
 		}
 	}
@@ -204,6 +242,16 @@ impl<'de> Deserialize<'de> for DeviceName {
 	}
 }
 
+impl Display for DeviceName {
+	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+		match self {
+			DeviceName::UnImplemented(s) => write!(f, "{}", s),
+			DeviceName::IPhone(variant) => write!(f, "iPhone {}", variant),
+			DeviceName::Ipad(variant) => write!(f, "iPad {}", variant),
+		}
+	}
+}
+
 #[cfg(test)]
 mod tests {
 	use tracing::debug;
@@ -231,6 +279,14 @@ mod tests {
 						device.parsed_successfully(),
 						"{:?} was not parsed successfully",
 						device
+					);
+					assert_eq!(
+						&format!("{}", device),
+						example,
+						"The parsed device name {:?} from {:?} displayed {}",
+						device,
+						example,
+						&format!("{}", device)
 					);
 				}
 				Err(e) => panic!("Failed to parse {:?}: {}", example, e),
