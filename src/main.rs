@@ -1,10 +1,10 @@
 use apple_clis::cli::{self, CodeSign, Commands, IosDeploy, Security, Simctl, Spctl, XcRun};
 use apple_clis::codesign;
+use apple_clis::shared::identifiers::device_name::DeviceName;
 use apple_clis::shared::ExecInstance;
-use apple_clis::xcrun::{simctl, XcRunInstance};
+use apple_clis::xcrun::XcRunInstance;
 use apple_clis::{ios_deploy::IosDeployCLIInstance, security, spctl};
-use camino::Utf8PathBuf;
-use clap::Parser;
+use clap::{CommandFactory, Parser};
 use tracing::*;
 use tracing_subscriber::filter::LevelFilter;
 use tracing_subscriber::EnvFilter;
@@ -21,6 +21,15 @@ fn main() -> anyhow::Result<()> {
 	trace!("Config: {:?}", config);
 
 	match config.command {
+		Commands::GenerateZshCompletions => {
+			warn!("This is not tested");
+			clap_complete::generate(
+				clap_complete::shells::Zsh,
+				&mut cli::CliArgs::command(),
+				"apple-clis",
+				&mut std::io::stdout(),
+			);
+		}
 		Commands::IosDeploy(ios_deploy) => {
 			let ios_deploy_instance = IosDeployCLIInstance::try_new_from_which()?;
 			match ios_deploy {
@@ -142,8 +151,20 @@ fn main() -> anyhow::Result<()> {
 							let devices = devices.devices().collect::<Vec<_>>();
 							println!("{} devices found with `xcrun simctl list`:", devices.len());
 							for device in devices {
-								println!("Device found: Name = {}, simulator running = {}", device.name, device.ready());
+								println!(
+									"Device found: Name = {}, simulator running = {}",
+									device.name,
+									device.ready()
+								);
 							}
+						}
+						Simctl::Boot { ipad, iphone, name } => {
+							let name: DeviceName = match name {
+								Some(n) => n,
+								None => {
+									todo!()
+								}
+							};
 						}
 					}
 				}

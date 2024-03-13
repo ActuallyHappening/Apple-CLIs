@@ -1,10 +1,10 @@
-use std::{collections::HashMap, str::FromStr};
-
-use camino::{Utf8Path, Utf8PathBuf};
-use serde::Deserialize;
-
+use crate::prelude::*;
+use crate::shared::identifiers::device_name::IPadVariant;
 use crate::shared::{
-	identifiers::{device_name::DeviceName, RuntimeIdentifier},
+	identifiers::{
+		device_name::{DeviceName, IPhoneVariant},
+		RuntimeIdentifier,
+	},
 	Device,
 };
 
@@ -27,6 +27,20 @@ pub struct ListOutput {
 impl ListOutput {
 	pub fn devices(&self) -> impl Iterator<Item = &ListDevice> {
 		self.devices.values().flatten()
+	}
+
+	pub fn iphones(&self) -> impl Iterator<Item = &IPhoneVariant> {
+		self.devices().filter_map(|device| match device.name {
+			DeviceName::IPhone(ref variant) => Some(variant),
+			_ => None,
+		})
+	}
+
+	pub fn ipads(&self) -> impl Iterator<Item = &IPadVariant> {
+		self.devices().filter_map(|device| match device.name {
+			DeviceName::IPad(ref variant) => Some(variant),
+			_ => None,
+		})
 	}
 }
 

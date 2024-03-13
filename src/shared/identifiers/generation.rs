@@ -2,7 +2,7 @@ use std::fmt::Display;
 
 use crate::shared::prelude::*;
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, PartialOrd)]
 pub struct Generation(NonZeroU8);
 
 fn ordinal(input: &str) -> IResult<&str, &str> {
@@ -40,6 +40,13 @@ mod tests {
 	use tracing::debug;
 
 	use super::*;
+
+	#[test]
+	fn generation_ordering() {
+		let old = Generation(NonZeroU8::new(1).unwrap());
+		let newer = Generation(NonZeroU8::new(2).unwrap());
+		assert!(newer > old);
+	}
 
 	#[test]
 	fn test_parse_ordinal() {

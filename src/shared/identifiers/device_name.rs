@@ -24,168 +24,21 @@ pub enum DeviceNameParseError {
 }
 
 /// [Deserialize]s from a [String] representation.
-#[derive(Debug)]
+#[derive(Debug, Clone, PartialEq)]
 pub enum DeviceName {
 	IPhone(IPhoneVariant),
 
-	Ipad(IPadVariant),
+	IPad(IPadVariant),
 
 	#[doc = include_str!("../../../docs/TODO.md")]
 	UnImplemented(String),
 }
 
-use iphone::*;
-mod iphone {
-	use super::*;
+pub use iphone::*;
+mod iphone;
 
-	#[derive(Debug, Clone, PartialEq, EnumDiscriminants)]
-	pub enum IPhoneVariant {
-		SE {
-			generation: Generation,
-		},
-
-		Number {
-			num: NonZeroU8,
-			plus: bool,
-			pro: bool,
-			max: bool,
-		},
-
-		#[doc = include_str!("../../../docs/TODO.md")]
-		UnImplemented {
-			input: String,
-		},
-	}
-
-	impl NomFromStr for IPhoneVariant {
-		fn nom_from_str(input: &str) -> IResult<&str, Self> {
-			let (remaining, discriminate) = alt((
-				value(IPhoneVariantDiscriminants::SE, ws(tag("SE"))),
-				value(IPhoneVariantDiscriminants::Number, peek(ws(digit1))),
-				success(IPhoneVariantDiscriminants::UnImplemented),
-			))(input)?;
-
-			match discriminate {
-				IPhoneVariantDiscriminants::SE => {
-					let (remaining, generation) = Generation::nom_from_str(remaining)?;
-					Ok((remaining, IPhoneVariant::SE { generation }))
-				}
-				IPhoneVariantDiscriminants::Number => {
-					let (remaining, num) = NonZeroU8::nom_from_str(remaining)?;
-					let (remaining, plus) = alt((value(true, ws(tag("Plus"))), success(false)))(remaining)?;
-					let (remaining, pro) = alt((value(true, ws(tag("Pro"))), success(false)))(remaining)?;
-					let (remaining, max) = alt((value(true, ws(tag("Max"))), success(false)))(remaining)?;
-					Ok((
-						remaining,
-						IPhoneVariant::Number {
-							num,
-							plus,
-							pro,
-							max,
-						},
-					))
-				}
-				IPhoneVariantDiscriminants::UnImplemented => Ok((
-					remaining,
-					IPhoneVariant::UnImplemented {
-						input: remaining.to_owned(),
-					},
-				)),
-			}
-		}
-	}
-
-	impl Display for IPhoneVariant {
-		fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-			match self {
-				IPhoneVariant::UnImplemented { input } => write!(f, "{}", input),
-				IPhoneVariant::SE { generation } => write!(f, "SE {}", generation),
-				IPhoneVariant::Number {
-					num,
-					plus,
-					pro,
-					max,
-				} => {
-					write!(f, "{}", num)?;
-					if *plus {
-						write!(f, " Plus")?;
-					}
-					if *pro {
-						write!(f, " Pro")?;
-					}
-					if *max {
-						write!(f, " Max")?;
-					}
-					Ok(())
-				}
-			}
-		}
-	}
-}
-
-use ipad::*;
-mod ipad {
-	use super::*;
-
-	#[derive(Debug, Clone, PartialEq, EnumDiscriminants)]
-	pub enum IPadVariant {
-		Mini {
-			generation: Generation,
-		},
-		Air {
-			generation: Generation,
-		},
-		Plain {
-			generation: Generation,
-		},
-		Pro {
-			size: ScreenSize,
-			generation: Generation,
-		},
-	}
-
-	impl NomFromStr for IPadVariant {
-		fn nom_from_str(input: &str) -> IResult<&str, Self> {
-			let (remaining, discriminate) = alt((
-				value(IPadVariantDiscriminants::Mini, ws(tag("mini"))),
-				value(IPadVariantDiscriminants::Air, ws(tag("Air"))),
-				value(IPadVariantDiscriminants::Pro, ws(tag("Pro"))),
-				success(IPadVariantDiscriminants::Plain),
-			))(input)?;
-
-			match discriminate {
-				IPadVariantDiscriminants::Air => {
-					let (remaining, generation) = Generation::nom_from_str(remaining)?;
-					Ok((remaining, IPadVariant::Air { generation }))
-				}
-				IPadVariantDiscriminants::Mini => {
-					let (remaining, generation) = Generation::nom_from_str(remaining)?;
-					Ok((remaining, IPadVariant::Mini { generation }))
-				}
-				IPadVariantDiscriminants::Plain => {
-					let (remaining, generation) = Generation::nom_from_str(remaining)?;
-					Ok((remaining, IPadVariant::Plain { generation }))
-				}
-				IPadVariantDiscriminants::Pro => {
-					let (remaining, size) = ws(ScreenSize::nom_from_str)(remaining)?;
-					let (remaining, generation) = Generation::nom_from_str(remaining)?;
-					Ok((remaining, IPadVariant::Pro { size, generation }))
-				}
-			}
-		}
-	}
-
-	impl Display for IPadVariant {
-		fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-			match self {
-				IPadVariant::Mini { generation } => write!(f, "mini {}", generation),
-				IPadVariant::Air { generation } => write!(f, "Air {}", generation),
-				IPadVariant::Plain { generation } => write!(f, "{}", generation),
-				IPadVariant::Pro { size, generation } => write!(f, "Pro {} {}", size, generation),
-			}
-		}
-	}
-}
+pub use ipad::*;
+mod ipad;
 
 impl DeviceName {
 	pub fn parsed_successfully(&self) -> bool {
@@ -198,7 +51,7 @@ impl NomFromStr for DeviceName {
 		alt((
 			map(
 				preceded(ws(tag("iPad")), IPadVariant::nom_from_str),
-				DeviceName::Ipad,
+				DeviceName::IPad,
 			),
 			map(
 				preceded(ws(tag("iPhone")), IPhoneVariant::nom_from_str),
@@ -247,7 +100,7 @@ impl Display for DeviceName {
 		match self {
 			DeviceName::UnImplemented(s) => write!(f, "{}", s),
 			DeviceName::IPhone(variant) => write!(f, "iPhone {}", variant),
-			DeviceName::Ipad(variant) => write!(f, "iPad {}", variant),
+			DeviceName::IPad(variant) => write!(f, "iPad {}", variant),
 		}
 	}
 }
@@ -281,12 +134,12 @@ mod tests {
 						device
 					);
 					assert_eq!(
-						&format!("{}", device),
+						&device.to_string(),
 						example,
 						"The parsed device name {:?} from {:?} displayed {}",
 						device,
 						example,
-						&format!("{}", device)
+						&device.to_string()
 					);
 				}
 				Err(e) => panic!("Failed to parse {:?}: {}", example, e),

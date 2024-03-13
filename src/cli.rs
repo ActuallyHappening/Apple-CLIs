@@ -2,6 +2,8 @@ use camino::Utf8PathBuf;
 use clap::{Args, Parser, Subcommand};
 use tracing::{info, warn};
 
+use crate::shared::identifiers::device_name::DeviceName;
+
 pub mod prelude {
 	pub use super::*;
 }
@@ -69,6 +71,8 @@ pub struct TopLevelCliArgs {
 
 #[derive(Subcommand, Debug)]
 pub enum Commands {
+	GenerateZshCompletions,
+
 	#[clap(subcommand)]
 	IosDeploy(IosDeploy),
 
@@ -127,7 +131,17 @@ pub enum XcRun {
 
 #[derive(Subcommand, Debug)]
 pub enum Simctl {
-	List
+	List,
+	Boot {
+		#[arg(long, group = "device_name")]
+		ipad: bool,
+
+		#[arg(long, group = "device_name")]
+		iphone: bool,
+
+		#[arg(group = "device_name")]
+		name: Option<DeviceName>,
+	}
 }
 
 #[derive(thiserror::Error, Debug)]
