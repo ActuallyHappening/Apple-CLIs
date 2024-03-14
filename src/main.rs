@@ -2,8 +2,11 @@ use std::fs::File;
 use std::io::{BufRead, Write};
 
 use anyhow::Context;
-use apple_clis::cli::{self, CodeSign, Commands, Init, IosDeploy, Security, Simctl, Spctl, XcRun};
+use apple_clis::cli::{
+	self, CodeSign, Commands, Init, IosDeploy, Open, Security, Simctl, Spctl, XcRun,
+};
 use apple_clis::codesign;
+use apple_clis::open::OpenCLIInstance;
 use apple_clis::shared::identifiers::DeviceName;
 use apple_clis::shared::ExecInstance;
 use apple_clis::xcrun::XcRunInstance;
@@ -247,6 +250,15 @@ fn main() -> anyhow::Result<()> {
 							simctl_instance.boot(device_name)?;
 						}
 					}
+				}
+			}
+		}
+		Commands::Open(open) => {
+			let open_instance = OpenCLIInstance::new()?;
+			match open {
+				Open::WellKnown { well_known } => {
+					info!("Opening a well known path {:?}", well_known);
+					open_instance.open_well_known(well_known)?;
 				}
 			}
 		}

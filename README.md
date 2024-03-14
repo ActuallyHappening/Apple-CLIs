@@ -50,6 +50,8 @@ cd ..
 
 # example command
 cargo r -- codesign display
+cargo r -- codesign sign
+cargo r -- codesign display
 ```
 
 ### Todo/Features:

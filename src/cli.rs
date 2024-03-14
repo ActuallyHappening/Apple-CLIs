@@ -2,7 +2,7 @@ use camino::Utf8PathBuf;
 use clap::{Args, Parser, Subcommand};
 use tracing::{info, warn};
 
-use crate::shared::identifiers::DeviceName;
+use crate::{open::well_known::WellKnown, shared::identifiers::DeviceName};
 
 pub mod prelude {
 	pub use super::*;
@@ -90,6 +90,9 @@ pub enum Commands {
 
 	#[clap(subcommand, name = "xcrun")]
 	XcRun(XcRun),
+
+	#[clap(subcommand)]
+	Open(Open),
 }
 
 #[derive(Subcommand, Debug)]
@@ -167,6 +170,14 @@ pub enum Simctl {
 		#[arg(group = "device_name")]
 		name: Option<DeviceName>,
 	},
+}
+
+#[derive(Subcommand, Debug)]
+pub enum Open {
+	WellKnown {
+		#[arg(value_enum)]
+		well_known: WellKnown,
+	}
 }
 
 #[derive(thiserror::Error, Debug)]
