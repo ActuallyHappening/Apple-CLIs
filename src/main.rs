@@ -249,6 +249,16 @@ fn main() -> anyhow::Result<()> {
 							info!("Booting device: {}", device_name);
 							simctl_instance.boot(device_name)?;
 						}
+						Simctl::InstallBooted { app_path } => {
+							let path = match app_path {
+								Some(p) => p,
+								None => {
+									// find directory/file ending in .app
+									cli::glob("**/*.app")?
+								}
+							};
+							simctl_instance.install_booted(path)?;
+						}
 					}
 				}
 			}

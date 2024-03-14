@@ -64,8 +64,9 @@ pub struct TopLevelCliArgs {
 
 	#[arg(long, env = "CARGO")]
 	cargo: Option<Utf8PathBuf>,
-	// #[arg(long)]
-	// json: bool,
+
+	#[arg(long, global = true)]
+	json: bool,
 }
 
 #[derive(Subcommand, Debug)]
@@ -169,6 +170,9 @@ pub enum Simctl {
 
 		#[arg(group = "device_name")]
 		name: Option<DeviceName>,
+	},
+	InstallBooted {
+		app_path: Option<Utf8PathBuf>,
 	},
 }
 

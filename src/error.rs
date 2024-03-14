@@ -5,8 +5,9 @@ pub enum Error {
 	#[error("Command exited with an error: {0}")]
 	ExecuteErrored(#[from] bossy::Error),
 
-	#[error("Calling `--version` failed: {0}")]
-	VersionCheckFailed(#[source] bossy::Error),
+	/// TODO: propagate more information
+	#[error("Calling `--version` failed")]
+	VersionCheckFailed,
 
 	#[error("Error parsing command JSON output: {0}")]
 	ParseJson(#[from] serde_json::Error),

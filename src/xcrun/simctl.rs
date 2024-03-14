@@ -1,25 +1,29 @@
-use crate::prelude::ExecInstance;
+use crate::prelude::*;
 
 use super::XcRunInstance;
 
 pub mod boot;
-pub mod list;
 pub mod install;
+pub mod list;
 
 pub struct XcRunSimctlInstance<'src> {
-	xc_run_instance: &'src XcRunInstance,
+	exec_parent: &'src XcRunInstance,
 }
 
 impl XcRunInstance {
 	pub fn simctl(&self) -> XcRunSimctlInstance {
-		XcRunSimctlInstance {
-			xc_run_instance: self,
-		}
+		XcRunSimctlInstance { exec_parent: self }
 	}
 }
 
 impl XcRunSimctlInstance<'_> {
 	fn bossy_command(&self) -> bossy::Command {
-		self.xc_run_instance.bossy_command().with_arg("simctl")
+		self.exec_parent.bossy_command().with_arg("simctl")
 	}
 }
+
+impl_exec_child!(
+	XcRunSimctlInstance<'src>,
+	parent = XcRunInstance,
+	subcommand = "simctl"
+);

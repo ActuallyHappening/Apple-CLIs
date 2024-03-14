@@ -5,8 +5,9 @@ pub mod identifiers;
 
 pub mod prelude {
 	pub use super::identifiers::*;
-	pub(super) use super::{ws, NomFromStr};
 	pub(crate) use super::ExecInstance;
+	pub(super) use super::{ws, NomFromStr};
+	pub(crate) use crate::impl_exec_instance;
 	pub(super) use crate::prelude::*;
 	#[allow(unused_imports)]
 	pub(super) use nom::{
@@ -20,7 +21,6 @@ pub mod prelude {
 		IResult,
 	};
 	pub(super) use strum::EnumDiscriminants;
-	pub(crate) use crate::impl_exec_instance;
 }
 use prelude::*;
 
@@ -53,6 +53,13 @@ pub trait ExecInstance: Sized {
 		self.bossy_command().with_arg("--version")
 	}
 
+	fn validate_version(&self) -> bool {
+		self
+			.version_command()
+			.run_and_wait()
+			.is_ok_and(|status| status.success())
+	}
+
 	fn from_path(path: impl AsRef<Utf8Path>) -> Result<Self> {
 		// check path exists
 		let path = path.as_ref();
@@ -73,8 +80,57 @@ pub trait ExecInstance: Sized {
 	fn new() -> Result<Self> {
 		let path = which::which(Self::BINARY_NAME)?;
 		let path = Utf8PathBuf::try_from(path)?;
+		// Safety: `path` is a valid path to the binary
 		let instance = unsafe { Self::new_unchecked(path) };
-		Ok(instance)
+		if !instance.validate_version() {
+			Err(Error::VersionCheckFailed)
+		} else {
+			Ok(instance)
+		}
+	}
+}
+
+pub trait ExecChild<'src>: Sized {
+	const SUBCOMMAND_NAME: &'static str;
+
+	type Parent: ExecInstance;
+
+	/// Unsafe constructor for a child command.
+	/// Assumes that the subcommand has been validated to exist.
+	///
+	/// # Safety
+	/// Parent must be validated. Type system should validate this,
+	/// this method being unsafe is to reflect [ExecInstance::new_unchecked].
+	///
+	/// Prefer [ChildExec::new]
+	unsafe fn new_unchecked(parent: &'src Self::Parent) -> Self;
+	fn get_inner_parent(&self) -> &Self::Parent;
+
+	fn bossy_command(&self) -> bossy::Command {
+		self
+			.get_inner_parent()
+			.bossy_command()
+			.with_arg(Self::SUBCOMMAND_NAME)
+	}
+
+	fn version_command(&self) -> bossy::Command {
+		self.bossy_command().with_arg("--version")
+	}
+
+	fn validate_version(&self) -> bool {
+		self
+			.version_command()
+			.run_and_wait()
+			.is_ok_and(|status| status.success())
+	}
+
+	fn new(parent: &'src Self::Parent) -> Result<Self> {
+		let instance = unsafe { Self::new_unchecked(parent) };
+		if !instance.validate_version() {
+			Err(Error::VersionCheckFailed)
+		} else {
+			Ok(instance)
+		}
 	}
 }
 
@@ -99,6 +155,35 @@ macro_rules! impl_exec_instance {
 			/// Constructs an instance of `Self` using `which`.
 			pub fn new() -> $crate::error::Result<Self> {
 				$crate::shared::ExecInstance::new()
+			}
+		}
+	};
+}
+
+#[macro_export]
+macro_rules! impl_exec_child {
+	($t:ty, parent = $parent:ty, subcommand = $name:expr) => {
+		impl<'src> $crate::shared::ExecChild<'src> for $t {
+			const SUBCOMMAND_NAME: &'static str = $name;
+			type Parent = $parent;
+
+			unsafe fn new_unchecked(parent: &'src Self::Parent) -> Self {
+				Self {
+					exec_parent: parent,
+				}
+			}
+
+			fn get_inner_parent(&self) -> &Self::Parent {
+				&self.exec_parent
+			}
+		}
+
+		impl<'src> $t {
+			/// Constructs an instance of `Self` using `which`.
+			pub fn new(
+				parent: &'src <Self as $crate::shared::ExecChild<'src>>::Parent,
+			) -> $crate::error::Result<Self> {
+				$crate::shared::ExecChild::new(parent)
 			}
 		}
 	};

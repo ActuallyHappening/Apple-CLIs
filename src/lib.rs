@@ -1,5 +1,5 @@
 pub mod prelude {
-	pub(crate) use crate::impl_exec_instance;
+	pub(crate) use crate::{impl_exec_instance, impl_exec_child};
 	pub use crate::shared::prelude::*;
 	pub use crate::error::{Error, Result};
 	pub use crate::error as error;
