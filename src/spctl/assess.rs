@@ -6,7 +6,7 @@ use super::SpctlCLIInstance;
 
 // See https://forums.developer.apple.com/forums/thread/130379
 #[derive(Debug)]
-enum AssessType {
+pub enum AssessType {
 	App,
 	DiskImage,
 	InstallerPackage,
@@ -24,7 +24,7 @@ impl AssessType {
 
 impl SpctlCLIInstance {
 	#[doc = include_str!("../../docs/inline/TODO.md")]
-	fn assess(&self, path: impl AsRef<Utf8Path>, assess_type: AssessType) -> Result<String> {
+	pub fn assess(&self, path: impl AsRef<Utf8Path>, assess_type: AssessType) -> Result<String> {
 		Ok(
 			self
 				.bossy_command()

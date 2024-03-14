@@ -3,7 +3,6 @@ use crate::prelude::*;
 use openssl::x509::X509;
 use openssl::{error::ErrorStack as OpenSslError, nid::Nid, x509::X509NameRef};
 use thiserror::Error;
-use tracing::{error, info, warn};
 
 use super::SecurityCLIInstance;
 

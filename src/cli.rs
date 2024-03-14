@@ -195,31 +195,6 @@ pub enum TopLevelArgsError {
 	CannotWhichCargo(#[from] which::Error),
 }
 
-impl TopLevelCliArgs {
-	fn try_get_manifest_path(&self) -> Result<Utf8PathBuf, TopLevelArgsError> {
-		match &self.manifest_path {
-			Some(p) => Ok(p.clone()),
-			None => match std::env::current_dir() {
-				Ok(p) => {
-					if p.join("Cargo.toml").exists() {
-						Ok(Utf8PathBuf::try_from(p)?)
-					} else {
-						Err(TopLevelArgsError::CargoTomlDoesNotExist)
-					}
-				}
-				Err(err) => Err(TopLevelArgsError::CwdDoesNotExist(err)),
-			},
-		}
-	}
-
-	fn try_get_cargo_path(&self) -> Result<Utf8PathBuf, TopLevelArgsError> {
-		match &self.cargo {
-			Some(p) => Ok(p.clone()),
-			None => Ok(Utf8PathBuf::try_from(which::which("cargo")?)?),
-		}
-	}
-}
-
 impl CliArgs {
 	#[deprecated]
 	pub fn machine_output(&self) -> bool {

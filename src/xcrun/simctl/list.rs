@@ -1,9 +1,6 @@
 use crate::prelude::*;
 use crate::shared::identifiers::IPadVariant;
-use crate::shared::{
-	identifiers::{DeviceName, IPhoneVariant, RuntimeIdentifier},
-	Device,
-};
+use crate::shared::identifiers::{DeviceName, IPhoneVariant, RuntimeIdentifier};
 
 use super::XcRunSimctlInstance;
 

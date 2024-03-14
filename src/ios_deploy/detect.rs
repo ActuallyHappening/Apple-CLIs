@@ -1,6 +1,4 @@
 use crate::shared::Device;
-use serde::Deserialize;
-use tracing::trace;
 use crate::prelude::*;
 
 use super::IosDeployCLIInstance;

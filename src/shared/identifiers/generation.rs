@@ -19,6 +19,7 @@ impl Generation {
 		}
 	}
 
+	#[cfg_attr(not(test), allow(dead_code))]
 	pub(crate) fn new(number: impl Into<u8>) -> Self {
 		Self(NonZeroU8::new(number.into()).unwrap())
 	}
