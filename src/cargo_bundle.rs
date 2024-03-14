@@ -1,6 +1,6 @@
-use camino::{Utf8Path, Utf8PathBuf};
+use bossy::ExitStatus;
 
-use crate::shared::CreateInstanceError;
+use crate::prelude::*;
 
 pub struct CargoBundleInstance {
 	cargo_path: Utf8PathBuf,
@@ -20,7 +20,7 @@ impl CargoBundleInstance {
 	}
 
 	pub fn try_new_from_which(// manifest_dir: impl AsRef<Utf8Path>,
-	) -> Result<CargoBundleInstance, CreateInstanceError> {
+	) -> Result<CargoBundleInstance> {
 		let path = which::which("cargo-bundle")?;
 		Ok(CargoBundleInstance::new(
 			Utf8PathBuf::try_from(path)?,
@@ -41,12 +41,12 @@ pub enum BundleError {
 
 impl CargoBundleInstance {
 	// cargo bundle --target aarch64-apple-ios-sim
-	pub fn bundle_ios(&self) -> Result<bool, BundleError> {
+	pub fn bundle_ios(&self) -> Result<ExitStatus> {
 		let exit_status = self
 			.bossy_command()
 			.with_args(["--target", "aarch64-apple-ios-sim"])
 			.run_and_wait()?;
 
-		Ok(exit_status.success())
+		Ok(exit_status)
 	}
 }

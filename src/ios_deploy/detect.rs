@@ -5,15 +5,6 @@ use crate::prelude::*;
 
 use super::IosDeployCLIInstance;
 
-#[derive(thiserror::Error, Debug)]
-pub enum IosDeployDetectError {
-	#[error("Failed to parse `ios-deploy --detect --json` output: {0}")]
-	ParseError(#[from] serde_json::Error),
-
-	#[error("An error occurred while executing `ios-deploy --detect`: {0}")]
-	ExecuteError(#[from] bossy::Error),
-}
-
 #[derive(Debug)]
 pub struct DetectDevicesConfig {
 	pub timeout: u8,
@@ -31,14 +22,14 @@ impl Default for DetectDevicesConfig {
 
 impl IosDeployCLIInstance {
 	/// Uses default [DetectDevicesConfig].
-	pub fn detect_devices(&self) -> Result<Vec<Device>, IosDeployDetectError> {
+	pub fn detect_devices(&self) -> Result<Vec<Device>> {
 		self.detect_devices_with_config(&DetectDevicesConfig::default())
 	}
 
 	pub fn detect_devices_with_config(
 		&self,
 		config: &DetectDevicesConfig,
-	) -> Result<Vec<Device>, IosDeployDetectError> {
+	) -> Result<Vec<Device>> {
 		let mut command = self
 			.bossy_command()
 			.with_arg("--detect")

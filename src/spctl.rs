@@ -1,6 +1,6 @@
 use camino::{Utf8Path, Utf8PathBuf};
 
-use crate::{impl_exec_instance, shared::CreateInstanceError};
+use crate::impl_exec_instance;
 
 mod assess;
 

@@ -1,9 +1,7 @@
-use super::{generation::Generation, screen_size::ScreenSize};
 use crate::shared::prelude::*;
-use std::{fmt::Display, num::NonZeroU8, str::FromStr};
+use std::{fmt::Display, str::FromStr};
 
 use serde::{Deserialize, Deserializer};
-use strum::EnumDiscriminants;
 
 #[derive(thiserror::Error, Debug)]
 pub enum DeviceNameParseError {
@@ -85,7 +83,7 @@ impl NomFromStr for DeviceName {
 impl FromStr for DeviceName {
 	type Err = DeviceNameParseError;
 
-	fn from_str(input: &str) -> Result<Self, Self::Err> {
+	fn from_str(input: &str) -> std::result::Result<Self, Self::Err> {
 		match DeviceName::nom_from_str(input) {
 			Ok((remaining, device)) => {
 				if remaining.is_empty() {
@@ -104,7 +102,7 @@ impl FromStr for DeviceName {
 }
 
 impl<'de> Deserialize<'de> for DeviceName {
-	fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+	fn deserialize<D>(deserializer: D) -> std::result::Result<Self, D::Error>
 	where
 		D: Deserializer<'de>,
 	{

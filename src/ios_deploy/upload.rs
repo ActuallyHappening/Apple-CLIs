@@ -1,23 +1,18 @@
 use crate::prelude::*;
 
+use bossy::ExitStatus;
 use camino::Utf8Path;
 
 use crate::shared::Device;
 
 use super::IosDeployCLIInstance;
 
-#[derive(thiserror::Error, Debug)]
-pub enum UploadBundleError {
-	#[error("An error occured while executing `ios-deploy`: {0}")]
-	ExecuteError(#[from] bossy::Error),
-}
-
 impl IosDeployCLIInstance {
 	pub fn upload_bundle(
 		&self,
 		device: &Device,
 		bundle_path: impl AsRef<Utf8Path>,
-	) -> Result<(), UploadBundleError> {
+	) -> Result<ExitStatus> {
 		let mut command = self
 			.bossy_command()
 			.with_args(["--id", &device.device_identifier])
@@ -27,8 +22,6 @@ impl IosDeployCLIInstance {
 		command.add_arg("--debug");
 		// }
 
-		command.run_and_wait()?;
-
-		Ok(())
+		Ok(command.run_and_wait()?)
 	}
 }

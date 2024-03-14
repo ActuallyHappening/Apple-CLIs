@@ -6,7 +6,7 @@ pub mod identifiers;
 pub mod prelude {
 	pub use super::identifiers::*;
 	pub(super) use super::{ws, NomFromStr};
-	pub(crate) use super::{CreateInstanceError, ExecInstance};
+	pub(crate) use super::ExecInstance;
 	pub(super) use crate::prelude::*;
 	#[allow(unused_imports)]
 	pub(super) use nom::{
@@ -20,6 +20,7 @@ pub mod prelude {
 		IResult,
 	};
 	pub(super) use strum::EnumDiscriminants;
+	pub(crate) use crate::impl_exec_instance;
 }
 use prelude::*;
 
@@ -29,24 +30,6 @@ pub struct Device {
 	pub device_name: String,
 	pub model_name: String,
 	pub interface: String,
-}
-
-#[derive(thiserror::Error, Debug)]
-pub enum CreateInstanceError {
-	#[error("Error running `which ios-deploy`: {0}")]
-	CommandExecution(#[from] which::Error),
-
-	#[error("Error converting path to UTF-8: {0}")]
-	PathNotUtf8(#[from] camino::FromPathBufError),
-
-	#[error("Calling `--version` failed: {0}")]
-	VersionCheckFailed(#[from] bossy::Error),
-
-	#[error("Path does not exist: {path} (std::io::Error: {err:?})")]
-	PathDoesNotExist {
-		path: Utf8PathBuf,
-		err: Option<std::io::Error>,
-	},
 }
 
 /// Wrapper of binary
@@ -70,16 +53,16 @@ pub trait ExecInstance: Sized {
 		self.bossy_command().with_arg("--version")
 	}
 
-	fn from_path(path: impl AsRef<Utf8Path>) -> Result<Self, CreateInstanceError> {
+	fn from_path(path: impl AsRef<Utf8Path>) -> Result<Self> {
 		// check path exists
 		let path = path.as_ref();
 		match path.try_exists() {
 			Ok(true) => Ok(unsafe { Self::new_unchecked(path) }),
-			Ok(false) => Err(CreateInstanceError::PathDoesNotExist {
+			Ok(false) => Err(Error::PathDoesNotExist {
 				path: path.to_owned(),
 				err: None,
 			}),
-			Err(e) => Err(CreateInstanceError::PathDoesNotExist {
+			Err(e) => Err(Error::PathDoesNotExist {
 				path: path.to_owned(),
 				err: Some(e),
 			}),
@@ -87,7 +70,7 @@ pub trait ExecInstance: Sized {
 	}
 
 	/// Uses `which` to find the binary automatically
-	fn new() -> Result<Self, CreateInstanceError> {
+	fn new() -> Result<Self> {
 		let path = which::which(Self::BINARY_NAME)?;
 		let path = Utf8PathBuf::try_from(path)?;
 		let instance = unsafe { Self::new_unchecked(path) };
@@ -114,7 +97,7 @@ macro_rules! impl_exec_instance {
 
 		impl $t {
 			/// Constructs an instance of `Self` using `which`.
-			pub fn new() -> Result<Self, $crate::shared::CreateInstanceError> {
+			pub fn new() -> $crate::error::Result<Self> {
 				$crate::shared::ExecInstance::new()
 			}
 		}

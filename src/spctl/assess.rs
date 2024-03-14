@@ -4,12 +4,6 @@ use camino::Utf8Path;
 
 use super::SpctlCLIInstance;
 
-#[derive(thiserror::Error, Debug)]
-pub enum SpctlAssessError {
-	#[error("Error executing `spctl --asses`: {0}")]
-	ExecuteError(#[from] bossy::Error),
-}
-
 // See https://forums.developer.apple.com/forums/thread/130379
 #[derive(Debug)]
 enum AssessType {
@@ -29,11 +23,8 @@ impl AssessType {
 }
 
 impl SpctlCLIInstance {
-	fn assess(
-		&self,
-		path: impl AsRef<Utf8Path>,
-		assess_type: AssessType,
-	) -> Result<String, SpctlAssessError> {
+	#[doc = include_str!("../../docs/inline/TODO.md")]
+	fn assess(&self, path: impl AsRef<Utf8Path>, assess_type: AssessType) -> Result<String> {
 		Ok(
 			self
 				.bossy_command()
@@ -44,7 +35,7 @@ impl SpctlCLIInstance {
 		)
 	}
 
-	pub fn assess_app(&self, path: impl AsRef<Utf8Path>) -> Result<String, SpctlAssessError> {
+	pub fn assess_app(&self, path: impl AsRef<Utf8Path>) -> Result<String> {
 		self.assess(path, AssessType::App)
 	}
 }
