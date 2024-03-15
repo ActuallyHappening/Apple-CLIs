@@ -2,6 +2,7 @@ use camino::{Utf8Path, Utf8PathBuf};
 use serde::{Deserialize, Serialize};
 
 pub mod identifiers;
+pub mod cmd;
 
 pub mod prelude {
 	pub use super::identifiers::*;

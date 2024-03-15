@@ -8,7 +8,7 @@ pub mod prelude {
 	pub use std::collections::HashMap;
 	pub use std::num::NonZeroU8;
 	pub use std::fmt::Display;
-	pub use tracing::{trace, debug, info, warn, error};
+	pub use tracing::{trace, debug, info, warn, error, instrument};
 }
 
 pub mod error;
