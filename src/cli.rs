@@ -2,7 +2,7 @@ use camino::Utf8PathBuf;
 use clap::{Args, Parser, Subcommand};
 use tracing::{info, warn};
 
-use crate::{open::well_known::WellKnown, shared::identifiers::DeviceName};
+use crate::{ios_deploy::detect::DetectDevicesConfig, open::well_known::WellKnown, shared::identifiers::DeviceName};
 
 use self::{app_path::AppPath, device_name::DeviceSimulator};
 
@@ -205,11 +205,17 @@ pub enum Init {
 #[derive(Subcommand, Debug)]
 pub enum IosDeploy {
 	/// Spends a second to detect any already connected devices
-	Detect,
+	Detect {
+		#[clap(flatten)]
+		config: DetectDevicesConfig,
+	},
 	/// Uploads an app to a real device
 	Upload {
 		#[clap(flatten)]
 		app_path: app_path::AppPath,
+
+		#[clap(flatten)]
+		auto_detect_config: DetectDevicesConfig,
 	},
 }
 

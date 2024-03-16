@@ -135,8 +135,8 @@ fn run(command: Commands) -> std::result::Result<Option<serde_json::Value>, colo
 		Commands::IosDeploy(ios_deploy) => {
 			let ios_deploy_instance = IosDeployCLIInstance::new()?;
 			match ios_deploy {
-				IosDeploy::Detect => {
-					let devices = ios_deploy_instance.detect_devices()?;
+				IosDeploy::Detect { config } => {
+					let devices = ios_deploy_instance.detect_devices(&config)?;
 					// println!("{} real devices found with `ios-deploy`:", devices.len());
 					// for device in devices {
 					// 	println!("Device: {:?}", device);
@@ -145,9 +145,12 @@ fn run(command: Commands) -> std::result::Result<Option<serde_json::Value>, colo
 						.map(Option::Some)
 						.map_err(|err| eyre!("Failed to convert devices to JSON: {}", err))
 				}
-				IosDeploy::Upload { app_path } => {
+				IosDeploy::Upload {
+					app_path,
+					auto_detect_config,
+				} => {
 					let path = app_path.resolve()?;
-					let devices = ios_deploy_instance.detect_devices()?;
+					let devices = ios_deploy_instance.detect_devices(&auto_detect_config)?;
 					let device = match devices.first() {
 						Some(d) => d,
 						None => Err(eyre!("No devices found to upload to"))?,

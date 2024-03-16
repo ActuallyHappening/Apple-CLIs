@@ -4,8 +4,12 @@ use crate::shared::Device;
 use super::IosDeployCLIInstance;
 
 #[derive(Debug)]
+#[cfg_attr(feature = "cli", derive(clap::Args))]
 pub struct DetectDevicesConfig {
+	#[cfg_attr(feature = "cli", clap(long, default_value_t = 1))]
 	pub timeout: u8,
+
+	#[cfg_attr(feature = "cli", clap(long, default_value_t = false))]
 	pub wifi: bool,
 }
 
@@ -20,14 +24,13 @@ impl Default for DetectDevicesConfig {
 }
 
 impl IosDeployCLIInstance {
-	/// Uses default [DetectDevicesConfig].
-	#[instrument]
-	pub fn detect_devices(&self) -> Result<Vec<Device>> {
-		self.detect_devices_with_config(&DetectDevicesConfig::default())
-	}
+	// #[cfg(feature = "cli")]
+	// pub fn detect_device_report(&self, config: &DetectDevicesConfig) -> std::result::Result<Vec<Device>, color_eyre::Report> {
+	// 	self.detect_devices(config).wrap_err("Failed to detect devices")
+	// }
 
 	#[instrument]
-	pub fn detect_devices_with_config(&self, config: &DetectDevicesConfig) -> Result<Vec<Device>> {
+	pub fn detect_devices(&self, config: &DetectDevicesConfig) -> Result<Vec<Device>> {
 		let mut command = self
 			.bossy_command()
 			.with_arg("--detect")
@@ -35,7 +38,7 @@ impl IosDeployCLIInstance {
 			.with_args(["--timeout", config.timeout.to_string().as_str()]);
 
 		if !config.wifi {
-			command.add_arg("--wifi");
+			command.add_arg("--no-wifi");
 		}
 
 		let output = command.run_and_wait_for_string()?;
