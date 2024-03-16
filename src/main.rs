@@ -26,7 +26,9 @@ fn to_json<T: Serialize>(value: T) -> Result<Option<serde_json::Value>, color_ey
 		.map_err(|err| eyre!("Failed to convert value to JSON: {}", err))
 }
 
-fn to_raw_json<T: std::fmt::Debug>(output: T) -> Result<Option<serde_json::Value>, color_eyre::Report> {
+fn to_raw_json<T: std::fmt::Debug>(
+	output: T,
+) -> Result<Option<serde_json::Value>, color_eyre::Report> {
 	Ok(Some(json!({
 		"msg": "This value does not have a good JSON representation yet, so it is not returned in the JSON output. PRs welcome!",
 		"raw_output": format!("{:#?}", output),

@@ -59,9 +59,7 @@ pub enum Error {
 		"Error trying to parse the `codesign` status of a .app: Missing property {}",
 		missing_key
 	)]
-	SigningPropertyNotFound {
-		missing_key: String,
-	},
+	SigningPropertyNotFound { missing_key: String },
 
 	#[error("Error parsing date: {0}")]
 	ParseDateError(#[from] time::error::Parse),
