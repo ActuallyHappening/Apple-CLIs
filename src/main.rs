@@ -264,8 +264,8 @@ fn run(command: Commands) -> std::result::Result<Option<serde_json::Value>, colo
 						Simctl::Boot { simulator_id } => {
 							let device_name: DeviceName = simulator_id.resolve(&simctl_instance)?;
 							info!(simulator_id = %device_name, "Booting device");
-							simctl_instance.boot(device_name)?;
-							Ok(None)
+							let output = simctl_instance.boot(device_name)?;
+							to_json(output)
 						}
 						Simctl::InstallBooted { app_path } => {
 							let path = app_path.resolve()?;

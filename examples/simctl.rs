@@ -1,7 +1,7 @@
 use apple_clis::{
 	open::{well_known::WellKnown, OpenCLIInstance},
 	shared::identifiers::{DeviceName, IPadVariant},
-	xcrun::{simctl::list::ListDevice, XcRunInstance},
+	xcrun::{simctl::{boot::{self, BootOutput}, list::ListDevice}, XcRunInstance},
 };
 
 fn main() -> Result<(), apple_clis::error::Error> {
@@ -35,7 +35,12 @@ fn main() -> Result<(), apple_clis::error::Error> {
 	}
 
 	// boot the simulator
-	simctl_instance.boot(DeviceName::from(*ipad_simulator))?;
+	let boot_result = simctl_instance.boot(DeviceName::from(*ipad_simulator))?;
+	match boot_result {
+		BootOutput::Success => println!("Booted the simulator"),
+		BootOutput::AlreadyBooted => println!("Simulator was already booted"),
+		_ => println!("PRs welcome to cover more cases"),
+	}
 
 	// open the simulator
 	let open_instance = OpenCLIInstance::new()?;
