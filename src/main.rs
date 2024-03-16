@@ -1,21 +1,19 @@
 use std::fs::File;
 use std::io::{BufRead, Write};
 
-use anyhow::Context;
 use apple_clis::cli::{
 	self, CodeSign, Commands, Init, IosDeploy, Open, Security, Simctl, Spctl, XcRun,
 };
 use apple_clis::codesign;
 use apple_clis::open::OpenCLIInstance;
 use apple_clis::shared::identifiers::DeviceName;
-use apple_clis::shared::ExecInstance;
 use apple_clis::xcrun::XcRunInstance;
 use apple_clis::{ios_deploy::IosDeployCLIInstance, security, spctl};
 use camino::Utf8PathBuf;
 use clap::{CommandFactory, Parser};
-use serde::Serialize;
+use color_eyre::eyre::{eyre, Context, ContextCompat};
+use serde_json::{json, Value};
 use tracing::*;
-use tracing_error::ErrorLayer;
 use tracing_subscriber::filter::LevelFilter;
 use tracing_subscriber::prelude::*;
 use tracing_subscriber::{fmt, EnvFilter};
@@ -23,38 +21,38 @@ use tracing_subscriber::{fmt, EnvFilter};
 fn main() {
 	let config = cli::CliArgs::parse();
 
-	if config.human_output() {
+	if config.human() {
 		// let env_filter = EnvFilter::builder()
 		// 	.with_default_directive(LevelFilter::INFO.into())
 		// 	.from_env_lossy();
 		// tracing_subscriber::fmt().with_env_filter(env_filter).init();
 
 		let fmt_layer = fmt::layer().with_target(false);
-		let filter_layer = EnvFilter::try_from_default_env()
-			.or_else(|_| EnvFilter::try_new("info"))
-			.unwrap();
+		let filter_layer = EnvFilter::builder()
+			.with_default_directive(LevelFilter::INFO.into())
+			.from_env_lossy();
 
 		tracing_subscriber::registry()
 			.with(filter_layer)
 			.with(fmt_layer)
-			.with(ErrorLayer::default())
+			.with(tracing_error::ErrorLayer::default())
 			.init();
 	}
 
-	trace!("Config: {:?}", config);
+	trace!(config = ?config, "Parsed CLI arguments");
 
 	match run(&config.command) {
 		Ok(report) => {
-			todo!("report")
+			info!(value = ?report, "Success!");
 		}
 		Err(e) => {
-			eprintln!("Error: {}", e);
+			error!(error = ?e, "Error!");
 			std::process::exit(1)
 		}
 	}
 }
 
-fn run(command: &Commands) -> std::result::Result<Box<dyn Serialize>, color_eyre::Report> {
+fn run(command: &Commands) -> std::result::Result<Option<serde_json::Value>, color_eyre::Report> {
 	match command {
 		Commands::Init(Init::NuShell { auto, raw_script }) => match (auto, raw_script) {
 			(false, true) => {
@@ -66,6 +64,7 @@ fn run(command: &Commands) -> std::result::Result<Box<dyn Serialize>, color_eyre
 					"apple-clis",
 					&mut std::io::stdout(),
 				);
+				Ok(None)
 			}
 			(true, false) => {
 				// write completions
@@ -100,9 +99,9 @@ fn run(command: &Commands) -> std::result::Result<Box<dyn Serialize>, color_eyre
 						.context("Running `nu -c '$nu.config-path'` failed")?;
 					let config_path = config_path.trim();
 
-					let path = Utf8PathBuf::from(config_path);
-					let file =
-						File::open(&path).context(format!("Cannot open config.nu file at {:?}", &path))?;
+					let config_path = Utf8PathBuf::from(config_path);
+					let file = File::open(&config_path)
+						.context(format!("Cannot open config.nu file at {:?}", &config_path))?;
 					let reader = std::io::BufReader::new(file);
 					// if there is a line that contains "source ~/.apple-clis.nu" then don't add it
 					if reader
@@ -114,12 +113,15 @@ fn run(command: &Commands) -> std::result::Result<Box<dyn Serialize>, color_eyre
 					} else {
 						let mut file = std::fs::OpenOptions::new()
 							.append(true)
-							.open(&path)
-							.context(format!("Cannot open config.nu file at {:?}", &path))?;
-						writeln!(file, "source ~/.apple-clis.nu")
-							.context(format!("Cannot write to config.nu file at {:?}", &path))?;
+							.open(&config_path)
+							.context(format!("Cannot open config.nu file at {:?}", &config_path))?;
+						writeln!(file, "source ~/.apple-clis.nu").context(format!(
+							"Cannot write to config.nu file at {:?}",
+							&config_path
+						))?;
 						info!("~/.apple-clis.nu added to your nu config");
 					}
+					Ok(None)
 				}
 			}
 			_ => unreachable!("Clap arguments should prevent this"),
@@ -129,27 +131,23 @@ fn run(command: &Commands) -> std::result::Result<Box<dyn Serialize>, color_eyre
 			match ios_deploy {
 				IosDeploy::Detect => {
 					let devices = ios_deploy_instance.detect_devices()?;
-					println!("{} real devices found with `ios-deploy`:", devices.len());
-					for device in devices {
-						println!("Device: {:?}", device);
-					}
+					// println!("{} real devices found with `ios-deploy`:", devices.len());
+					// for device in devices {
+					// 	println!("Device: {:?}", device);
+					// }
+					serde_json::to_value(devices)
+						.map(Option::Some)
+						.map_err(|err| eyre!("Failed to convert devices to JSON: {}", err))
 				}
 				IosDeploy::Upload { app_path } => {
-					let path = match app_path {
-						Some(p) => p,
-						None => {
-							// find directory/file ending in .app
-							cli::glob("**/*.app")?
-						}
-					};
+					let path = app_path.resolve()?;
 					let devices = ios_deploy_instance.detect_devices()?;
 					let device = match devices.first() {
 						Some(d) => d,
-						None => {
-							anyhow::bail!("No devices found to upload to")
-						}
+						None => Err(eyre!("No devices found to upload to"))?,
 					};
 					ios_deploy_instance.upload_bundle(device, path)?;
+					Ok(None)
 				}
 			}
 		}
@@ -175,6 +173,9 @@ fn run(command: &Commands) -> std::result::Result<Box<dyn Serialize>, color_eyre
 					for team in teams {
 						println!("Team: {:?}", team);
 					}
+					serde_json::to_value(teams)
+						.map(Option::Some)
+						.map_err(|err| eyre!("Failed to convert teams to JSON: {}", err))
 				}
 				Security::Pems => {
 					let pems = security_instance.get_developer_pems()?;
@@ -182,6 +183,11 @@ fn run(command: &Commands) -> std::result::Result<Box<dyn Serialize>, color_eyre
 					for pem in pems {
 						println!("Pem: {:#?}", pem);
 					}
+					let debug_str = format!("{:#?}", pems);
+					Ok(Some(json!({
+							"error": "PEMs don't have a good JSON representation yet, so they are not returned in the JSON output",
+							"debug_str": debug_str,
+					})))
 				}
 			}
 		}
@@ -189,14 +195,11 @@ fn run(command: &Commands) -> std::result::Result<Box<dyn Serialize>, color_eyre
 			let spctl_instance = spctl::SpctlCLIInstance::new()?;
 			match spctl {
 				Spctl::AssessApp { app_path } => {
-					let path = match app_path {
-						Some(p) => p,
-						None => {
-							// find directory/file ending in .app
-							cli::glob("**/*.app")?
-						}
-					};
-					spctl_instance.assess_app(path)?;
+					let path = app_path.resolve()?;
+					let output = spctl_instance.assess_app(path)?;
+					Ok(Some(json!({
+						"raw_output": output,
+					})))
 				}
 			}
 		}
@@ -204,33 +207,25 @@ fn run(command: &Commands) -> std::result::Result<Box<dyn Serialize>, color_eyre
 			let codesign_instance = codesign::CodesignCLIInstance::new()?;
 			match codesign {
 				CodeSign::Display { app_path } => {
-					let path = match app_path {
-						Some(p) => p,
-						None => {
-							// find directory/file ending in .app
-							cli::glob("**/*.app")?
-						}
-					};
+					let path = app_path.resolve()?;
 					let output = codesign_instance.display(path)?;
 					println!("{}", output);
+					Ok(Some(json!({
+						"raw_output": output,
+					})))
 				}
 				CodeSign::Sign { app_path } => {
-					let path = match app_path {
-						Some(p) => p,
-						None => {
-							// find directory/file ending in .app
-							cli::glob("**/*.app")?
-						}
-					};
+					let path = app_path.resolve()?;
 					let security_instance = security::SecurityCLIInstance::new()?;
 					let certs = security_instance.get_developer_certs()?;
 					let cert = match certs.first() {
 						Some(c) => c,
-						None => {
-							anyhow::bail!("No developer certs found to sign with")
-						}
+						None => Err(eyre!("No developer certs found to sign with"))?,
 					};
-					codesign_instance.sign(cert, path)?;
+					let output = codesign_instance.sign(cert, path)?;
+					Ok(Some(json!({
+						"raw_output": output,
+					})))
 				}
 			}
 		}
@@ -243,48 +238,28 @@ fn run(command: &Commands) -> std::result::Result<Box<dyn Serialize>, color_eyre
 						Simctl::List => {
 							let devices = simctl_instance.list()?;
 							let devices = devices.devices().collect::<Vec<_>>();
-							println!("{} devices found with `xcrun simctl list`:", devices.len());
-							for device in devices {
-								println!(
-									"Device found: Name = {}, simulator running = {}",
-									device.name,
-									device.ready()
-								);
-							}
+							// println!("{} devices found with `xcrun simctl list`:", devices.len());
+							// for device in devices {
+							// 	println!(
+							// 		"Device found: Name = {}, simulator running = {}",
+							// 		device.name,
+							// 		device.ready()
+							// 	);
+							// }
+							serde_json::to_value(devices)
+								.map(Option::Some)
+								.map_err(|err| eyre!("Failed to convert devices to JSON: {}", err))
 						}
-						Simctl::Boot { ipad, iphone, name } => {
-							let device_name: DeviceName = match name {
-								Some(n) => n,
-								None => {
-									let list = simctl_instance.list()?;
-									match (ipad, iphone) {
-										(true, false) => {
-											let latest_ipad = list.ipads().max().context("No simulator iPads found!")?;
-											latest_ipad.clone().into()
-										}
-										(false, true) => {
-											let latest_iphone = list
-												.iphones()
-												.max()
-												.context("No simulator iPhones found!")?;
-											latest_iphone.clone().into()
-										}
-										_ => unreachable!("Clap arguments should prevent this"),
-									}
-								}
-							};
-							info!("Booting device: {}", device_name);
+						Simctl::Boot { simulator_id } => {
+							let device_name: DeviceName = simulator_id.resolve(&simctl_instance)?;
+							info!(simulator_id = %device_name, "Booting device");
 							simctl_instance.boot(device_name)?;
+							Ok(None)
 						}
 						Simctl::InstallBooted { app_path } => {
-							let path = match app_path {
-								Some(p) => p,
-								None => {
-									// find directory/file ending in .app
-									cli::glob("**/*.app")?
-								}
-							};
+							let path = app_path.resolve()?;
 							simctl_instance.install_booted(path)?;
+							Ok(None)
 						}
 					}
 				}
@@ -296,10 +271,9 @@ fn run(command: &Commands) -> std::result::Result<Box<dyn Serialize>, color_eyre
 				Open::WellKnown { well_known } => {
 					info!("Opening a well known path {:?}", well_known);
 					open_instance.open_well_known(well_known)?;
+					Ok(None)
 				}
 			}
 		}
 	}
-
-	Ok(())
 }

@@ -4,45 +4,112 @@ use tracing::{info, warn};
 
 use crate::{open::well_known::WellKnown, shared::identifiers::DeviceName};
 
+use self::{app_path::AppPath, device_name::DeviceSimulator};
+
 pub mod prelude {
 	pub use super::*;
 }
 
-#[derive(thiserror::Error, Debug)]
-pub enum GlobError {
-	#[error("Error converting path to UTF-8: {0}")]
-	NonUtf8Paths(#[from] camino::FromPathBufError),
+mod app_path {
+	use camino::Utf8PathBuf;
+	use color_eyre::eyre::eyre;
+	use tracing::{event, info, warn, Level};
 
-	#[error("Error running glob: {0}")]
-	GlobError(#[from] glob::PatternError),
+	#[derive(clap::Args, Debug)]
+	#[group(required = true, multiple = false)]
+	pub struct AppPath {
+		#[arg(long, long = "path", group = "app_path")]
+		app_path: Option<camino::Utf8PathBuf>,
 
-	#[error("No matched files / directories found for pattern: {0}")]
-	NoMatchedFiles(String),
-}
+		#[arg(long, group = "app_path")]
+		glob: bool,
+	}
 
-pub fn glob(pattern: &'static str) -> Result<Utf8PathBuf, GlobError> {
-	let matches = glob::glob(pattern)?
-		.filter_map(|p| p.ok())
-		.filter_map(|p| Utf8PathBuf::try_from(p).ok())
-		.collect::<Vec<_>>();
+	impl AppPath {
+		pub fn resolve(self) -> Result<Utf8PathBuf, color_eyre::Report> {
+			match self.app_path {
+				Some(p) => Ok(p),
+				None => match self.glob {
+					false => {
+						unreachable!("Clap should have enforced that either `app_path` or `glob` was set")
+					}
+					true => {
+						let matches = glob::glob("**/*.app")
+							.map_err(|err| eyre!("Error running glob: {}", err))?
+							.filter_map(|p| p.ok())
+							.filter_map(|p| Utf8PathBuf::try_from(p).ok())
+							.collect::<Vec<_>>();
 
-	match matches.first() {
-		Some(p) => {
-			if matches.len() > 1 {
-				warn!(
-					"More than one file / directory matched the pattern {:?}, using the first match: {:?}",
-					pattern, p
-				);
-				Ok(p.clone())
-			} else {
-				info!(
-					"Implicitly using the only matched file / directory: {:?}",
-					p
-				);
-				Ok(p.clone())
+						if matches.len() > 1 {
+							warn!(
+								globbed = ?matches,
+								"More than one .app file found, using the first match",
+							);
+						}
+
+						match matches.first() {
+							Some(p) => {
+								info!(message = "Using the first matched .app file", "match" = ?p);
+								Ok(p.clone())
+							}
+							None => Err(eyre!(
+								"No .app files found in the current directory or any subdirectories"
+							)),
+						}
+					}
+				},
 			}
 		}
-		None => Err(GlobError::NoMatchedFiles(pattern.into())),
+	}
+}
+
+mod device_name {
+	use color_eyre::eyre::eyre;
+
+	use crate::{prelude::DeviceName, xcrun::simctl::XcRunSimctlInstance};
+
+	#[derive(clap::Args, Debug)]
+	#[group(required = true, multiple = false)]
+	pub struct DeviceSimulator {
+		/// Automatically selects the latest iPad simulator
+		#[arg(long, group = "device_name")]
+		ipad: bool,
+
+		/// Automatically selects the latest iPhone simulator
+		#[arg(long, group = "device_name")]
+		iphone: bool,
+
+		/// Provide an exact name, e.g. "iPhone 12 Pro Max"
+		#[arg(group = "device_name")]
+		name: Option<DeviceName>,
+	}
+
+	impl DeviceSimulator {
+		pub fn resolve(
+			self,
+			simctl_instance: &XcRunSimctlInstance,
+		) -> Result<DeviceName, color_eyre::Report> {
+			match (self.ipad, self.iphone, self.name) {
+				(false, false, Some(name)) => Ok(name),
+				(true, false, None) => {
+					let list = simctl_instance.list()?;
+					let latest_ipad = list
+						.ipads()
+						.max()
+						.ok_or_else(|| eyre!("No simulator iPads found!"))?;
+					Ok(latest_ipad.clone().into())
+				}
+				(false, true, None) => {
+					let list_output = &simctl_instance.list()?;
+					let latest_iphone = list_output
+						.iphones()
+						.max()
+						.ok_or_else(|| eyre!("No simulator iPhones found!"))?;
+					Ok(latest_iphone.clone().into())
+				}
+				_ => Err(eyre!("Clap arguments should prevent this")),
+			}
+		}
 	}
 }
 
@@ -59,14 +126,18 @@ pub struct CliArgs {
 
 #[derive(Args, Debug)]
 pub struct TopLevelCliArgs {
-	#[arg(long, env = "CARGO_MANIFEST_DIR")]
-	manifest_path: Option<Utf8PathBuf>,
+	#[arg(long)]
+	pub machine: bool,
+}
 
-	#[arg(long, env = "CARGO")]
-	cargo: Option<Utf8PathBuf>,
+impl CliArgs {
+	pub fn machine(&self) -> bool {
+		self.args.machine
+	}
 
-	#[arg(long, global = true)]
-	json: bool,
+	pub fn human(&self) -> bool {
+		!self.machine()
+	}
 }
 
 #[derive(Subcommand, Debug)]
@@ -120,7 +191,10 @@ pub enum IosDeploy {
 	/// Spends a second to detect any already connected devices
 	Detect,
 	/// Uploads an app to a real device
-	Upload { app_path: Option<Utf8PathBuf> },
+	Upload {
+		#[clap(flatten)]
+		app_path: app_path::AppPath,
+	},
 }
 
 #[derive(Subcommand, Debug)]
@@ -139,16 +213,21 @@ pub enum Security {
 pub enum CodeSign {
 	/// Displays the code signature of the given file
 	Display {
-		app_path: Option<Utf8PathBuf>,
+		#[clap(flatten)]
+		app_path: AppPath,
 	},
 	Sign {
-		app_path: Option<Utf8PathBuf>,
+		#[clap(flatten)]
+		app_path: AppPath,
 	},
 }
 
 #[derive(Subcommand, Debug)]
 pub enum Spctl {
-	AssessApp { app_path: Option<Utf8PathBuf> },
+	AssessApp {
+		#[clap(flatten)]
+		app_path: AppPath,
+	},
 }
 
 #[derive(Subcommand, Debug)]
@@ -162,17 +241,12 @@ pub enum Simctl {
 	List,
 	#[group(required = true)]
 	Boot {
-		#[arg(long, group = "device_name")]
-		ipad: bool,
-
-		#[arg(long, group = "device_name")]
-		iphone: bool,
-
-		#[arg(group = "device_name")]
-		name: Option<DeviceName>,
+		#[clap(flatten)]
+		simulator_id: DeviceSimulator,
 	},
 	InstallBooted {
-		app_path: Option<Utf8PathBuf>,
+		#[clap(flatten)]
+		app_path: app_path::AppPath,
 	},
 }
 
@@ -181,33 +255,5 @@ pub enum Open {
 	WellKnown {
 		#[arg(value_enum)]
 		well_known: WellKnown,
-	}
-}
-
-#[derive(thiserror::Error, Debug)]
-pub enum TopLevelArgsError {
-	#[error("Error getting current working directory")]
-	CwdDoesNotExist(std::io::Error),
-
-	#[error("Error converting CWD path to UTF-8: {0}")]
-	PathNotUtf8(#[from] camino::FromPathBufError),
-
-	#[error("The CWD does not contain a `Cargo.toml` file")]
-	CargoTomlDoesNotExist,
-
-	#[error("Error running `which cargo`: {0}")]
-	CannotWhichCargo(#[from] which::Error),
-}
-
-impl CliArgs {
-	#[deprecated]
-	pub fn machine_output(&self) -> bool {
-		// self.args.json
-		false
-	}
-
-	#[deprecated]
-	pub fn human_output(&self) -> bool {
-		!self.machine_output()
-	}
+	},
 }

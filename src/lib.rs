@@ -13,9 +13,10 @@ pub mod prelude {
 
 pub mod error;
 pub mod shared;
+#[cfg(feature = "cli")]
+pub mod cli;
 
 pub mod cargo_bundle;
-pub mod cli;
 pub mod codesign;
 pub mod ios_deploy;
 pub mod pkgbuild;

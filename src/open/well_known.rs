@@ -43,7 +43,7 @@ impl WellKnown {
 }
 
 impl OpenCLIInstance {
-	pub fn open_well_known(&self, well_known: WellKnown) -> Result<ExitStatus> {
+	pub fn open_well_known(&self, well_known: &WellKnown) -> Result<ExitStatus> {
 		let path = well_known.get_path()?;
 		Ok(self.bossy_command().with_arg(path).run_and_wait()?)
 	}
