@@ -281,13 +281,10 @@ fn run(command: Commands) -> std::result::Result<Option<serde_json::Value>, colo
 		}
 		Commands::Open(open) => {
 			let open_instance = OpenCLIInstance::new()?;
-			match open {
-				Open::WellKnown { well_known } => {
-					info!("Opening a well known path {:?}", well_known);
-					open_instance.open_well_known(&well_known)?;
-					Ok(None)
-				}
-			}
+			let well_known = open.well_known;
+			info!(path = ?well_known, "Opening a well known path");
+			open_instance.open_well_known(&well_known)?;
+			Ok(None)
 		}
 	}
 }

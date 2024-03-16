@@ -1,4 +1,4 @@
-use camino::Utf8PathBuf;
+use camino::{Utf8Path, Utf8PathBuf};
 use clap::{Args, Parser, Subcommand};
 use tracing::{info, warn};
 
@@ -136,7 +136,7 @@ pub struct CliArgs {
 #[derive(Args, Debug)]
 #[group(required = false, multiple = false)]
 pub struct TopLevelCliArgs {
-	#[arg(long, global = true, group = "top_level_args")]
+	#[arg(long, global = true, group = "top_level_args", alias = "json")]
 	machine: bool,
 
 	#[arg(long, global = true, group = "top_level_args")]
@@ -183,8 +183,7 @@ pub enum Commands {
 	#[clap(subcommand, name = "xcrun")]
 	XcRun(XcRun),
 
-	#[clap(subcommand)]
-	Open(Open),
+	Open(#[clap(flatten)] Open),
 }
 
 #[derive(Subcommand, Debug)]
@@ -276,10 +275,8 @@ pub enum Simctl {
 	},
 }
 
-#[derive(Subcommand, Debug)]
-pub enum Open {
-	WellKnown {
-		#[arg(value_enum)]
-		well_known: WellKnown,
-	},
+#[derive(Args, Debug)]
+pub struct Open {
+	#[arg(long, value_enum)]
+	pub well_known: WellKnown,
 }
