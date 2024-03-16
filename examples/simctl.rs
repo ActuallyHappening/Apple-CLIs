@@ -1,7 +1,10 @@
 use apple_clis::{
 	open::{well_known::WellKnown, OpenCLIInstance},
 	shared::identifiers::{DeviceName, IPadVariant},
-	xcrun::{simctl::{boot::{self, BootOutput}, list::ListDevice}, XcRunInstance},
+	xcrun::{
+		simctl::{boot::BootOutput, list::ListDevice},
+		XcRunInstance,
+	},
 };
 
 fn main() -> Result<(), apple_clis::error::Error> {

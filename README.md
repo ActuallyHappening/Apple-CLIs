@@ -38,6 +38,22 @@ cargo run --example security-find-certificates
 cargo run --example simctl
 ```
 
+## Examples using NuShell
+### Ios-Deploy detect
+```sh
+apple-clis ios-deploy detect --json | from json
+
+cargo run --example ios-deploy-detect
+```
+![apple-clis ios-deploy detect --machine | from json](docs/ios-deploy-detect-nu.png)
+
+### xcrun simctl list
+```sh
+apple-clis xcrun simctl list --json | from json | get device_type_identifier
+
+
+```
+
 ## Contributions
 PRs welcome!
 
