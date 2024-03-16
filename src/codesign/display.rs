@@ -23,7 +23,7 @@ impl CodesignCLIInstance {
 			Ok(output) => {
 				let stdout = String::from_utf8_lossy(output.stdout()).to_string();
 				let stderr = String::from_utf8_lossy(output.stderr()).to_string();
-				debug!(%stdout, %stderr, "codesign exited successfully");
+				trace!(%stdout, %stderr, "codesign exited successfully");
 				Ok(CodeSignOutput::from_str(&stderr)?)
 			}
 			Err(err) => {

@@ -62,11 +62,11 @@ impl FromStr for SignedKeys {
 	type Err = error::Error;
 
 	fn from_str(s: &str) -> std::result::Result<Self, Self::Err> {
-		debug!(?s, "Parsing SignedKeys from string");
+		trace!(?s, "Parsing SignedKeys from string");
 		match parse_display_output(s) {
 			Ok((_, result)) => Self::from_parsed(result),
 			Err(err) => {
-				debug!(?err, "Failed to parse SignedKeys from string");
+				trace!(?err, "Failed to parse SignedKeys from string");
 				Err(Error::ParsingFailed {
 					name: "SignedKeys".to_owned(),
 					err: err.to_owned(),
