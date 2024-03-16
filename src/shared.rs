@@ -1,4 +1,5 @@
 use camino::{Utf8Path, Utf8PathBuf};
+use nom::character::complete::multispace0;
 use serde::{Deserialize, Serialize};
 
 pub mod cmd;
@@ -159,6 +160,32 @@ macro_rules! impl_exec_instance {
 			}
 		}
 	};
+	($t:ty, $name:expr, skip_version_check) => {
+		impl $crate::shared::ExecInstance for $t {
+			const BINARY_NAME: &'static str = $name;
+
+			unsafe fn new_unchecked(exec_path: impl AsRef<::camino::Utf8Path>) -> Self {
+				Self {
+					exec_path: exec_path.as_ref().to_path_buf(),
+				}
+			}
+
+			fn get_inner_exec_path(&self) -> &::camino::Utf8Path {
+				&self.exec_path
+			}
+
+			fn validate_version(&self) -> bool {
+				true
+			}
+		}
+
+		impl $t {
+			/// Constructs an instance of `Self` using `which`.
+			pub fn new() -> $crate::error::Result<Self> {
+				$crate::shared::ExecInstance::new()
+			}
+		}
+	};
 }
 
 #[macro_export]
@@ -190,7 +217,7 @@ macro_rules! impl_exec_child {
 	};
 }
 
-trait NomFromStr: Sized {
+pub(crate) trait NomFromStr: Sized {
 	fn nom_from_str(input: &str) -> IResult<&str, Self>;
 }
 
@@ -201,14 +228,13 @@ impl NomFromStr for NonZeroU8 {
 	}
 }
 
-#[tracing::instrument(level = "trace", skip(inner))]
 /// A combinator that takes a parser `inner` and produces a parser that also consumes both leading and
 /// trailing whitespace, returning the output of `inner`.
-fn ws<'a, F: 'a, O, E: nom::error::ParseError<&'a str>>(
+pub(crate) fn ws<'a, F: 'a, O, E: nom::error::ParseError<&'a str>>(
 	inner: F,
 ) -> impl FnMut(&'a str) -> IResult<&'a str, O, E>
 where
 	F: Fn(&'a str) -> IResult<&'a str, O, E>,
 {
-	delimited(space0, inner, space0)
+	delimited(multispace0, inner, multispace0)
 }

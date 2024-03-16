@@ -5,8 +5,9 @@ use crate::{impl_exec_instance, prelude::*};
 pub mod display;
 pub mod sign;
 
+#[derive(Debug)]
 pub struct CodesignCLIInstance {
 	exec_path: Utf8PathBuf,
 }
 
-impl_exec_instance!(CodesignCLIInstance, "codesign");
+impl_exec_instance!(CodesignCLIInstance, "codesign", skip_version_check);

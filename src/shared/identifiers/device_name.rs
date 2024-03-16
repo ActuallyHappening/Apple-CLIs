@@ -3,24 +3,6 @@ use std::{fmt::Display, str::FromStr};
 
 use serde::{Deserialize, Deserializer, Serialize};
 
-#[derive(thiserror::Error, Debug)]
-pub enum DeviceNameParseError {
-	#[error("Failed to parse device name")]
-	ParsingFailed(#[source] nom::Err<nom::error::Error<String>>),
-
-	#[error(
-		"The parsed string was not completely consumed, with {:?} left from {:?}. Parsed: {:?}",
-		input,
-		remaining,
-		parsed
-	)]
-	RemainingNotEmpty {
-		input: String,
-		remaining: String,
-		parsed: DeviceName,
-	},
-}
-
 /// [Deserialize]s from a [String] representation.
 #[derive(Debug, Clone, PartialEq)]
 pub enum DeviceName {
@@ -28,7 +10,7 @@ pub enum DeviceName {
 
 	IPad(IPadVariant),
 
-	#[doc = include_str!("../../../docs/inline/TODO.md")]
+	#[doc = include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/docs/inline/TODO.md"))]
 	UnImplemented(String),
 }
 
@@ -87,7 +69,7 @@ impl NomFromStr for DeviceName {
 }
 
 impl FromStr for DeviceName {
-	type Err = DeviceNameParseError;
+	type Err = error::Error;
 
 	#[tracing::instrument(level = "trace", skip(input))]
 	fn from_str(input: &str) -> std::result::Result<Self, Self::Err> {
@@ -96,14 +78,17 @@ impl FromStr for DeviceName {
 				if remaining.is_empty() {
 					Ok(device)
 				} else {
-					Err(DeviceNameParseError::RemainingNotEmpty {
+					Err(Error::ParsingRemainingNotEmpty {
 						input: input.to_owned(),
 						remaining: remaining.to_owned(),
-						parsed: device,
+						parsed_debug: format!("{:#?}", device),
 					})
 				}
 			}
-			Err(e) => Err(DeviceNameParseError::ParsingFailed(e.to_owned())),
+			Err(e) => Err(Error::ParsingFailed {
+				err: e.to_owned(),
+				name: "Device Name".into(),
+			}),
 		}
 	}
 }

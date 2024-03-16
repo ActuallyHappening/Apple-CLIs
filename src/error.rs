@@ -12,6 +12,27 @@ pub enum Error {
 	#[error("Error parsing command JSON output: {0}")]
 	ParseJson(#[from] serde_json::Error),
 
+	#[error("Failed to parse {}: {:?}", name, err)]
+	ParsingFailed {
+		/// What was being parsed
+		name: String,
+		#[source]
+		err: nom::Err<nom::error::Error<String>>,
+	},
+
+	#[error(
+		"The parsed string was not completely consumed, with {:?} left from {:?}. Parsed: {:?}",
+		input,
+		remaining,
+		parsed_debug
+	)]
+	ParsingRemainingNotEmpty {
+		input: String,
+		remaining: String,
+		/// [Debug] representation of parsed value
+		parsed_debug: String,
+	},
+
 	#[error(
 		"The hard coded path {:?} was not found ({:?}: {err:?})",
 		hard_coded_path,

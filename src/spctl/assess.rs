@@ -25,7 +25,7 @@ impl AssessType {
 
 impl SpctlCLIInstance {
 	#[tracing::instrument(level = "trace", skip(self, path, assess_type))]
-	#[doc = include_str!("../../docs/inline/TODO.md")]
+		#[doc = include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/docs/inline/TODO.md"))]
 	pub fn assess(&self, path: impl AsRef<Utf8Path>, assess_type: AssessType) -> Result<String> {
 		Ok(
 			self

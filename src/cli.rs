@@ -21,10 +21,10 @@ mod app_path {
 	#[derive(clap::Args, Debug)]
 	#[group(required = true, multiple = false)]
 	pub struct AppPath {
-		#[arg(long, long = "path", group = "app_path")]
+		#[arg(long, long = "path", group = "app_path_group")]
 		app_path: Option<camino::Utf8PathBuf>,
 
-		#[arg(long, group = "app_path")]
+		#[arg(long, group = "app_path_group")]
 		glob: bool,
 	}
 

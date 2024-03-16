@@ -13,11 +13,25 @@ use apple_clis::{ios_deploy::IosDeployCLIInstance, security, spctl};
 use camino::Utf8PathBuf;
 use clap::{CommandFactory, Parser};
 use color_eyre::eyre::{eyre, Context, ContextCompat};
+use serde::Serialize;
 use serde_json::json;
 use tracing::*;
 use tracing_subscriber::filter::LevelFilter;
 use tracing_subscriber::prelude::*;
 use tracing_subscriber::{fmt, EnvFilter};
+
+fn to_json<T: Serialize>(value: T) -> Result<Option<serde_json::Value>, color_eyre::Report> {
+	serde_json::to_value(value)
+		.map(Option::Some)
+		.map_err(|err| eyre!("Failed to convert value to JSON: {}", err))
+}
+
+fn to_raw_json<T: std::fmt::Debug>(output: T) -> Result<Option<serde_json::Value>, color_eyre::Report> {
+	Ok(Some(json!({
+		"msg": "This value does not have a good JSON representation yet, so it is not returned in the JSON output. PRs welcome!",
+		"raw_output": format!("{:#?}", output),
+	})))
+}
 
 #[tracing::instrument(level = "trace", skip())]
 fn main() {
@@ -187,9 +201,7 @@ fn run(command: Commands) -> std::result::Result<Option<serde_json::Value>, colo
 					for team in teams.iter() {
 						println!("Team: {:?}", team);
 					}
-					serde_json::to_value(teams)
-						.map(Option::Some)
-						.map_err(|err| eyre!("Failed to convert teams to JSON: {}", err))
+					to_json(teams)
 				}
 				Security::Pems => {
 					let pems = security_instance.get_developer_pems()?;
@@ -200,7 +212,7 @@ fn run(command: Commands) -> std::result::Result<Option<serde_json::Value>, colo
 					let debug_str = format!("{:#?}", pems);
 					Ok(Some(json!({
 							"error": "PEMs don't have a good JSON representation yet, so they are not returned in the JSON output",
-							"debug_str": debug_str,
+							"raw_output": debug_str,
 					})))
 				}
 			}
@@ -211,9 +223,7 @@ fn run(command: Commands) -> std::result::Result<Option<serde_json::Value>, colo
 				Spctl::AssessApp { app_path } => {
 					let path = app_path.resolve()?;
 					let output = spctl_instance.assess_app(path)?;
-					Ok(Some(json!({
-						"raw_output": output,
-					})))
+					to_raw_json(output)
 				}
 			}
 		}
@@ -223,10 +233,7 @@ fn run(command: Commands) -> std::result::Result<Option<serde_json::Value>, colo
 				CodeSign::Display { app_path } => {
 					let path = app_path.resolve()?;
 					let output = codesign_instance.display(path)?;
-					println!("{}", output);
-					Ok(Some(json!({
-						"raw_output": output,
-					})))
+					to_json(output)
 				}
 				CodeSign::Sign { app_path } => {
 					let path = app_path.resolve()?;
@@ -237,9 +244,7 @@ fn run(command: Commands) -> std::result::Result<Option<serde_json::Value>, colo
 						None => Err(eyre!("No developer certs found to sign with"))?,
 					};
 					let output = codesign_instance.sign(cert, path)?;
-					Ok(Some(json!({
-						"raw_output": output,
-					})))
+					to_raw_json(output)
 				}
 			}
 		}
@@ -252,17 +257,7 @@ fn run(command: Commands) -> std::result::Result<Option<serde_json::Value>, colo
 						Simctl::List => {
 							let devices = simctl_instance.list()?;
 							let devices = devices.devices().collect::<Vec<_>>();
-							// println!("{} devices found with `xcrun simctl list`:", devices.len());
-							// for device in devices {
-							// 	println!(
-							// 		"Device found: Name = {}, simulator running = {}",
-							// 		device.name,
-							// 		device.ready()
-							// 	);
-							// }
-							serde_json::to_value(devices)
-								.map(Option::Some)
-								.map_err(|err| eyre!("Failed to convert devices to JSON: {}", err))
+							to_json(devices)
 						}
 						Simctl::Boot { simulator_id } => {
 							let device_name: DeviceName = simulator_id.resolve(&simctl_instance)?;
