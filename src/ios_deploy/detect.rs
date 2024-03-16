@@ -1,7 +1,5 @@
-use crate::prelude::*;
-use crate::shared::Device;
-
 use super::IosDeployCLIInstance;
+use crate::prelude::*;
 
 #[derive(Debug)]
 #[cfg_attr(feature = "cli", derive(clap::Args))]
@@ -21,6 +19,21 @@ impl Default for DetectDevicesConfig {
 			wifi: true,
 		}
 	}
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct Device {
+	pub device_identifier: String,
+	pub device_name: String,
+	pub model_name: String,
+	pub interface: DeviceInterface,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+#[serde(rename_all = "SCREAMING_SNAKE_CASE")]
+pub enum DeviceInterface {
+	Usb,
+	Wifi,
 }
 
 impl IosDeployCLIInstance {
@@ -55,7 +68,7 @@ impl IosDeployCLIInstance {
 		#[derive(Debug, Deserialize)]
 		struct Event {
 			#[serde(rename(deserialize = "Interface"))]
-			interface: String,
+			interface: DeviceInterface,
 
 			#[serde(rename(deserialize = "Device"))]
 			device: DeviceDetected,

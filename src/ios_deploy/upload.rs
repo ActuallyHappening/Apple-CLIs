@@ -3,9 +3,7 @@ use crate::prelude::*;
 use bossy::ExitStatus;
 use camino::Utf8Path;
 
-use crate::shared::Device;
-
-use super::IosDeployCLIInstance;
+use super::{detect::Device, IosDeployCLIInstance};
 
 impl IosDeployCLIInstance {
 	#[tracing::instrument(level = "trace", skip(self, device, bundle_path))]

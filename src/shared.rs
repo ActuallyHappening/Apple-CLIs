@@ -24,14 +24,6 @@ pub mod prelude {
 }
 use prelude::*;
 
-#[derive(Debug, Serialize, Deserialize)]
-pub struct Device {
-	pub device_identifier: String,
-	pub device_name: String,
-	pub model_name: String,
-	pub interface: String,
-}
-
 /// Wrapper of binary
 pub trait ExecInstance: Sized {
 	/// E.g. `codesign` or `xcrun`

@@ -70,11 +70,11 @@ mod test {
 	#[test]
 	fn ipad_ordering() {
 		let old = IPadVariant::Plain {
-			generation: Generation::new(NonZeroU8::new(1).unwrap()),
+			generation: Generation::long(NonZeroU8::new(1).unwrap()),
 		};
 		let new = IPadVariant::Pro {
 			size: ScreenSize::new(12.9),
-			generation: Generation::new(NonZeroU8::new(2).unwrap()),
+			generation: Generation::long(NonZeroU8::new(2).unwrap()),
 		};
 		assert!(new > old);
 	}

@@ -82,7 +82,7 @@ mod tests {
 	#[test]
 	fn iphone_ordering() {
 		let old = IPhoneVariant::SE {
-			generation: Generation::new(1),
+			generation: Generation::long(1),
 		};
 		let new = IPhoneVariant::Number {
 			num: NonZeroU8::new(69).unwrap(),

@@ -1,18 +1,18 @@
 use std::fmt::Display;
 
+use nom::combinator::all_consuming;
+
 use crate::shared::prelude::*;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, PartialOrd, Ord)]
-pub struct Generation(NonZeroU8);
-
-#[tracing::instrument(level = "trace", skip(input))]
-fn ordinal(input: &str) -> IResult<&str, &str> {
-	alt((tag("st"), tag("nd"), tag("rd"), tag("th")))(input)
+pub struct Generation {
+	num: NonZeroU8,
+	short: bool,
 }
 
 impl Generation {
 	const fn ordinal(&self) -> &str {
-		match self.0.get() {
+		match self.num.get() {
 			1 => "st",
 			2 => "nd",
 			3 => "rd",
@@ -22,29 +22,59 @@ impl Generation {
 
 	#[tracing::instrument(level = "trace", skip(number))]
 	#[cfg_attr(not(test), allow(dead_code))]
-	pub(crate) fn new(number: impl Into<u8>) -> Self {
-		Self(NonZeroU8::new(number.into()).unwrap())
+	pub(crate) fn long(number: impl Into<u8>) -> Self {
+		Self {
+			num: NonZeroU8::new(number.into()).unwrap(),
+			short: false,
+		}
+	}
+
+	fn short(num: impl Into<u8>) -> Self {
+		Self {
+			num: NonZeroU8::new(num.into()).unwrap(),
+			short: true,
+		}
 	}
 
 	pub fn get(&self) -> u8 {
-		self.0.get()
+		self.num.get()
 	}
+}
+
+#[tracing::instrument(level = "trace", skip(input))]
+fn ordinal(input: &str) -> IResult<&str, &str> {
+	alt((tag("st"), tag("nd"), tag("rd"), tag("th")))(input)
+}
+
+fn generation_brackets(input: &str) -> IResult<&str, Generation> {
+	all_consuming(delimited(
+		ws(tag("(")),
+		map(NonZeroU8::nom_from_str, Generation::long),
+		preceded(ws(ordinal), tag("generation)")),
+	))(input)
+}
+
+fn generation_model(input: &str) -> IResult<&str, Generation> {
+	all_consuming(terminated(
+		map(NonZeroU8::nom_from_str, Generation::short),
+		tag("G"),
+	))(input)
 }
 
 impl NomFromStr for Generation {
 	#[tracing::instrument(level = "trace", skip(input))]
 	fn nom_from_str(input: &str) -> IResult<&str, Self> {
-		let (remaining, number) = delimited(tag("("), NonZeroU8::nom_from_str, ordinal)(input)?;
-		let (remaining, _) = ws(tag("generation)"))(remaining)?; // consume the closing parenthesis
-
-		Ok((remaining, Generation(number)))
+		alt((generation_brackets, generation_model))(input)
 	}
 }
 
 impl Display for Generation {
 	#[tracing::instrument(level = "trace", skip(self, f))]
 	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-		write!(f, "({}{} generation)", self.0, self.ordinal())
+		match self.short {
+			false => write!(f, "({}{} generation)", self.get(), self.ordinal()),
+			true => write!(f, "{}G", self.get()),
+		}
 	}
 }
 
@@ -56,8 +86,12 @@ mod tests {
 
 	#[test]
 	fn generation_ordering() {
-		let old = Generation(NonZeroU8::new(1).unwrap());
-		let newer = Generation(NonZeroU8::new(2).unwrap());
+		let old = Generation::long(NonZeroU8::new(1).unwrap());
+		let newer = Generation::short(NonZeroU8::new(2).unwrap());
+		assert!(newer > old);
+
+		let old = Generation::short(NonZeroU8::new(1).unwrap());
+		let newer = Generation::long(NonZeroU8::new(2).unwrap());
 		assert!(newer > old);
 	}
 
@@ -82,6 +116,8 @@ mod tests {
 			"(2nd generation)",
 			"(3rd generation)",
 			"(4th generation)",
+			"3G",
+			"69G",
 		];
 		for example in examples.iter() {
 			let output = Generation::nom_from_str(example);
