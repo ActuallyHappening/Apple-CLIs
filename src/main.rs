@@ -62,9 +62,10 @@ fn main() {
 
 	match run(config.command) {
 		Ok(report) => {
-			info!(value = ?report, "Success!");
-			if config.args.machine() {
-				if let Some(report) = report {
+			if let Some(report) = report {
+				let value = serde_json::ser::to_string_pretty(&report).expect("Couldn't pretty print JSON");
+				info!(%value, "Success!");
+				if config.args.machine() {
 					println!("{}", report);
 				}
 			}
