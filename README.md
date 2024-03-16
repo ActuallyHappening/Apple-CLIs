@@ -30,6 +30,7 @@ apple-clis init nushell --raw-script
 ```sh
 cargo run --example ios-deploy-detect
 cargo run --example security-find-certificates
+cargo run --example simctl
 ```
 
 ![Example `ios-deploy --detect`](docs/ios-deploy-detect.png)

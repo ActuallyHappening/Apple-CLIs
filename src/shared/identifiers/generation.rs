@@ -25,6 +25,10 @@ impl Generation {
 	pub(crate) fn new(number: impl Into<u8>) -> Self {
 		Self(NonZeroU8::new(number.into()).unwrap())
 	}
+
+	pub fn get(&self) -> u8 {
+		self.0.get()
+	}
 }
 
 impl NomFromStr for Generation {

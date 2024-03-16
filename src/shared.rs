@@ -258,6 +258,38 @@ impl NomFromStr for NonZeroU8 {
 	}
 }
 
+/// [impl]s [std::str::FromStr] for a type that already implements
+/// [NomFromStr]
+#[macro_export]
+macro_rules! nom_from_str {
+	($type:ty) => {
+		impl std::str::FromStr for $type {
+			type Err = $crate::error::Error;
+
+			#[tracing::instrument(level = "trace", skip(input))]
+			fn from_str(input: &str) -> std::result::Result<Self, Self::Err> {
+				match <$type>::nom_from_str(input) {
+					Ok((remaining, output)) => {
+						if remaining.is_empty() {
+							Ok(output)
+						} else {
+							Err(Error::ParsingRemainingNotEmpty {
+								input: input.to_owned(),
+								remaining: remaining.to_owned(),
+								parsed_debug: format!("{:#?}", output),
+							})
+						}
+					}
+					Err(e) => Err(Error::ParsingFailed {
+						err: e.to_owned(),
+						name: stringify!($type).into(),
+					}),
+				}
+			}
+		}
+	};
+}
+
 /// A combinator that takes a parser `inner` and produces a parser that also consumes both leading and
 /// trailing whitespace, returning the output of `inner`.
 pub(crate) fn ws<'a, F: 'a, O, E: nom::error::ParseError<&'a str>>(

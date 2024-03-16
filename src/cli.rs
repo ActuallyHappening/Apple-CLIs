@@ -158,7 +158,6 @@ pub enum XcRun {
 #[derive(Subcommand, Debug)]
 pub enum Simctl {
 	List,
-	#[group(required = true)]
 	Boot {
 		#[clap(flatten)]
 		simulator_id: DeviceSimulator,

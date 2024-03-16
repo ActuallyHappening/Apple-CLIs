@@ -2,7 +2,7 @@ use crate::shared::prelude::*;
 
 /// Loosely ordered from oldest to newest.
 /// newest > oldest
-#[derive(Debug, Clone, PartialEq, Eq, EnumDiscriminants, PartialOrd, Ord)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, EnumDiscriminants, PartialOrd, Ord)]
 pub enum IPadVariant {
 	Air {
 		generation: Generation,
