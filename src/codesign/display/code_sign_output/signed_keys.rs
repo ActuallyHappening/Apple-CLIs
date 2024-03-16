@@ -104,7 +104,7 @@ impl SignedKeys {
 	}
 
 	const DATE_FORMAT: &'static [time::format_description::FormatItem<'static>] =
-		format_description!("[day] [month repr:short] [year] at [hour]:[minute]:[second] [period]");
+		format_description!(version = 2, "[day] [month repr:short] [year] at [hour padding:none]:[minute]:[second] [period case_sensitive:false]");
 
 	#[instrument(level = "trace", skip(raw), ret)]
 	fn from_parsed(raw: HashMap<Cow<str>, &str>) -> error::Result<Self> {
@@ -129,11 +129,13 @@ impl SignedKeys {
 				})?
 				.to_string(),
 			signed_time: time::PrimitiveDateTime::parse(
-				raw
+				&raw
 					.get("Signed Time")
 					.ok_or_else(|| error::Error::SigningPropertyNotFound {
 						missing_key: "Signed Time".into(),
-					})?,
+					})?
+					.to_string()
+					.replace(' ', " "), // replace stupid space with good space to [time::PrimitiveDateTime::parse] works
 				&Self::DATE_FORMAT,
 			)?,
 			raw: raw
@@ -160,6 +162,74 @@ mod test {
 			}
 			Err(err) => {
 				panic!("Failed to parse: {:?}", err);
+			}
+		}
+	}
+
+	#[test]
+	fn test_basic_times_parse() {
+		let fmt =
+			format_description!("[hour padding:none]:[minute]:[second] [period case_sensitive:false]");
+		let examples = ["2:41:28 pm"];
+		for example in examples {
+			match time::Time::parse(example, &fmt) {
+				Ok(result) => {
+					println!("Parsed: {:#?}", result);
+				}
+				Err(err) => {
+					panic!("Failed to parse {}: {:?}", example, err);
+				}
+			}
+		}
+
+		let fmt = format_description!(
+			" at [hour padding:none]:[minute]:[second] [period case_sensitive:false]"
+		);
+		let examples = [" at 2:41:28 pm"];
+		for example in examples {
+			match time::Time::parse(example, &fmt) {
+				Ok(result) => {
+					println!("Parsed: {:#?}", result);
+				}
+				Err(err) => {
+					panic!("Failed to parse {}: {:?}", example, err);
+				}
+			}
+		}
+	}
+
+	#[test]
+	fn test_basic_dates_parse() {
+		let fmt = format_description!(version = 2, "[day] [month repr:short] [year] at [hour padding:none]:[minute]:[second] [period case_sensitive:false]");
+		let examples = ["16 Mar 2024 at 2:41:28 pm"];
+		for example in examples {
+			match time::PrimitiveDateTime::parse(example, &fmt) {
+				Ok(result) => {
+					println!("Parsed: {:#?}", result);
+				}
+				Err(err) => {
+					panic!("Failed to parse {}: {:?}", example, err);
+				}
+			}
+		}
+	}
+
+	#[test]
+	fn test_date_parses() {
+		println!(
+			"this took me an hour to debug: char: {} and {}",
+			' ' as u32, ' ' as u32
+		);
+		let fmt = SignedKeys::DATE_FORMAT;
+		let examples = ["16 Mar 2024 at 2:41:28 pm"];
+		for example in examples {
+			match time::PrimitiveDateTime::parse(example, &fmt) {
+				Ok(result) => {
+					println!("Parsed: {:#?}", result);
+				}
+				Err(err) => {
+					panic!("Failed to parse {}: {:?}", example, err);
+				}
 			}
 		}
 	}
