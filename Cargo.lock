@@ -76,7 +76,7 @@ dependencies = [
 
 [[package]]
 name = "apple-clis"
-version = "0.0.7"
+version = "0.0.8"
 dependencies = [
  "bossy",
  "camino",

@@ -1,7 +1,7 @@
 pub mod prelude {
 	pub use crate::error;
 	pub use crate::error::{Error, Result};
-	pub(crate) use crate::{impl_exec_child, impl_exec_instance};
+	pub(crate) use crate::{impl_exec_child, impl_exec_instance, impl_str_serde, nom_from_str};
 	pub use camino::{Utf8Path, Utf8PathBuf};
 	pub use serde::{Deserialize, Serialize};
 	pub use std::collections::HashMap;

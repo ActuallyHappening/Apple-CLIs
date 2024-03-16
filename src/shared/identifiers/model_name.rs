@@ -1,4 +1,4 @@
-use crate::{nom_from_str, prelude::*};
+use crate::{impl_str_serde, nom_from_str, prelude::*};
 
 /// Isomorphic to [DeviceName].
 /// [Deserialize]s and [Serialize]s from a [String] representation.
@@ -14,6 +14,7 @@ pub enum ModelName {
 }
 
 nom_from_str!(ModelName);
+impl_str_serde!(ModelName);
 
 impl ModelName {
 	pub fn is_iphone(&self) -> bool {

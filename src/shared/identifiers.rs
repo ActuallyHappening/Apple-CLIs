@@ -1,5 +1,3 @@
-use crate::prelude::*;
-
 use serde::Deserialize;
 
 pub use device_name::{DeviceName, IPadVariant, IPhoneVariant};

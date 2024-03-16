@@ -25,7 +25,7 @@ impl Default for DetectDevicesConfig {
 pub struct Device {
 	pub device_identifier: String,
 	pub device_name: String,
-	pub model_name: String,
+	pub model_name: ModelName,
 	pub interface: DeviceInterface,
 }
 
@@ -83,7 +83,7 @@ impl IosDeployCLIInstance {
 			device_name: String,
 
 			#[serde(rename(deserialize = "modelName"))]
-			model_name: String,
+			model_name: ModelName,
 		}
 
 		let events = serde_json::from_str::<Vec<Event>>(&output)?;

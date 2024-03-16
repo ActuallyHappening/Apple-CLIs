@@ -32,7 +32,7 @@ impl DeviceSimulator {
 					.ipads()
 					.max()
 					.ok_or_else(|| eyre!("No simulator iPads found!"))?;
-				Ok(latest_ipad.clone().into())
+				Ok((*latest_ipad).into())
 			}
 			(false, true, None) => {
 				let list_output = &simctl_instance.list()?;

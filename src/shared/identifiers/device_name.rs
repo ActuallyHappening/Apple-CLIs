@@ -1,7 +1,4 @@
-use crate::{nom_from_str, prelude::*};
-use std::{fmt::Display, str::FromStr};
-
-use serde::{Deserialize, Deserializer, Serialize};
+use crate::prelude::*;
 
 /// [Deserialize]s from a [String] representation.
 #[derive(Debug, Clone, PartialEq, derive_more::Display, derive_more::From)]
@@ -16,6 +13,7 @@ pub enum DeviceName {
 }
 
 nom_from_str!(DeviceName);
+impl_str_serde!(DeviceName);
 
 pub use iphone::*;
 mod iphone;
@@ -48,30 +46,6 @@ impl NomFromStr for DeviceName {
 			map(ws(IPhoneVariant::nom_from_str), DeviceName::IPhone),
 			map(rest, |s: &str| DeviceName::UnImplemented(s.to_owned())),
 		))(input)
-	}
-}
-
-impl<'de> Deserialize<'de> for DeviceName {
-	#[tracing::instrument(level = "trace", skip(deserializer))]
-	fn deserialize<D>(deserializer: D) -> std::result::Result<Self, D::Error>
-	where
-		D: Deserializer<'de>,
-	{
-		let buf = String::deserialize(deserializer)?;
-
-		// cron::Schedule::from_str(&buf).map_err(serde::de::Error::custom)
-		DeviceName::from_str(&buf).map_err(serde::de::Error::custom)
-	}
-}
-
-// impl serialize
-impl Serialize for DeviceName {
-	#[tracing::instrument(level = "trace", skip(self, serializer))]
-	fn serialize<S>(&self, serializer: S) -> std::result::Result<S::Ok, S::Error>
-	where
-		S: serde::Serializer,
-	{
-		serializer.serialize_str(&self.to_string())
 	}
 }
 
