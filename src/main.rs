@@ -13,10 +13,9 @@ use apple_clis::{ios_deploy::IosDeployCLIInstance, security, spctl};
 use camino::Utf8PathBuf;
 use clap::{CommandFactory, Parser};
 use color_eyre::eyre::{eyre, Context, ContextCompat};
-use serde_json::{json, Value};
+use serde_json::json;
 use tracing::*;
 use tracing_subscriber::filter::LevelFilter;
-use tracing_subscriber::fmt::format::FmtSpan;
 use tracing_subscriber::prelude::*;
 use tracing_subscriber::{fmt, EnvFilter};
 
@@ -24,15 +23,13 @@ use tracing_subscriber::{fmt, EnvFilter};
 fn main() {
 	let config = cli::CliArgs::parse();
 
-	if config.human() {
+	if config.args.human() {
 		// let env_filter = EnvFilter::builder()
 		// 	.with_default_directive(LevelFilter::INFO.into())
 		// 	.from_env_lossy();
 		// tracing_subscriber::fmt().with_env_filter(env_filter).init();
 
-		let fmt_normal_layer = fmt::layer()
-			.with_target(false)
-			.without_time();
+		let fmt_normal_layer = fmt::layer().with_target(false).without_time();
 		let fmt_verbose_layer = fmt::layer().pretty();
 
 		let filter_layer = EnvFilter::builder()
@@ -41,8 +38,8 @@ fn main() {
 
 		tracing_subscriber::registry()
 			.with(filter_layer)
-			.with(config.verbose().then_some(fmt_verbose_layer))
-			.with(config.verbose().not().then_some(fmt_normal_layer))
+			.with(config.args.verbose().then_some(fmt_verbose_layer))
+			.with(config.args.verbose().not().then_some(fmt_normal_layer))
 			.with(tracing_error::ErrorLayer::default())
 			.init();
 	}
@@ -52,6 +49,11 @@ fn main() {
 	match run(config.command) {
 		Ok(report) => {
 			info!(value = ?report, "Success!");
+			if config.args.machine() {
+				if let Some(report) = report {
+					println!("{}", report);
+				}
+			}
 		}
 		Err(e) => {
 			error!(error = ?e, "Error!");

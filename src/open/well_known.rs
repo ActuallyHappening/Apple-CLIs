@@ -9,6 +9,8 @@ use super::OpenCLIInstance;
 pub enum WellKnown {
 	/// Opens "/Applications/Xcode.app/Contents/Developer/Applications/Simulator.app"
 	Simulator,
+	/// Opens "/Applications/Xcode.app"
+	Xcode,
 }
 
 impl TryFrom<&WellKnown> for &'static Utf8Path {
@@ -21,6 +23,7 @@ impl TryFrom<&WellKnown> for &'static Utf8Path {
 			WellKnown::Simulator => {
 				Utf8Path::new("/Applications/Xcode.app/Contents/Developer/Applications/Simulator.app")
 			}
+			WellKnown::Xcode => Utf8Path::new("/Applications/Xcode.app"),
 		};
 		match path.try_exists() {
 			Ok(true) => Ok(path),

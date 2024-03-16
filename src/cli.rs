@@ -143,10 +143,10 @@ pub struct TopLevelCliArgs {
 	verbose: bool,
 }
 
-impl CliArgs {
+impl TopLevelCliArgs {
 	#[tracing::instrument(level = "trace", skip(self))]
 	pub fn machine(&self) -> bool {
-		self.args.machine
+		self.machine
 	}
 
 	#[tracing::instrument(level = "trace", skip(self))]
@@ -156,7 +156,7 @@ impl CliArgs {
 
 	#[tracing::instrument(level = "trace", skip(self))]
 	pub fn verbose(&self) -> bool {
-		self.args.verbose
+		self.verbose
 	}
 }
 

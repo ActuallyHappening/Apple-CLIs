@@ -3,15 +3,15 @@
 		{
 			"path": "."
 		},
-		{
-			"path": "../cargo-mobile"
-		},
-		{
-			"path": "../tt"
-		},
-		{
-			"path": "../cargo-bundle"
-		}
+		// {
+		// 	"path": "../cargo-mobile"
+		// },
+		// {
+		// 	"path": "../tt"
+		// },
+		// {
+		// 	"path": "../cargo-bundle"
+		// }
 	],
 	"settings": {
 		"cSpell.words": [
