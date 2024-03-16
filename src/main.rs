@@ -1,5 +1,6 @@
 use std::fs::File;
 use std::io::{BufRead, Write};
+use std::ops::Not;
 
 use apple_clis::cli::{
 	self, CodeSign, Commands, Init, IosDeploy, Open, Security, Simctl, Spctl, XcRun,
@@ -27,14 +28,17 @@ fn main() {
 		// 	.from_env_lossy();
 		// tracing_subscriber::fmt().with_env_filter(env_filter).init();
 
-		let fmt_layer = fmt::layer().with_target(false);
+		let fmt_normal_layer = fmt::layer().with_target(false).without_time();
+		let fmt_verbose_layer = fmt::layer().pretty();
+
 		let filter_layer = EnvFilter::builder()
 			.with_default_directive(LevelFilter::INFO.into())
 			.from_env_lossy();
 
 		tracing_subscriber::registry()
 			.with(filter_layer)
-			.with(fmt_layer)
+			.with(config.verbose().then_some(fmt_verbose_layer))
+			.with(config.verbose().not().then_some(fmt_normal_layer))
 			.with(tracing_error::ErrorLayer::default())
 			.init();
 	}

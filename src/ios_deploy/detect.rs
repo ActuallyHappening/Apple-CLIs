@@ -20,10 +20,12 @@ impl Default for DetectDevicesConfig {
 
 impl IosDeployCLIInstance {
 	/// Uses default [DetectDevicesConfig].
+	#[instrument]
 	pub fn detect_devices(&self) -> Result<Vec<Device>> {
 		self.detect_devices_with_config(&DetectDevicesConfig::default())
 	}
 
+	#[instrument]
 	pub fn detect_devices_with_config(
 		&self,
 		config: &DetectDevicesConfig,

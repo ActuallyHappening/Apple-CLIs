@@ -130,8 +130,11 @@ pub struct CliArgs {
 
 #[derive(Args, Debug)]
 pub struct TopLevelCliArgs {
-	#[arg(long)]
-	pub machine: bool,
+	#[arg(long, global = true)]
+	machine: bool,
+
+	#[arg(long, global = true)]
+	verbose: bool,
 }
 
 impl CliArgs {
@@ -141,6 +144,10 @@ impl CliArgs {
 
 	pub fn human(&self) -> bool {
 		!self.machine()
+	}
+
+	pub fn verbose(&self) -> bool {
+		self.args.verbose
 	}
 }
 
