@@ -1499,15 +1499,15 @@
         "name": "iPad Pro (11-inch) (4th generation)"
       },
       {
-        "lastBootedAt": "2024-03-14T11:20:59Z",
+        "lastBootedAt": "2024-03-16T07:57:34Z",
         "dataPath": "/Users/ah/Library/Developer/CoreSimulator/Devices/082A3477-208B-474D-918D-7AFD64BD634E/data",
-        "dataPathSize": 1246625792,
+        "dataPathSize": 1256427520,
         "logPath": "/Users/ah/Library/Logs/CoreSimulator/082A3477-208B-474D-918D-7AFD64BD634E",
         "udid": "082A3477-208B-474D-918D-7AFD64BD634E",
         "isAvailable": true,
-        "logPathSize": 90112,
+        "logPathSize": 118784,
         "deviceTypeIdentifier": "com.apple.CoreSimulator.SimDeviceType.iPad-Pro-12-9-inch-6th-generation-8GB",
-        "state": "Booted",
+        "state": "Shutdown",
         "name": "iPad Pro (12.9-inch) (6th generation)"
       }
     ]

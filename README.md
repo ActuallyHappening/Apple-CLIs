@@ -6,12 +6,13 @@ This is heavily a work in progress, and will be added to as I need more function
 ## CLI Install
 The crates.io release is likely behind the development branch, but has a greater chance of working.
 ```sh
-# install from crates.io
+# install from crates.io if it works
 cargo install apple-clis
 ```
 
 Install from source:
 ```sh
+# install from git if crates.io doesn't work / missing features
 cargo install --git https://github.com/ActuallyHappening/Apple-CLIs.git apple-clis
 ```
 
@@ -26,14 +27,16 @@ apple-clis init nushell --auto
 apple-clis init nushell --raw-script
 ```
 
-## Examples
+## Run Rust Examples
 ```sh
+# clone repo
+git clone https://github.com/ActuallyHappening/Apple-CLIs.git
+cd Apple-CLIs
+
 cargo run --example ios-deploy-detect
 cargo run --example security-find-certificates
 cargo run --example simctl
 ```
-
-![Example `ios-deploy --detect`](docs/ios-deploy-detect.png)
 
 ## Contributions
 PRs welcome!
@@ -43,18 +46,13 @@ PRs welcome!
 # try the crates.io release if it works
 cargo install --git https://github.com/burtonageo/cargo-bundle.git
 brew install ios-deploy
+cargo install nu # nushell is really awesome
 
-# build an example bundle from the included example project
-cd example-bundle
-nu test-bundle
-cd ..
+# build an example bundle from the included example project + run tests
+nu test.nu
 
-# example command
-cargo r -- codesign display
-cargo r -- codesign sign
-cargo r -- codesign display
+# example commands using nushell
+cargo r -- codesign display --glob --machine | from json
+cargo r -- codesign sign --glob
+cargo r -- ios-deploy detect --machine | from json
 ```
-
-### Todo/Features:
-Split into different crates for documentation purposes.
-- [ ] simctl
