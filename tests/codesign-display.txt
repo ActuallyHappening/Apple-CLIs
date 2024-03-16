@@ -1,0 +1,27 @@
+Executable=/Users/ah/Desktop/Apple-CLIs/example-bundle/bundle/example-bundle.app/example-bundle
+Identifier=example-bundle
+Format=bundle with Mach-O thin (arm64)
+CodeDirectory v=20400 size=3474 flags=0x0(none) hashes=102+3 location=embedded
+VersionPlatform=2
+VersionMin=1115136
+VersionSDK=1115136
+Hash type=sha256 size=32
+CandidateCDHash sha256=5dfdf8b020a316218c2485a723781826d344f61a
+CandidateCDHashFull sha256=5dfdf8b020a316218c2485a723781826d344f61aa52fb170fcfbc0d5cdfa0f68
+Hash choices=sha256
+CMSDigest=5dfdf8b020a316218c2485a723781826d344f61aa52fb170fcfbc0d5cdfa0f68
+CMSDigestType=2
+Executable Segment base=0
+Executable Segment limit=278528
+Executable Segment flags=0x1
+Page size=4096
+CDHash=5dfdf8b020a316218c2485a723781826d344f61a
+Signature size=4797
+Authority=Apple Development: actuallyhappening42@gmail.com (URPGAVRJ3M)
+Authority=Apple Worldwide Developer Relations Certification Authority
+Authority=Apple Root CA
+Signed Time=16 Mar 2024 at 2:41:28 pm
+Info.plist entries=9
+TeamIdentifier=8495B78D24
+Sealed Resources version=2 rules=10 files=0
+Internal requirements count=1 size=196

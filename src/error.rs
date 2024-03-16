@@ -55,6 +55,17 @@ pub enum Error {
 	#[error("Error parsing X509 cert: {0}")]
 	X509ParseFailed(#[from] openssl::error::ErrorStack),
 
+	#[error(
+		"Error trying to parse the `codesign` status of a .app: Missing property {}",
+		missing_key
+	)]
+	SigningPropertyNotFound {
+		missing_key: String,
+	},
+
+	#[error("Error parsing date: {0}")]
+	ParseDateError(#[from] time::error::Parse),
+
 	#[error("Error find with `which`: {0}")]
 	CannotFindWithWhich(#[from] which::Error),
 }

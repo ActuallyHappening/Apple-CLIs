@@ -10,4 +10,4 @@ pub struct CodesignCLIInstance {
 	exec_path: Utf8PathBuf,
 }
 
-impl_exec_instance!(CodesignCLIInstance, "codesign", skip_version_check);
+impl_exec_instance!(CodesignCLIInstance, "codesign", skip_version_check, extra_flags = ["-vvvv"]);

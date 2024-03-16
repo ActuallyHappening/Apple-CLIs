@@ -186,6 +186,36 @@ macro_rules! impl_exec_instance {
 			}
 		}
 	};
+	($t:ty, $name:expr, skip_version_check, extra_flags = $extra_flags:expr) => {
+		impl $crate::shared::ExecInstance for $t {
+			const BINARY_NAME: &'static str = $name;
+
+			unsafe fn new_unchecked(exec_path: impl AsRef<::camino::Utf8Path>) -> Self {
+				Self {
+					exec_path: exec_path.as_ref().to_path_buf(),
+				}
+			}
+
+			fn get_inner_exec_path(&self) -> &::camino::Utf8Path {
+				&self.exec_path
+			}
+
+			fn bossy_command(&self) -> ::bossy::Command {
+				bossy::Command::pure(&self.get_inner_exec_path()).with_args($extra_flags)
+			}
+
+			fn validate_version(&self) -> bool {
+				true
+			}
+		}
+
+		impl $t {
+			/// Constructs an instance of `Self` using `which`.
+			pub fn new() -> $crate::error::Result<Self> {
+				$crate::shared::ExecInstance::new()
+			}
+		}
+	};
 }
 
 #[macro_export]

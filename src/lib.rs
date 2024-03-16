@@ -4,7 +4,7 @@ pub mod prelude {
 	pub use crate::shared::prelude::*;
 	pub(crate) use crate::{impl_exec_child, impl_exec_instance};
 	pub use camino::{Utf8Path, Utf8PathBuf};
-	pub use serde::Deserialize;
+	pub use serde::{Deserialize, Serialize};
 	pub use std::collections::HashMap;
 	pub use std::fmt::Display;
 	pub use std::num::NonZeroU8;
