@@ -47,22 +47,6 @@ pub(super) fn parse_display_output(input: &str) -> IResult<&str, HashMap<Cow<str
 	Ok(("", result))
 }
 
-#[test]
-fn test_parse_raw_display_output() {
-	let test_input = include_str!(concat!(
-		env!("CARGO_MANIFEST_DIR"),
-		"/tests/codesign-display.txt"
-	));
-	match parse_display_output(test_input) {
-		Ok((_, result)) => {
-			println!("Parsed: {:#?}", result);
-		}
-		Err(err) => {
-			panic!("Failed to parse: {:?}", err);
-		}
-	}
-}
-
 #[derive(Debug, Serialize)]
 pub struct SignedKeys {
 	authority_1: String,
@@ -119,11 +103,12 @@ impl SignedKeys {
 		input.parse()
 	}
 
+	const DATE_FORMAT: &'static [time::format_description::FormatItem<'static>] =
+		format_description!("[day] [month repr:short] [year] at [hour]:[minute]:[second] [period]");
+
 	#[instrument(level = "trace", skip(raw), ret)]
 	fn from_parsed(raw: HashMap<Cow<str>, &str>) -> error::Result<Self> {
 		debug!(?raw, "Extracting SignedKeys from parsed input");
-		let date_format =
-			format_description!("[day] [month repr:short] [year] at [hour]:[minute]:[second] [period]");
 		Ok(SignedKeys {
 			authority_1: raw
 				.get("Authority_1")
@@ -149,12 +134,49 @@ impl SignedKeys {
 					.ok_or_else(|| error::Error::SigningPropertyNotFound {
 						missing_key: "Signed Time".into(),
 					})?,
-				&date_format,
+				&Self::DATE_FORMAT,
 			)?,
 			raw: raw
 				.into_iter()
 				.map(|(k, v)| (k.into_owned(), v.to_string()))
 				.collect(),
 		})
+	}
+}
+
+#[cfg(test)]
+mod test {
+	use super::*;
+
+	#[test]
+	fn test_parse_raw_display_output() {
+		let test_input = include_str!(concat!(
+			env!("CARGO_MANIFEST_DIR"),
+			"/tests/codesign-display.txt"
+		));
+		match parse_display_output(test_input) {
+			Ok((_, result)) => {
+				println!("Parsed: {:#?}", result);
+			}
+			Err(err) => {
+				panic!("Failed to parse: {:?}", err);
+			}
+		}
+	}
+
+	#[test]
+	fn test_parse_extracted_display_output() {
+		let test_input = include_str!(concat!(
+			env!("CARGO_MANIFEST_DIR"),
+			"/tests/codesign-display.txt"
+		));
+		match SignedKeys::from_str(test_input) {
+			Ok(result) => {
+				println!("Parsed: {:#?}", result);
+			}
+			Err(err) => {
+				panic!("Failed to parse: {:?}", err);
+			}
+		}
 	}
 }
