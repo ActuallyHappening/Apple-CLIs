@@ -2,9 +2,7 @@ use std::fs::File;
 use std::io::{BufRead, Write};
 use std::ops::Not;
 
-use apple_clis::cli::{
-	self, CodeSign, Commands, Init, IosDeploy, Open, Security, Simctl, Spctl, XcRun,
-};
+use apple_clis::cli::{self, CodeSign, Commands, Init, IosDeploy, Security, Simctl, Spctl, XcRun};
 use apple_clis::codesign;
 use apple_clis::open::OpenCLIInstance;
 use apple_clis::shared::identifiers::DeviceName;

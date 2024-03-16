@@ -2,14 +2,12 @@ use camino::{Utf8Path, Utf8PathBuf};
 use nom::character::complete::multispace0;
 use serde::{Deserialize, Serialize};
 
-pub mod cmd;
 pub mod identifiers;
 
 pub mod prelude {
 	pub use super::identifiers::*;
 	pub(crate) use super::ExecInstance;
 	pub(super) use super::{ws, NomFromStr};
-	pub(crate) use crate::impl_exec_instance;
 	pub(super) use crate::prelude::*;
 	#[allow(unused_imports)]
 	pub(super) use nom::{

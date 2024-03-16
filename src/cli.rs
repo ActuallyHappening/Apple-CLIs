@@ -1,11 +1,6 @@
-use camino::{Utf8Path, Utf8PathBuf};
 use clap::{Args, Parser, Subcommand};
-use tracing::{info, warn};
 
-use crate::{
-	ios_deploy::detect::DetectDevicesConfig, open::well_known::WellKnown,
-	shared::identifiers::DeviceName,
-};
+use crate::{ios_deploy::detect::DetectDevicesConfig, open::well_known::WellKnown};
 
 use self::{app_path::AppPath, device_name::DeviceSimulator};
 

@@ -1,6 +1,6 @@
 use camino::Utf8PathBuf;
 use color_eyre::eyre::eyre;
-use tracing::{event, info, warn, Level};
+use tracing::{info, warn};
 
 #[derive(clap::Args, Debug)]
 #[group(required = true, multiple = false)]

@@ -3,8 +3,8 @@ use std::str::FromStr;
 use camino::{Utf8Path, Utf8PathBuf};
 use nom::{
 	branch::alt,
-	bytes::complete::{tag, take_till, take_while},
-	combinator::{map, map_res, rest, success},
+	bytes::complete::{tag, take_while},
+	combinator::{map, map_res, rest},
 	sequence::terminated,
 	IResult,
 };

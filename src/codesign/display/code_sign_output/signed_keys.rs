@@ -1,12 +1,8 @@
 use std::{borrow::Cow, str::FromStr};
 
 use nom::{
-	bytes::complete::*,
-	character::complete::{multispace0, newline},
-	combinator::*,
-	multi::fold_many1,
-	sequence::*,
-	IResult,
+	bytes::complete::*, character::complete::multispace0, combinator::*, multi::fold_many1,
+	sequence::*, IResult,
 };
 use time::macros::format_description;
 
