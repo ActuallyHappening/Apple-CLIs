@@ -1453,23 +1453,25 @@
         "name": "iPhone 15 Pro Max"
       },
       {
+        "lastBootedAt": "2024-03-13T09:07:54Z",
         "dataPath": "/Users/ah/Library/Developer/CoreSimulator/Devices/169F37C3-3436-4FD5-A23F-4542239923D3/data",
-        "dataPathSize": 18337792,
+        "dataPathSize": 841736192,
         "logPath": "/Users/ah/Library/Logs/CoreSimulator/169F37C3-3436-4FD5-A23F-4542239923D3",
         "udid": "169F37C3-3436-4FD5-A23F-4542239923D3",
         "isAvailable": true,
+        "logPathSize": 53248,
         "deviceTypeIdentifier": "com.apple.CoreSimulator.SimDeviceType.iPad-Air-5th-generation",
         "state": "Shutdown",
         "name": "iPad Air (5th generation)"
       },
       {
-        "lastBootedAt": "2024-03-12T01:47:50Z",
+        "lastBootedAt": "2024-03-13T08:45:22Z",
         "dataPath": "/Users/ah/Library/Developer/CoreSimulator/Devices/E4BBA9F2-DEB7-4276-84AF-E85A6971018E/data",
-        "dataPathSize": 1349505024,
+        "dataPathSize": 1392979968,
         "logPath": "/Users/ah/Library/Logs/CoreSimulator/E4BBA9F2-DEB7-4276-84AF-E85A6971018E",
         "udid": "E4BBA9F2-DEB7-4276-84AF-E85A6971018E",
         "isAvailable": true,
-        "logPathSize": 86016,
+        "logPathSize": 110592,
         "deviceTypeIdentifier": "com.apple.CoreSimulator.SimDeviceType.iPad-10th-generation",
         "state": "Shutdown",
         "name": "iPad (10th generation)"
@@ -1485,25 +1487,27 @@
         "name": "iPad mini (6th generation)"
       },
       {
-        "lastBootedAt": "2024-03-10T04:36:29Z",
+        "lastBootedAt": "2024-03-14T01:44:04Z",
         "dataPath": "/Users/ah/Library/Developer/CoreSimulator/Devices/FFA20B14-2D33-4E05-8946-460CC087EDED/data",
-        "dataPathSize": 117542912,
+        "dataPathSize": 127348736,
         "logPath": "/Users/ah/Library/Logs/CoreSimulator/FFA20B14-2D33-4E05-8946-460CC087EDED",
         "udid": "FFA20B14-2D33-4E05-8946-460CC087EDED",
         "isAvailable": true,
-        "logPathSize": 24576,
+        "logPathSize": 28672,
         "deviceTypeIdentifier": "com.apple.CoreSimulator.SimDeviceType.iPad-Pro-11-inch-4th-generation-8GB",
         "state": "Shutdown",
         "name": "iPad Pro (11-inch) (4th generation)"
       },
       {
+        "lastBootedAt": "2024-03-14T11:20:59Z",
         "dataPath": "/Users/ah/Library/Developer/CoreSimulator/Devices/082A3477-208B-474D-918D-7AFD64BD634E/data",
-        "dataPathSize": 18337792,
+        "dataPathSize": 1246625792,
         "logPath": "/Users/ah/Library/Logs/CoreSimulator/082A3477-208B-474D-918D-7AFD64BD634E",
         "udid": "082A3477-208B-474D-918D-7AFD64BD634E",
         "isAvailable": true,
+        "logPathSize": 90112,
         "deviceTypeIdentifier": "com.apple.CoreSimulator.SimDeviceType.iPad-Pro-12-9-inch-6th-generation-8GB",
-        "state": "Shutdown",
+        "state": "Booted",
         "name": "iPad Pro (12.9-inch) (6th generation)"
       }
     ]

@@ -16,6 +16,7 @@ use color_eyre::eyre::{eyre, Context, ContextCompat};
 use serde_json::{json, Value};
 use tracing::*;
 use tracing_subscriber::filter::LevelFilter;
+use tracing_subscriber::fmt::format::FmtSpan;
 use tracing_subscriber::prelude::*;
 use tracing_subscriber::{fmt, EnvFilter};
 
@@ -29,7 +30,9 @@ fn main() {
 		// 	.from_env_lossy();
 		// tracing_subscriber::fmt().with_env_filter(env_filter).init();
 
-		let fmt_normal_layer = fmt::layer().with_target(false).without_time();
+		let fmt_normal_layer = fmt::layer()
+			.with_target(false)
+			.without_time();
 		let fmt_verbose_layer = fmt::layer().pretty();
 
 		let filter_layer = EnvFilter::builder()
