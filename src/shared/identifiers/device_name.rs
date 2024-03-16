@@ -1,4 +1,4 @@
-use crate::prelude::*;
+use crate::{nom_from_str, prelude::*};
 use std::{fmt::Display, str::FromStr};
 
 use serde::{Deserialize, Deserializer, Serialize};
@@ -55,43 +55,14 @@ impl NomFromStr for DeviceName {
 	#[tracing::instrument(level = "trace", skip(input))]
 	fn nom_from_str(input: &str) -> IResult<&str, Self> {
 		alt((
-			map(
-				preceded(ws(tag("iPad")), IPadVariant::nom_from_str),
-				DeviceName::IPad,
-			),
-			map(
-				preceded(ws(tag("iPhone")), IPhoneVariant::nom_from_str),
-				DeviceName::IPhone,
-			),
+			map(ws(IPadVariant::nom_from_str), DeviceName::IPad),
+			map(ws(IPhoneVariant::nom_from_str), DeviceName::IPhone),
 			map(rest, |s: &str| DeviceName::UnImplemented(s.to_owned())),
 		))(input)
 	}
 }
 
-impl FromStr for DeviceName {
-	type Err = error::Error;
-
-	#[tracing::instrument(level = "trace", skip(input))]
-	fn from_str(input: &str) -> std::result::Result<Self, Self::Err> {
-		match DeviceName::nom_from_str(input) {
-			Ok((remaining, device)) => {
-				if remaining.is_empty() {
-					Ok(device)
-				} else {
-					Err(Error::ParsingRemainingNotEmpty {
-						input: input.to_owned(),
-						remaining: remaining.to_owned(),
-						parsed_debug: format!("{:#?}", device),
-					})
-				}
-			}
-			Err(e) => Err(Error::ParsingFailed {
-				err: e.to_owned(),
-				name: "Device Name".into(),
-			}),
-		}
-	}
-}
+nom_from_str!(DeviceName);
 
 impl<'de> Deserialize<'de> for DeviceName {
 	#[tracing::instrument(level = "trace", skip(deserializer))]
@@ -122,51 +93,21 @@ impl Display for DeviceName {
 	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
 		match self {
 			DeviceName::UnImplemented(s) => write!(f, "{}", s),
-			DeviceName::IPhone(variant) => write!(f, "iPhone {}", variant),
-			DeviceName::IPad(variant) => write!(f, "iPad {}", variant),
+			DeviceName::IPhone(variant) => write!(f, "{}", variant),
+			DeviceName::IPad(variant) => write!(f, "{}", variant),
 		}
 	}
 }
 
 #[cfg(test)]
 mod tests {
-	use tracing::debug;
+	use crate::shared::assert_nom_parses;
 
 	use super::*;
 
 	#[test]
 	fn test_parse_device_name() {
 		let examples = include!("../../../tests/names.json");
-		for example in examples.iter() {
-			let output = DeviceName::nom_from_str(example);
-			match output {
-				Ok((remaining, device)) => {
-					debug!(
-						"Parsed device: {:?} from {} [remaining: {}]",
-						device, example, remaining
-					);
-					assert!(
-						remaining.is_empty(),
-						"Remaining was not empty: {:?} (already parsed {:?})",
-						remaining,
-						device
-					);
-					assert!(
-						device.parsed_successfully(),
-						"{:?} was not parsed successfully",
-						device
-					);
-					assert_eq!(
-						&device.to_string(),
-						example,
-						"The parsed device name {:?} from {:?} displayed {}",
-						device,
-						example,
-						&device.to_string()
-					);
-				}
-				Err(e) => panic!("Failed to parse {:?}: {}", example, e),
-			}
-		}
+		assert_nom_parses::<DeviceName>(examples, |d| d.parsed_successfully())
 	}
 }

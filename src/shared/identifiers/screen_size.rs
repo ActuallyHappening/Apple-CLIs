@@ -40,28 +40,25 @@ impl ScreenSize {
 }
 
 fn screen_size_long(input: &str) -> IResult<&str, ScreenSize> {
-	all_consuming(delimited(
+	delimited(
 		ws(tag("(")),
 		map(float, ScreenSize::long),
 		ws(tag("-inch)")),
-	))(input)
+	)(input)
 }
 
 fn screen_size_short(input: &str) -> IResult<&str, ScreenSize> {
-	all_consuming(delimited(
+	delimited(
 		ws(tag("(")),
 		map(float, ScreenSize::short),
 		ws(tag("\")")),
-	))(input)
+	)(input)
 }
 
 impl NomFromStr for ScreenSize {
 	#[tracing::instrument(level = "trace", skip(input))]
 	fn nom_from_str(input: &str) -> IResult<&str, Self> {
-		alt((
-			screen_size_long,
-			screen_size_short
-		))(input)
+		alt((screen_size_long, screen_size_short))(input)
 	}
 }
 
@@ -77,16 +74,14 @@ impl Display for ScreenSize {
 
 #[cfg(test)]
 mod tests {
+	use crate::shared::assert_nom_parses;
+
 	use super::*;
 
 	#[test]
 	fn screen_size_parses() {
-		let examples = ["(5.5-inch)", "(6.1\")"];
-		for example in examples {
-			let (remaining, parsed) = ScreenSize::nom_from_str(example).unwrap();
-			assert!(remaining.is_empty());
-			assert_eq!(parsed.to_string(), example);
-		}
+		let examples = ["(5.5-inch)", "(11-inch)", "(6.1\")"];
+		assert_nom_parses::<ScreenSize>(examples, |_| true)
 	}
 
 	#[test]

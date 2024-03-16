@@ -47,18 +47,18 @@ fn ordinal(input: &str) -> IResult<&str, &str> {
 }
 
 fn generation_brackets(input: &str) -> IResult<&str, Generation> {
-	all_consuming(delimited(
+	delimited(
 		ws(tag("(")),
 		map(NonZeroU8::nom_from_str, Generation::long),
 		preceded(ws(ordinal), tag("generation)")),
-	))(input)
+	)(input)
 }
 
 fn generation_model(input: &str) -> IResult<&str, Generation> {
-	all_consuming(terminated(
+	terminated(
 		map(NonZeroU8::nom_from_str, Generation::short),
 		tag("G"),
-	))(input)
+	)(input)
 }
 
 impl NomFromStr for Generation {

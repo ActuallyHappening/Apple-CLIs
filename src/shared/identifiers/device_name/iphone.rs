@@ -19,10 +19,20 @@ pub enum IPhoneVariant {
 impl NomFromStr for IPhoneVariant {
 	#[tracing::instrument(level = "trace", skip(input))]
 	fn nom_from_str(input: &str) -> IResult<&str, Self> {
-		let (remaining, discriminate) = alt((
-			value(IPhoneVariantDiscriminants::SE, ws(tag("SE"))),
-			value(IPhoneVariantDiscriminants::Number, peek(ws(digit1))),
-		))(input)?;
+		let (remaining, discriminate) = preceded(
+			ws(tag("iPhone")),
+			alt((
+				value(IPhoneVariantDiscriminants::SE, ws(tag("SE"))),
+				value(IPhoneVariantDiscriminants::Number, peek(ws(digit1))),
+			)),
+		)(input)?;
+
+		#[cfg(test)]
+		trace!(
+			?discriminate,
+			?remaining,
+			"Discriminant found for parsing [IPhoneVariant]"
+		);
 
 		match discriminate {
 			IPhoneVariantDiscriminants::SE => {
@@ -52,14 +62,14 @@ impl Display for IPhoneVariant {
 	#[tracing::instrument(level = "trace", skip(self, f))]
 	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
 		match self {
-			IPhoneVariant::SE { generation } => write!(f, "SE {}", generation),
+			IPhoneVariant::SE { generation } => write!(f, "iPhone SE {}", generation),
 			IPhoneVariant::Number {
 				num,
 				plus,
 				pro,
 				max,
 			} => {
-				write!(f, "{}", num)?;
+				write!(f, "iPhone {}", num)?;
 				if *plus {
 					write!(f, " Plus")?;
 				}

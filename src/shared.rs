@@ -288,6 +288,15 @@ fn assert_nom_parses<T: NomFromStr + std::fmt::Display + std::fmt::Debug>(
 	examples: impl IntoIterator<Item = &'static str>,
 	successfully_parsed: impl Fn(&T) -> bool,
 ) {
+	use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
+
+	let fmt_verbose_layer = tracing_subscriber::fmt::layer().pretty();
+
+	tracing_subscriber::registry()
+		.with(fmt_verbose_layer)
+		.try_init()
+		.ok();
+
 	for example in examples.into_iter() {
 		let example = example.to_string();
 		match T::nom_from_str(&example) {
@@ -308,7 +317,7 @@ fn assert_nom_parses<T: NomFromStr + std::fmt::Display + std::fmt::Debug>(
 					example
 				);
 				assert!(
-					!successfully_parsed(&parsed),
+					successfully_parsed(&parsed),
 					"While parsing {}, got unimplemented variant {:?}",
 					example,
 					parsed
