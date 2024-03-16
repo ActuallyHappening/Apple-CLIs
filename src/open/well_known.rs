@@ -14,6 +14,7 @@ pub enum WellKnown {
 impl TryFrom<&WellKnown> for &'static Utf8Path {
 	type Error = error::Error;
 
+	#[tracing::instrument(level = "trace", skip(value))]
 	/// Path may be invalid
 	fn try_from(value: &WellKnown) -> std::result::Result<Self, Self::Error> {
 		let path: &'static Utf8Path = match value {
@@ -36,6 +37,7 @@ impl TryFrom<&WellKnown> for &'static Utf8Path {
 }
 
 impl WellKnown {
+	#[tracing::instrument(level = "trace", skip(self))]
 	/// Fails if path doesn't exist
 	pub fn get_path(&self) -> error::Result<&Utf8Path> {
 		self.try_into()
@@ -43,6 +45,7 @@ impl WellKnown {
 }
 
 impl OpenCLIInstance {
+	#[tracing::instrument(level = "trace", skip(self, well_known))]
 	pub fn open_well_known(&self, well_known: &WellKnown) -> Result<ExitStatus> {
 		let path = well_known.get_path()?;
 		Ok(self.bossy_command().with_arg(path).run_and_wait()?)

@@ -12,10 +12,12 @@ pub struct ListOutput {
 }
 
 impl ListOutput {
+	#[tracing::instrument(level = "trace", skip(self))]
 	pub fn devices(&self) -> impl Iterator<Item = &ListDevice> {
 		self.devices.values().flatten()
 	}
 
+	#[tracing::instrument(level = "trace", skip(self))]
 	pub fn iphones(&self) -> impl Iterator<Item = &IPhoneVariant> {
 		self.devices().filter_map(|device| match device.name {
 			DeviceName::IPhone(ref variant) => Some(variant),
@@ -23,6 +25,7 @@ impl ListOutput {
 		})
 	}
 
+	#[tracing::instrument(level = "trace", skip(self))]
 	pub fn ipads(&self) -> impl Iterator<Item = &IPadVariant> {
 		self.devices().filter_map(|device| match device.name {
 			DeviceName::IPad(ref variant) => Some(variant),
@@ -52,18 +55,21 @@ pub enum State {
 }
 
 impl State {
+	#[tracing::instrument(level = "trace", skip(self))]
 	pub fn ready(&self) -> bool {
 		matches!(self, State::Booted)
 	}
 }
 
 impl ListDevice {
+	#[tracing::instrument(level = "trace", skip(self))]
 	pub fn ready(&self) -> bool {
 		self.state.ready() && self.is_available
 	}
 }
 
 impl<'src> XcRunSimctlInstance<'src> {
+	#[tracing::instrument(level = "trace", skip(self))]
 	pub fn list(&self) -> Result<ListOutput> {
 		let output = self
 			.bossy_command()

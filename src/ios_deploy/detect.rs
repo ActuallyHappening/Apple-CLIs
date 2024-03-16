@@ -1,5 +1,5 @@
-use crate::shared::Device;
 use crate::prelude::*;
+use crate::shared::Device;
 
 use super::IosDeployCLIInstance;
 
@@ -10,6 +10,7 @@ pub struct DetectDevicesConfig {
 }
 
 impl Default for DetectDevicesConfig {
+	#[tracing::instrument(level = "trace", skip())]
 	fn default() -> Self {
 		DetectDevicesConfig {
 			timeout: 1,
@@ -26,10 +27,7 @@ impl IosDeployCLIInstance {
 	}
 
 	#[instrument]
-	pub fn detect_devices_with_config(
-		&self,
-		config: &DetectDevicesConfig,
-	) -> Result<Vec<Device>> {
+	pub fn detect_devices_with_config(&self, config: &DetectDevicesConfig) -> Result<Vec<Device>> {
 		let mut command = self
 			.bossy_command()
 			.with_arg("--detect")

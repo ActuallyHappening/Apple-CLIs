@@ -11,12 +11,14 @@ pub struct XcRunSimctlInstance<'src> {
 }
 
 impl XcRunInstance {
+	#[tracing::instrument(level = "trace", skip(self))]
 	pub fn simctl(&self) -> XcRunSimctlInstance {
 		XcRunSimctlInstance { exec_parent: self }
 	}
 }
 
 impl XcRunSimctlInstance<'_> {
+	#[tracing::instrument(level = "trace", skip(self))]
 	fn bossy_command(&self) -> bossy::Command {
 		self.exec_parent.bossy_command().with_arg("simctl")
 	}

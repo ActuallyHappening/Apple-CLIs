@@ -17,6 +17,7 @@ pub enum IPhoneVariant {
 }
 
 impl NomFromStr for IPhoneVariant {
+	#[tracing::instrument(level = "trace", skip(input))]
 	fn nom_from_str(input: &str) -> IResult<&str, Self> {
 		let (remaining, discriminate) = alt((
 			value(IPhoneVariantDiscriminants::SE, ws(tag("SE"))),
@@ -48,6 +49,7 @@ impl NomFromStr for IPhoneVariant {
 }
 
 impl Display for IPhoneVariant {
+	#[tracing::instrument(level = "trace", skip(self, f))]
 	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
 		match self {
 			IPhoneVariant::SE { generation } => write!(f, "SE {}", generation),

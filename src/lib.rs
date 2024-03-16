@@ -1,24 +1,25 @@
 pub mod prelude {
-	pub(crate) use crate::{impl_exec_instance, impl_exec_child};
-	pub use crate::shared::prelude::*;
+	pub use crate::error;
 	pub use crate::error::{Error, Result};
-	pub use crate::error as error;
+	pub use crate::shared::prelude::*;
+	pub(crate) use crate::{impl_exec_child, impl_exec_instance};
 	pub use camino::{Utf8Path, Utf8PathBuf};
 	pub use serde::Deserialize;
 	pub use std::collections::HashMap;
-	pub use std::num::NonZeroU8;
 	pub use std::fmt::Display;
-	pub use tracing::{trace, debug, info, warn, error, instrument};
+	pub use std::num::NonZeroU8;
+	pub use tracing::{debug, error, info, instrument, trace, warn};
 }
 
-pub mod error;
-pub mod shared;
 #[cfg(feature = "cli")]
 pub mod cli;
+pub mod error;
+pub mod shared;
 
 pub mod cargo_bundle;
 pub mod codesign;
 pub mod ios_deploy;
+pub mod open;
 pub mod pkgbuild;
 pub mod pkgutil;
 pub mod productbuild;
@@ -27,4 +28,3 @@ pub mod security;
 pub mod spctl;
 pub mod xcodebuild;
 pub mod xcrun;
-pub mod open;

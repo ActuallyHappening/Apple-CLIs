@@ -11,13 +11,12 @@ use super::SecurityCLIInstance;
 pub enum FindCertificatesError {
 	#[error("Error running `security find-certificate -a -p`: {0}")]
 	ExecuteError(#[from] bossy::Error),
-
-	
 }
 
 impl SecurityCLIInstance {
 	const DEVELOPER_NAME_SCHEMAS: [&'static str; 2] = ["Developer:", "Development:"];
 
+	#[tracing::instrument(level = "trace", skip(self, name_substr))]
 	fn get_pem_list(&self, name_substr: &str) -> bossy::Result<bossy::Output> {
 		self
 			.bossy_command()
@@ -25,6 +24,7 @@ impl SecurityCLIInstance {
 			.run_and_wait_for_output()
 	}
 
+	#[tracing::instrument(level = "trace", skip(self))]
 	fn get_developer_pem_list(&self) -> bossy::Result<Vec<bossy::Output>> {
 		Self::DEVELOPER_NAME_SCHEMAS
 			.iter()
@@ -32,18 +32,18 @@ impl SecurityCLIInstance {
 			.collect()
 	}
 
+	#[tracing::instrument(level = "trace", skip(self))]
 	pub fn get_developer_pems(&self) -> Result<Vec<X509>> {
 		let certs = self
 			.get_developer_pem_list()?
 			.into_iter()
-			.map(|output| {
-				X509::stack_from_pem(output.stdout()).map_err(Error::X509ParseFailed)
-			})
+			.map(|output| X509::stack_from_pem(output.stdout()).map_err(Error::X509ParseFailed))
 			.collect::<Result<Vec<_>>>()?;
 		let certs = certs.into_iter().flatten();
 		Ok(certs.collect())
 	}
 
+	#[tracing::instrument(level = "trace", skip(self))]
 	pub fn get_developer_certs(&self) -> Result<Vec<Certificate>> {
 		Ok(
 			self
@@ -72,6 +72,7 @@ pub enum X509FieldError {
 	FieldNotValidUtf8(#[source] OpenSslError),
 }
 
+#[tracing::instrument(level = "trace", skip(subject_name, field_name, field_nid))]
 fn get_x509_field(
 	subject_name: &X509NameRef,
 	field_name: &'static str,
@@ -97,6 +98,7 @@ pub enum FromX509Error {
 }
 
 impl Certificate {
+	#[tracing::instrument(level = "trace", skip(cert))]
 	pub fn try_from_x509(cert: X509) -> std::result::Result<Self, FromX509Error> {
 		let subject = cert.subject_name();
 		let common_name = get_x509_field(subject, "Common Name", Nid::COMMONNAME)?;

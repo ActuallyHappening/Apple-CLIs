@@ -26,6 +26,7 @@ mod app_path {
 	}
 
 	impl AppPath {
+		#[tracing::instrument(level = "trace", skip(self))]
 		pub fn resolve(self) -> Result<Utf8PathBuf, color_eyre::Report> {
 			let path = match self.app_path {
 				Some(p) => p,
@@ -89,6 +90,7 @@ mod device_name {
 	}
 
 	impl DeviceSimulator {
+		#[tracing::instrument(level = "trace", skip(self, simctl_instance))]
 		pub fn resolve(
 			self,
 			simctl_instance: &XcRunSimctlInstance,
@@ -138,14 +140,17 @@ pub struct TopLevelCliArgs {
 }
 
 impl CliArgs {
+	#[tracing::instrument(level = "trace", skip(self))]
 	pub fn machine(&self) -> bool {
 		self.args.machine
 	}
 
+	#[tracing::instrument(level = "trace", skip(self))]
 	pub fn human(&self) -> bool {
 		!self.machine()
 	}
 
+	#[tracing::instrument(level = "trace", skip(self))]
 	pub fn verbose(&self) -> bool {
 		self.args.verbose
 	}

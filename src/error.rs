@@ -12,7 +12,11 @@ pub enum Error {
 	#[error("Error parsing command JSON output: {0}")]
 	ParseJson(#[from] serde_json::Error),
 
-	#[error("The hard coded path {:?} was not found ({:?}: {err:?})", hard_coded_path, err)]
+	#[error(
+		"The hard coded path {:?} was not found ({:?}: {err:?})",
+		hard_coded_path,
+		err
+	)]
 	WellKnownPathNotFound {
 		hard_coded_path: Utf8PathBuf,
 		err: Option<std::io::Error>,
@@ -31,7 +35,7 @@ pub enum Error {
 	X509ParseFailed(#[from] openssl::error::ErrorStack),
 
 	#[error("Error find with `which`: {0}")]
-	CannotFindWithWhich(#[from] which::Error)
+	CannotFindWithWhich(#[from] which::Error),
 }
 
 pub type Result<T> = std::result::Result<T, crate::error::Error>;

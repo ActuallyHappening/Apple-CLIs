@@ -9,6 +9,7 @@ pub struct OpenCLIInstance {
 impl_exec_instance!(OpenCLIInstance, "open");
 
 impl OpenCLIInstance {
+	#[tracing::instrument(level = "trace", skip(self, path))]
 	pub fn open_path(&self, path: impl AsRef<Utf8Path>) -> Result<bossy::ExitStatus> {
 		Ok(
 			self

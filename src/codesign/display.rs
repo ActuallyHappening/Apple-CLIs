@@ -5,6 +5,7 @@ use camino::Utf8Path;
 use super::CodesignCLIInstance;
 
 impl CodesignCLIInstance {
+	#[tracing::instrument(level = "trace", skip(self, path))]
 	#[doc = include_str!("../../docs/inline/TODO.md")]
 	pub fn display(&self, path: impl AsRef<Utf8Path>) -> Result<String> {
 		let output = self

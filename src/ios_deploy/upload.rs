@@ -8,6 +8,7 @@ use crate::shared::Device;
 use super::IosDeployCLIInstance;
 
 impl IosDeployCLIInstance {
+	#[tracing::instrument(level = "trace", skip(self, device, bundle_path))]
 	pub fn upload_bundle(
 		&self,
 		device: &Device,

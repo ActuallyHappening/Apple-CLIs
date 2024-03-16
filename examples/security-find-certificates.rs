@@ -1,5 +1,6 @@
 use apple_clis::security;
 
+#[tracing::instrument(level = "trace", skip())]
 fn main() {
 	let security_instance =
 		security::SecurityCLIInstance::new().expect("Couldn't find security executable");

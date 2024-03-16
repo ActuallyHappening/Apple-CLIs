@@ -20,6 +20,7 @@ pub enum IPadVariant {
 }
 
 impl NomFromStr for IPadVariant {
+	#[tracing::instrument(level = "trace", skip(input))]
 	fn nom_from_str(input: &str) -> IResult<&str, Self> {
 		let (remaining, discriminate) = alt((
 			value(IPadVariantDiscriminants::Mini, ws(tag("mini"))),
@@ -51,6 +52,7 @@ impl NomFromStr for IPadVariant {
 }
 
 impl Display for IPadVariant {
+	#[tracing::instrument(level = "trace", skip(self, f))]
 	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
 		match self {
 			IPadVariant::Mini { generation } => write!(f, "mini {}", generation),

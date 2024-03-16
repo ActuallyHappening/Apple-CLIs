@@ -19,6 +19,7 @@ use tracing_subscriber::filter::LevelFilter;
 use tracing_subscriber::prelude::*;
 use tracing_subscriber::{fmt, EnvFilter};
 
+#[tracing::instrument(level = "trace", skip())]
 fn main() {
 	let config = cli::CliArgs::parse();
 
@@ -56,6 +57,7 @@ fn main() {
 	}
 }
 
+#[tracing::instrument(level = "trace", skip(command))]
 fn run(command: Commands) -> std::result::Result<Option<serde_json::Value>, color_eyre::Report> {
 	match command {
 		Commands::Init(Init::NuShell { auto, raw_script }) => match (auto, raw_script) {

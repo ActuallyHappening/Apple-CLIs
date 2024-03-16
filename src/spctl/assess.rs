@@ -13,6 +13,7 @@ pub enum AssessType {
 }
 
 impl AssessType {
+	#[tracing::instrument(level = "trace", skip(self))]
 	fn into_type(self) -> &'static str {
 		match self {
 			AssessType::App => "exec",
@@ -23,6 +24,7 @@ impl AssessType {
 }
 
 impl SpctlCLIInstance {
+	#[tracing::instrument(level = "trace", skip(self, path, assess_type))]
 	#[doc = include_str!("../../docs/inline/TODO.md")]
 	pub fn assess(&self, path: impl AsRef<Utf8Path>, assess_type: AssessType) -> Result<String> {
 		Ok(
@@ -35,6 +37,7 @@ impl SpctlCLIInstance {
 		)
 	}
 
+	#[tracing::instrument(level = "trace", skip(self, path))]
 	pub fn assess_app(&self, path: impl AsRef<Utf8Path>) -> Result<String> {
 		self.assess(path, AssessType::App)
 	}

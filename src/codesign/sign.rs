@@ -13,6 +13,7 @@ pub enum CodeSignError {
 }
 
 impl CodesignCLIInstance {
+	#[tracing::instrument(level = "trace", skip(self, cert, path))]
 	pub fn sign(&self, cert: &Certificate, path: impl AsRef<Utf8Path>) -> Result<String> {
 		let output = self
 			.bossy_command()

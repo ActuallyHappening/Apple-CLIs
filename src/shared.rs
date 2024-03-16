@@ -1,8 +1,8 @@
 use camino::{Utf8Path, Utf8PathBuf};
 use serde::{Deserialize, Serialize};
 
-pub mod identifiers;
 pub mod cmd;
+pub mod identifiers;
 
 pub mod prelude {
 	pub use super::identifiers::*;
@@ -195,11 +195,13 @@ trait NomFromStr: Sized {
 }
 
 impl NomFromStr for NonZeroU8 {
+	#[tracing::instrument(level = "trace", skip(input))]
 	fn nom_from_str(input: &str) -> IResult<&str, Self> {
 		map_res(digit1, |s: &str| s.parse())(input)
 	}
 }
 
+#[tracing::instrument(level = "trace", skip(inner))]
 /// A combinator that takes a parser `inner` and produces a parser that also consumes both leading and
 /// trailing whitespace, returning the output of `inner`.
 fn ws<'a, F: 'a, O, E: nom::error::ParseError<&'a str>>(

@@ -5,6 +5,7 @@ use crate::shared::prelude::*;
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, PartialOrd, Ord)]
 pub struct Generation(NonZeroU8);
 
+#[tracing::instrument(level = "trace", skip(input))]
 fn ordinal(input: &str) -> IResult<&str, &str> {
 	alt((tag("st"), tag("nd"), tag("rd"), tag("th")))(input)
 }
@@ -19,6 +20,7 @@ impl Generation {
 		}
 	}
 
+	#[tracing::instrument(level = "trace", skip(number))]
 	#[cfg_attr(not(test), allow(dead_code))]
 	pub(crate) fn new(number: impl Into<u8>) -> Self {
 		Self(NonZeroU8::new(number.into()).unwrap())
@@ -26,6 +28,7 @@ impl Generation {
 }
 
 impl NomFromStr for Generation {
+	#[tracing::instrument(level = "trace", skip(input))]
 	fn nom_from_str(input: &str) -> IResult<&str, Self> {
 		let (remaining, number) = delimited(tag("("), NonZeroU8::nom_from_str, ordinal)(input)?;
 		let (remaining, _) = ws(tag("generation)"))(remaining)?; // consume the closing parenthesis
@@ -35,6 +38,7 @@ impl NomFromStr for Generation {
 }
 
 impl Display for Generation {
+	#[tracing::instrument(level = "trace", skip(self, f))]
 	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
 		write!(f, "({}{} generation)", self.0, self.ordinal())
 	}

@@ -39,32 +39,38 @@ pub use ipad::*;
 mod ipad;
 
 impl DeviceName {
+	#[tracing::instrument(level = "trace", skip(self))]
 	pub fn parsed_successfully(&self) -> bool {
 		!matches!(self, DeviceName::UnImplemented(_))
 	}
 
+	#[tracing::instrument(level = "trace", skip(self))]
 	pub fn is_iphone(&self) -> bool {
 		matches!(self, DeviceName::IPhone(_))
 	}
 
+	#[tracing::instrument(level = "trace", skip(self))]
 	pub fn is_ipad(&self) -> bool {
 		matches!(self, DeviceName::IPad(_))
 	}
 }
 
 impl From<IPhoneVariant> for DeviceName {
+	#[tracing::instrument(level = "trace", skip(variant))]
 	fn from(variant: IPhoneVariant) -> Self {
 		DeviceName::IPhone(variant)
 	}
 }
 
 impl From<IPadVariant> for DeviceName {
+	#[tracing::instrument(level = "trace", skip(variant))]
 	fn from(variant: IPadVariant) -> Self {
 		DeviceName::IPad(variant)
 	}
 }
 
 impl NomFromStr for DeviceName {
+	#[tracing::instrument(level = "trace", skip(input))]
 	fn nom_from_str(input: &str) -> IResult<&str, Self> {
 		alt((
 			map(
@@ -83,6 +89,7 @@ impl NomFromStr for DeviceName {
 impl FromStr for DeviceName {
 	type Err = DeviceNameParseError;
 
+	#[tracing::instrument(level = "trace", skip(input))]
 	fn from_str(input: &str) -> std::result::Result<Self, Self::Err> {
 		match DeviceName::nom_from_str(input) {
 			Ok((remaining, device)) => {
@@ -102,6 +109,7 @@ impl FromStr for DeviceName {
 }
 
 impl<'de> Deserialize<'de> for DeviceName {
+	#[tracing::instrument(level = "trace", skip(deserializer))]
 	fn deserialize<D>(deserializer: D) -> std::result::Result<Self, D::Error>
 	where
 		D: Deserializer<'de>,
@@ -115,6 +123,7 @@ impl<'de> Deserialize<'de> for DeviceName {
 
 // impl serialize
 impl Serialize for DeviceName {
+	#[tracing::instrument(level = "trace", skip(self, serializer))]
 	fn serialize<S>(&self, serializer: S) -> std::result::Result<S::Ok, S::Error>
 	where
 		S: serde::Serializer,
@@ -124,6 +133,7 @@ impl Serialize for DeviceName {
 }
 
 impl Display for DeviceName {
+	#[tracing::instrument(level = "trace", skip(self, f))]
 	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
 		match self {
 			DeviceName::UnImplemented(s) => write!(f, "{}", s),

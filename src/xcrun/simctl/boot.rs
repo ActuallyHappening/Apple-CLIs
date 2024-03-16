@@ -5,6 +5,7 @@ use crate::{prelude::*, shared::identifiers::DeviceName};
 use super::XcRunSimctlInstance;
 
 impl XcRunSimctlInstance<'_> {
+	#[tracing::instrument(level = "trace", skip(self, device_name))]
 	pub fn boot(&self, device_name: DeviceName) -> Result<ExitStatus> {
 		Ok(
 			self
