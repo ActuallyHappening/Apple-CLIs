@@ -4,15 +4,18 @@ use std::{fmt::Display, str::FromStr};
 use serde::{Deserialize, Deserializer, Serialize};
 
 /// [Deserialize]s from a [String] representation.
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, derive_more::Display, derive_more::From)]
 pub enum DeviceName {
 	IPhone(IPhoneVariant),
 
 	IPad(IPadVariant),
 
+	#[from(ignore)]
 	#[doc = include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/docs/inline/TODO.md"))]
 	UnImplemented(String),
 }
+
+nom_from_str!(DeviceName);
 
 pub use iphone::*;
 mod iphone;
@@ -37,20 +40,6 @@ impl DeviceName {
 	}
 }
 
-impl From<IPhoneVariant> for DeviceName {
-	#[tracing::instrument(level = "trace", skip(variant))]
-	fn from(variant: IPhoneVariant) -> Self {
-		DeviceName::IPhone(variant)
-	}
-}
-
-impl From<IPadVariant> for DeviceName {
-	#[tracing::instrument(level = "trace", skip(variant))]
-	fn from(variant: IPadVariant) -> Self {
-		DeviceName::IPad(variant)
-	}
-}
-
 impl NomFromStr for DeviceName {
 	#[tracing::instrument(level = "trace", skip(input))]
 	fn nom_from_str(input: &str) -> IResult<&str, Self> {
@@ -61,8 +50,6 @@ impl NomFromStr for DeviceName {
 		))(input)
 	}
 }
-
-nom_from_str!(DeviceName);
 
 impl<'de> Deserialize<'de> for DeviceName {
 	#[tracing::instrument(level = "trace", skip(deserializer))]
@@ -88,17 +75,6 @@ impl Serialize for DeviceName {
 	}
 }
 
-impl Display for DeviceName {
-	#[tracing::instrument(level = "trace", skip(self, f))]
-	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-		match self {
-			DeviceName::UnImplemented(s) => write!(f, "{}", s),
-			DeviceName::IPhone(variant) => write!(f, "{}", variant),
-			DeviceName::IPad(variant) => write!(f, "{}", variant),
-		}
-	}
-}
-
 #[cfg(test)]
 mod tests {
 	use crate::shared::assert_nom_parses;
@@ -107,7 +83,7 @@ mod tests {
 
 	#[test]
 	fn test_parse_device_name() {
-		let examples = include!("../../../tests/names.json");
+		let examples = include!("../../../tests/device-names.json");
 		assert_nom_parses::<DeviceName>(examples, |d| d.parsed_successfully())
 	}
 }

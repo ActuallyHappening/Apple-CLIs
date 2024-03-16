@@ -1501,7 +1501,7 @@
       {
         "lastBootedAt": "2024-03-16T07:57:34Z",
         "dataPath": "/Users/ah/Library/Developer/CoreSimulator/Devices/082A3477-208B-474D-918D-7AFD64BD634E/data",
-        "dataPathSize": 1256427520,
+        "dataPathSize": 1255604224,
         "logPath": "/Users/ah/Library/Logs/CoreSimulator/082A3477-208B-474D-918D-7AFD64BD634E",
         "udid": "082A3477-208B-474D-918D-7AFD64BD634E",
         "isAvailable": true,

@@ -14,12 +14,12 @@ pub mod prelude {
 	pub(super) use crate::shared::{ws, NomFromStr};
 	#[allow(unused_imports)]
 	pub(super) use nom::{
-		branch::alt,
+		branch::{alt, permutation},
 		bytes::complete::{tag, take_till, take_until},
 		character::complete::{alpha0, alpha1, digit1, space0, space1, multispace0, multispace1},
-		combinator::{all_consuming, map, map_res, peek, rest, success, value},
+		combinator::{all_consuming, map, map_res, peek, rest, success, value, cut},
 		number::complete::float,
-		sequence::tuple,
+		sequence::{tuple, pair},
 		sequence::{delimited, preceded, terminated},
 		IResult,
 	};

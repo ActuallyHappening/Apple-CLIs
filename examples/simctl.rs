@@ -28,7 +28,10 @@ fn main() -> Result<(), apple_clis::error::Error> {
 		.expect("an iPad simulator to be available");
 	println!("Found an {} simulator", ipad_simulator);
 
-	if let IPadVariant::Pro { size, generation } = ipad_simulator {
+	if let IPadVariant::Pro {
+		size, generation, ..
+	} = ipad_simulator
+	{
 		let inches: f32 = size.inches();
 		let gen: u8 = generation.get();
 		println!(

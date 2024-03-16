@@ -16,25 +16,29 @@ pub enum IPadVariant {
 	Pro {
 		size: ScreenSize,
 		generation: Generation,
+		/// For lossless parsing
+		size_before_generation: bool,
 	},
 }
 
 impl NomFromStr for IPadVariant {
-	#[tracing::instrument(level = "trace", skip(input))]
+	#[tracing::instrument(level = "trace")]
 	fn nom_from_str(input: &str) -> IResult<&str, Self> {
 		let (remaining, discriminate) = preceded(
-			tag("iPad"),
-			alt((
+			ws(tag("iPad")),
+			cut(alt((
 				value(IPadVariantDiscriminants::Mini, ws(tag("mini"))),
 				value(IPadVariantDiscriminants::Air, ws(tag("Air"))),
 				value(IPadVariantDiscriminants::Pro, ws(tag("Pro"))),
 				success(IPadVariantDiscriminants::Plain),
-			)),
+			))),
 		)(input)?;
 
 		#[cfg(test)]
 		trace!(
 			?discriminate,
+			remaining,
+			input,
 			"Discriminant found for parsing [IPadVariant]"
 		);
 
@@ -52,9 +56,24 @@ impl NomFromStr for IPadVariant {
 				Ok((remaining, IPadVariant::Plain { generation }))
 			}
 			IPadVariantDiscriminants::Pro => {
-				let (remaining, size) = ws(ScreenSize::nom_from_str)(remaining)?;
-				let (remaining, generation) = Generation::nom_from_str(remaining)?;
-				Ok((remaining, IPadVariant::Pro { size, generation }))
+				let (remaining, (size_before_generation, (size, generation))) = alt((
+					map(
+						pair(ws(ScreenSize::nom_from_str), ws(Generation::nom_from_str)),
+						|v| (true, v),
+					),
+					map(
+						pair(ws(Generation::nom_from_str), ws(ScreenSize::nom_from_str)),
+						|(gen, ss)| (false, (ss, gen)),
+					),
+				))(remaining)?;
+				Ok((
+					remaining,
+					IPadVariant::Pro {
+						size,
+						generation,
+						size_before_generation,
+					},
+				))
 			}
 		}
 	}
@@ -64,7 +83,16 @@ impl Display for IPadVariant {
 	#[tracing::instrument(level = "trace", skip(self, f))]
 	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
 		match self {
-			IPadVariant::Pro { size, generation } => write!(f, "iPad Pro {} {}", size, generation),
+			IPadVariant::Pro {
+				size,
+				generation,
+				size_before_generation: true,
+			} => write!(f, "iPad Pro {} {}", size, generation),
+			IPadVariant::Pro {
+				size,
+				generation,
+				size_before_generation: false,
+			} => write!(f, "iPad Pro {} {}", generation, size),
 			IPadVariant::Mini { generation } => write!(f, "iPad mini {}", generation),
 			IPadVariant::Air { generation } => write!(f, "iPad Air {}", generation),
 			IPadVariant::Plain { generation } => write!(f, "iPad {}", generation),
@@ -86,6 +114,7 @@ mod test {
 		let new = IPadVariant::Pro {
 			size: ScreenSize::long(12.9),
 			generation: Generation::long(NonZeroU8::new(2).unwrap()),
+			size_before_generation: false,
 		};
 		assert!(new > old);
 	}

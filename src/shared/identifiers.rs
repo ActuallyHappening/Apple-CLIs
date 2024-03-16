@@ -5,8 +5,10 @@ use serde::Deserialize;
 pub use device_name::{DeviceName, IPadVariant, IPhoneVariant};
 pub use generation::Generation;
 pub use screen_size::ScreenSize;
+pub use model_name::ModelName;
 
 mod device_name;
+mod model_name;
 mod generation;
 mod screen_size;
 

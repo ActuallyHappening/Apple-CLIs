@@ -21,10 +21,10 @@ impl NomFromStr for IPhoneVariant {
 	fn nom_from_str(input: &str) -> IResult<&str, Self> {
 		let (remaining, discriminate) = preceded(
 			ws(tag("iPhone")),
-			alt((
+			cut(alt((
 				value(IPhoneVariantDiscriminants::SE, ws(tag("SE"))),
 				value(IPhoneVariantDiscriminants::Number, peek(ws(digit1))),
-			)),
+			))),
 		)(input)?;
 
 		#[cfg(test)]
