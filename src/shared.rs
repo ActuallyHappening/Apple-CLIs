@@ -57,7 +57,7 @@ pub trait ExecInstance: Sized {
 	fn validate_version(&self) -> bool {
 		self
 			.version_command()
-			.run_and_wait()
+			.run_and_wait_for_output()
 			.is_ok_and(|status| status.success())
 	}
 
@@ -121,7 +121,7 @@ pub trait ExecChild<'src>: Sized {
 	fn validate_version(&self) -> bool {
 		self
 			.version_command()
-			.run_and_wait()
+			.run_and_wait_for_output()
 			.is_ok_and(|status| status.success())
 	}
 

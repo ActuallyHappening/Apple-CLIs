@@ -2,7 +2,10 @@ use camino::Utf8PathBuf;
 use clap::{Args, Parser, Subcommand};
 use tracing::{info, warn};
 
-use crate::{ios_deploy::detect::DetectDevicesConfig, open::well_known::WellKnown, shared::identifiers::DeviceName};
+use crate::{
+	ios_deploy::detect::DetectDevicesConfig, open::well_known::WellKnown,
+	shared::identifiers::DeviceName,
+};
 
 use self::{app_path::AppPath, device_name::DeviceSimulator};
 
@@ -131,11 +134,12 @@ pub struct CliArgs {
 }
 
 #[derive(Args, Debug)]
+#[group(required = false, multiple = false)]
 pub struct TopLevelCliArgs {
-	#[arg(long, global = true)]
+	#[arg(long, global = true, group = "top_level_args")]
 	machine: bool,
 
-	#[arg(long, global = true)]
+	#[arg(long, global = true, group = "top_level_args")]
 	verbose: bool,
 }
 
