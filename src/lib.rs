@@ -8,6 +8,7 @@ pub mod prelude {
 	pub use std::fmt::Display;
 	pub use std::num::NonZeroU8;
 	pub use tracing::{debug, error, info, instrument, trace, warn};
+	pub use bossy::{Command, ExitStatus, Output};
 
 	pub use crate::shared::identifiers::*;
 	pub(crate) use crate::shared::ExecInstance;

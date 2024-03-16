@@ -1,11 +1,9 @@
-use bossy::ExitStatus;
-use clap::ValueEnum;
-
 use crate::prelude::*;
 
 use super::OpenCLIInstance;
 
-#[derive(Clone, Copy, PartialEq, Eq, ValueEnum, Debug)]
+#[derive(Clone, Copy, PartialEq, Eq, Debug)]
+#[cfg_attr(feature = "cli", derive(clap::ValueEnum))]
 pub enum WellKnown {
 	/// Opens "/Applications/Xcode.app/Contents/Developer/Applications/Simulator.app"
 	Simulator,

@@ -1,6 +1,6 @@
 [package]
 name = "apple-clis"
-version = "0.0.8"
+version = "0.0.9"
 edition = "2021"
 default-run = "apple-clis"
 description = "A collection of Apple command-line tool wrappers, library and CLI"
@@ -17,8 +17,7 @@ exclude = ["example-bundle"]
 
 [features]
 default = ["cli"]
-cli = ["dep:clap", "dep:clap_complete", "dep:clap_complete_nushell", "dep:color-eyre", "dep:clap-cargo", "glob"]
-clap-cargo = ["dep:clap-cargo"]
+cli = ["dep:clap", "dep:clap_complete", "dep:clap_complete_nushell", "dep:color-eyre", "dep:clap-cargo", "dep:glob"]
 
 [[bin]]
 name = "apple-clis"
