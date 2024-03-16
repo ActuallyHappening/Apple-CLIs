@@ -1,4 +1,4 @@
-use crate::shared::prelude::*;
+use crate::prelude::*;
 use std::{fmt::Display, str::FromStr};
 
 use serde::{Deserialize, Deserializer, Serialize};

@@ -1,7 +1,6 @@
 pub mod prelude {
 	pub use crate::error;
 	pub use crate::error::{Error, Result};
-	pub use crate::shared::prelude::*;
 	pub(crate) use crate::{impl_exec_child, impl_exec_instance};
 	pub use camino::{Utf8Path, Utf8PathBuf};
 	pub use serde::{Deserialize, Serialize};
@@ -9,6 +8,22 @@ pub mod prelude {
 	pub use std::fmt::Display;
 	pub use std::num::NonZeroU8;
 	pub use tracing::{debug, error, info, instrument, trace, warn};
+
+	pub use crate::shared::identifiers::*;
+	pub(crate) use crate::shared::ExecInstance;
+	pub(super) use crate::shared::{ws, NomFromStr};
+	#[allow(unused_imports)]
+	pub(super) use nom::{
+		branch::alt,
+		bytes::complete::{tag, take_till, take_until},
+		character::complete::{alpha0, alpha1, digit1, space0, space1, multispace0, multispace1},
+		combinator::{all_consuming, map, map_res, peek, rest, success, value},
+		number::complete::float,
+		sequence::tuple,
+		sequence::{delimited, preceded, terminated},
+		IResult,
+	};
+	pub(super) use strum::EnumDiscriminants;
 }
 
 #[cfg(feature = "cli")]

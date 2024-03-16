@@ -1,28 +1,6 @@
-use camino::{Utf8Path, Utf8PathBuf};
-use nom::character::complete::multispace0;
-use serde::{Deserialize, Serialize};
+use crate::prelude::*;
 
 pub mod identifiers;
-
-pub mod prelude {
-	pub use super::identifiers::*;
-	pub(crate) use super::ExecInstance;
-	pub(super) use super::{ws, NomFromStr};
-	pub(super) use crate::prelude::*;
-	#[allow(unused_imports)]
-	pub(super) use nom::{
-		branch::alt,
-		bytes::complete::{tag, take_till, take_until},
-		character::complete::{alpha0, alpha1, digit1, space0, space1},
-		combinator::{map, map_res, peek, rest, success, value},
-		number::complete::float,
-		sequence::tuple,
-		sequence::{delimited, preceded, terminated},
-		IResult,
-	};
-	pub(super) use strum::EnumDiscriminants;
-}
-use prelude::*;
 
 /// Wrapper of binary
 pub trait ExecInstance: Sized {
@@ -278,6 +256,16 @@ macro_rules! nom_from_str {
 			}
 		}
 	};
+
+	($type:ty, unimplemented = $unimplemented:expr) => {
+		$crate::nom_from_str!($type);
+
+		impl $crate::shared::SuccessfullyParsed for $type {
+			fn successfully_parsed(&self) -> bool {
+				matches!(self, $unimplemented)
+			}
+		}
+	};
 }
 
 /// A combinator that takes a parser `inner` and produces a parser that also consumes both leading and
@@ -289,4 +277,46 @@ where
 	F: Fn(&'a str) -> IResult<&'a str, O, E>,
 {
 	delimited(multispace0, inner, multispace0)
+}
+
+pub(crate) trait SuccessfullyParsed {
+	fn successfully_parsed(&self) -> bool;
+}
+
+#[cfg(test)]
+fn assert_nom_parses<T: NomFromStr + std::fmt::Display + std::fmt::Debug>(
+	examples: impl IntoIterator<Item = &'static str>,
+	successfully_parsed: impl Fn(&T) -> bool,
+) {
+	for example in examples.into_iter() {
+		let example = example.to_string();
+		match T::nom_from_str(&example) {
+			Ok((remaining, parsed)) => {
+				assert!(
+					remaining.is_empty(),
+					"Leftover input {:?} while parsing {} into {:?}",
+					remaining,
+					example,
+					parsed
+				);
+				assert_eq!(
+					parsed.to_string(),
+					example,
+					"Parsing {} into {:?} didn't match Display of {}",
+					example,
+					parsed,
+					example
+				);
+				assert!(
+					!successfully_parsed(&parsed),
+					"While parsing {}, got unimplemented variant {:?}",
+					example,
+					parsed
+				);
+			}
+			Err(err) => {
+				panic!("Failed to parse {:?}: {}", example, err);
+			}
+		}
+	}
 }

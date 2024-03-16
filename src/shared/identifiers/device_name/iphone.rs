@@ -1,4 +1,4 @@
-use crate::shared::prelude::*;
+use crate::prelude::*;
 
 /// Ordered from oldest to newest.
 /// newest > oldest

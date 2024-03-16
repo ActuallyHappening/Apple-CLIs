@@ -1,4 +1,4 @@
-use crate::shared::prelude::*;
+use crate::prelude::*;
 
 /// Loosely ordered from oldest to newest.
 /// newest > oldest
@@ -65,6 +65,8 @@ impl Display for IPadVariant {
 
 #[cfg(test)]
 mod test {
+	use crate::shared::assert_nom_parses;
+
 	use super::*;
 
 	#[test]
@@ -73,9 +75,21 @@ mod test {
 			generation: Generation::long(NonZeroU8::new(1).unwrap()),
 		};
 		let new = IPadVariant::Pro {
-			size: ScreenSize::new(12.9),
+			size: ScreenSize::long(12.9),
 			generation: Generation::long(NonZeroU8::new(2).unwrap()),
 		};
 		assert!(new > old);
+	}
+
+	#[test]
+	fn partial_parsing() {
+		let examples = [
+			"iPad Air (5th generation)",
+			"iPad (10th generation)",
+			"iPad mini (6th generation)",
+			"iPad Pro (11-inch) (4th generation)",
+			"iPad Pro (12.9-inch) (6th generation)",
+		];
+		assert_nom_parses::<IPadVariant>(examples, |_| true)
 	}
 }

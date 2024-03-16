@@ -2,7 +2,7 @@ use std::fmt::Display;
 
 use nom::combinator::all_consuming;
 
-use crate::shared::prelude::*;
+use crate::shared::*;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, PartialOrd, Ord)]
 pub struct Generation {
