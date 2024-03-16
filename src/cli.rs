@@ -27,12 +27,12 @@ mod app_path {
 
 	impl AppPath {
 		pub fn resolve(self) -> Result<Utf8PathBuf, color_eyre::Report> {
-			match self.app_path {
-				Some(p) => Ok(p),
+			let path = match self.app_path {
+				Some(p) => p,
 				None => match self.glob {
-					false => {
-						unreachable!("Clap should have enforced that either `app_path` or `glob` was set")
-					}
+					false => Err(eyre!(
+						"Clap should have enforced that either `app_path` or `glob` was set"
+					))?,
 					true => {
 						let matches = glob::glob("**/*.app")
 							.map_err(|err| eyre!("Error running glob: {}", err))?
@@ -50,15 +50,19 @@ mod app_path {
 						match matches.first() {
 							Some(p) => {
 								info!(message = "Using the first matched .app file", "match" = ?p);
-								Ok(p.clone())
+								p.clone()
 							}
 							None => Err(eyre!(
 								"No .app files found in the current directory or any subdirectories"
-							)),
+							))?,
 						}
 					}
 				},
+			};
+			if !path.exists() {
+				Err(eyre!("Provided app path does not exist: {:?}", path))?
 			}
+			Ok(path)
 		}
 	}
 }

@@ -1,7 +1,7 @@
 use crate::shared::prelude::*;
 use std::{fmt::Display, str::FromStr};
 
-use serde::{Deserialize, Deserializer};
+use serde::{Deserialize, Deserializer, Serialize};
 
 #[derive(thiserror::Error, Debug)]
 pub enum DeviceNameParseError {
@@ -110,6 +110,16 @@ impl<'de> Deserialize<'de> for DeviceName {
 
 		// cron::Schedule::from_str(&buf).map_err(serde::de::Error::custom)
 		DeviceName::from_str(&buf).map_err(serde::de::Error::custom)
+	}
+}
+
+// impl serialize
+impl Serialize for DeviceName {
+	fn serialize<S>(&self, serializer: S) -> std::result::Result<S::Ok, S::Error>
+	where
+		S: serde::Serializer,
+	{
+		serializer.serialize_str(&self.to_string())
 	}
 }
 

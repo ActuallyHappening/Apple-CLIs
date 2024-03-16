@@ -1,3 +1,5 @@
+use serde::Serialize;
+
 use crate::prelude::*;
 use crate::shared::identifiers::IPadVariant;
 use crate::shared::identifiers::{DeviceName, IPhoneVariant, RuntimeIdentifier};
@@ -29,8 +31,8 @@ impl ListOutput {
 	}
 }
 
-#[derive(Deserialize, Debug)]
-#[serde(rename_all = "camelCase")]
+#[derive(Deserialize, Serialize, Debug)]
+#[serde(rename_all(deserialize = "camelCase"))]
 pub struct ListDevice {
 	pub availability_error: Option<String>,
 	pub data_path: Utf8PathBuf,
@@ -43,7 +45,7 @@ pub struct ListDevice {
 	pub name: DeviceName,
 }
 
-#[derive(Deserialize, Debug)]
+#[derive(Deserialize, Serialize, Debug)]
 pub enum State {
 	Shutdown,
 	Booted,

@@ -41,7 +41,7 @@ fn main() {
 
 	trace!(config = ?config, "Parsed CLI arguments");
 
-	match run(&config.command) {
+	match run(config.command) {
 		Ok(report) => {
 			info!(value = ?report, "Success!");
 		}
@@ -52,7 +52,7 @@ fn main() {
 	}
 }
 
-fn run(command: &Commands) -> std::result::Result<Option<serde_json::Value>, color_eyre::Report> {
+fn run(command: Commands) -> std::result::Result<Option<serde_json::Value>, color_eyre::Report> {
 	match command {
 		Commands::Init(Init::NuShell { auto, raw_script }) => match (auto, raw_script) {
 			(false, true) => {
@@ -170,7 +170,7 @@ fn run(command: &Commands) -> std::result::Result<Option<serde_json::Value>, col
 				Security::Certs => {
 					let teams = security_instance.get_developer_certs()?;
 					println!("{} development teams found with `security`:", teams.len());
-					for team in teams {
+					for team in teams.iter() {
 						println!("Team: {:?}", team);
 					}
 					serde_json::to_value(teams)
@@ -180,7 +180,7 @@ fn run(command: &Commands) -> std::result::Result<Option<serde_json::Value>, col
 				Security::Pems => {
 					let pems = security_instance.get_developer_pems()?;
 					println!("{} development pems found with `security`:", pems.len());
-					for pem in pems {
+					for pem in pems.iter() {
 						println!("Pem: {:#?}", pem);
 					}
 					let debug_str = format!("{:#?}", pems);
@@ -270,7 +270,7 @@ fn run(command: &Commands) -> std::result::Result<Option<serde_json::Value>, col
 			match open {
 				Open::WellKnown { well_known } => {
 					info!("Opening a well known path {:?}", well_known);
-					open_instance.open_well_known(well_known)?;
+					open_instance.open_well_known(&well_known)?;
 					Ok(None)
 				}
 			}
