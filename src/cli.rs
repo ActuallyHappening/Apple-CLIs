@@ -1,11 +1,12 @@
-use clap::{Args, Parser, Subcommand, ValueEnum};
+use crate::prelude::*;
 
 use crate::{ios_deploy::detect::DetectDevicesConfig, open::well_known::WellKnown, xcrun::simctl};
 
-pub use self::{app_path::AppPath, device_name::{DeviceSimulatorUnBootedArgs, DeviceSimulatorBootedArgs}, bundle_identifier::BundleIdentifierArgs};
-
+pub use app_path::AppPathArgs;
 mod app_path;
+pub use device_name::{DeviceSimulatorBootedArgs, DeviceSimulatorUnBootedArgs};
 mod device_name;
+pub use bundle_identifier::BundleIdentifierArgs;
 mod bundle_identifier;
 
 #[derive(Parser, Debug)]
@@ -101,7 +102,7 @@ pub enum IosDeploy {
 	/// Uploads an app to a real device
 	Upload {
 		#[clap(flatten)]
-		app_path: app_path::AppPath,
+		app_path: app_path::AppPathArgs,
 
 		#[clap(flatten)]
 		auto_detect_config: DetectDevicesConfig,
@@ -125,11 +126,11 @@ pub enum CodeSign {
 	/// Displays the code signature of the given file
 	Display {
 		#[clap(flatten)]
-		app_path: AppPath,
+		app_path: AppPathArgs,
 	},
 	Sign {
 		#[clap(flatten)]
-		app_path: AppPath,
+		app_path: AppPathArgs,
 	},
 }
 
@@ -137,7 +138,7 @@ pub enum CodeSign {
 pub enum Spctl {
 	AssessApp {
 		#[clap(flatten)]
-		app_path: AppPath,
+		app_path: AppPathArgs,
 	},
 }
 
@@ -164,7 +165,7 @@ pub enum Simctl {
 		booted_simulator: DeviceSimulatorBootedArgs,
 
 		#[clap(flatten)]
-		app_path: app_path::AppPath,
+		app_path: app_path::AppPathArgs,
 	},
 	Launch {
 		#[clap(flatten)]

@@ -66,6 +66,12 @@ pub enum Error {
 
 	#[error("Error find with `which`: {0}")]
 	CannotFindWithWhich(#[from] which::Error),
+
+	#[error("Error finding .app directory: {err:?} at {path}")]
+	AppDirectoryConstructorError {
+		path: Utf8PathBuf,
+		err: Option<std::io::Error>,
+	}
 }
 
 pub type Result<T> = std::result::Result<T, crate::error::Error>;

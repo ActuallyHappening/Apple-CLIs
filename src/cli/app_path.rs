@@ -1,22 +1,21 @@
-use camino::Utf8PathBuf;
-use color_eyre::eyre::eyre;
-use tracing::{info, warn};
+use crate::prelude::*;
 
+/// Arguments to specify a path to a .app directory
 #[derive(clap::Args, Debug)]
 #[group(required = true, multiple = false)]
-pub struct AppPath {
+pub struct AppPathArgs {
 	/// Provide an absolute path to the .app file
 	#[arg(long, long = "path")]
-	app_path: Option<camino::Utf8PathBuf>,
+	app_path: Option<Utf8PathBuf>,
 
 	/// Use glob to find the first .app file in the current directory or any subdirectories
 	#[arg(long)]
 	glob: bool,
 }
 
-impl AppPath {
+impl AppPathArgs {
 	#[tracing::instrument(level = "trace", skip(self))]
-	pub fn resolve(self) -> Result<Utf8PathBuf, color_eyre::Report> {
+	pub fn resolve(self) -> color_eyre::Result<types::AppDirectory> {
 		let path = match self.app_path {
 			Some(p) => p,
 			None => match self.glob {
@@ -52,6 +51,6 @@ impl AppPath {
 		if !path.exists() {
 			Err(eyre!("Provided app path does not exist: {:?}", path))?
 		}
-		Ok(path)
+		Ok(types::AppDirectory::new(path)?)
 	}
 }

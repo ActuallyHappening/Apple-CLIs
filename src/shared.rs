@@ -1,6 +1,7 @@
 use crate::prelude::*;
 
 pub mod identifiers;
+pub mod types;
 
 /// Wrapper of binary
 pub trait ExecInstance: Sized {
