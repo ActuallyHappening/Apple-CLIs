@@ -16,4 +16,16 @@ impl XcRunSimctlInstance<'_> {
 				.run_and_wait()?,
 		)
 	}
+
+	pub fn install(&self, app_path: impl AsRef<Utf8Path>, booted_simulator: &DeviceName) -> Result<ExitStatus> {
+		let app_path = app_path.as_ref();
+		Ok(
+			self
+				.bossy_command()
+				.with_arg("install")
+				.with_arg(booted_simulator.to_string())
+				.with_arg(app_path)
+				.run_and_wait()?,
+		)
+	}
 }

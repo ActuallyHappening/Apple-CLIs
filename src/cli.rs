@@ -1,4 +1,4 @@
-use clap::{Args, Parser, Subcommand};
+use clap::{Args, Parser, Subcommand, ValueEnum};
 
 use crate::{ios_deploy::detect::DetectDevicesConfig, open::well_known::WellKnown, xcrun::simctl};
 
@@ -147,6 +147,11 @@ pub enum XcRun {
 	Simctl(Simctl),
 }
 
+#[derive(Debug, ValueEnum, Clone)]
+pub enum Booted {
+	Booted,
+}
+
 #[derive(Subcommand, Debug)]
 pub enum Simctl {
 	List,
@@ -154,7 +159,10 @@ pub enum Simctl {
 		#[clap(flatten)]
 		simulator_id: DeviceSimulatorUnBootedArgs,
 	},
-	InstallBooted {
+	Install {
+		#[clap(flatten)]
+		booted_simulator: DeviceSimulatorBootedArgs,
+
 		#[clap(flatten)]
 		app_path: app_path::AppPath,
 	},

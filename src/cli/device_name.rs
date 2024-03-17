@@ -1,8 +1,5 @@
-use color_eyre::{eyre::eyre, Section};
-use tracing::info;
-
 use crate::prelude::*;
-use crate::{prelude::DeviceName, xcrun::simctl::XcRunSimctlInstance};
+use crate::xcrun::simctl::XcRunSimctlInstance;
 
 #[derive(clap::Args, Debug)]
 #[group(required = true, multiple = false)]
