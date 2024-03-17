@@ -15,6 +15,27 @@ pub enum DeviceName {
 nom_from_str!(DeviceName);
 impl_str_serde!(DeviceName);
 
+impl From<&IPhoneVariant> for DeviceName {
+	#[tracing::instrument(level = "trace", skip(variant))]
+	fn from(variant: &IPhoneVariant) -> Self {
+		Self::IPhone(*variant)
+	}
+}
+
+impl From<&IPadVariant> for DeviceName {
+	#[tracing::instrument(level = "trace", skip(variant))]
+	fn from(variant: &IPadVariant) -> Self {
+		Self::IPad(*variant)
+	}
+}
+
+impl From<&DeviceName> for DeviceName {
+	#[tracing::instrument(level = "trace", skip(variant))]
+	fn from(variant: &DeviceName) -> Self {
+		variant.clone()
+	}
+}
+
 pub use iphone::*;
 mod iphone;
 

@@ -32,6 +32,22 @@ impl ListOutput {
 			_ => None,
 		})
 	}
+
+	pub fn a_device(&self) -> Option<&ListDevice> {
+		self.devices().next()
+	}
+
+	/// Tries to find the latest iPad in the list of devices
+	/// Not necessarily booted already
+	pub fn an_ipad(&self) -> Option<&IPadVariant> {
+		self.ipads().max()
+	}
+
+	/// Tries to find the latest iPhone in the list of devices
+	/// Not necessarily booted already
+	pub fn an_iphone(&self) -> Option<&IPhoneVariant> {
+		self.iphones().max()
+	}
 }
 
 #[derive(Deserialize, Serialize, Debug)]

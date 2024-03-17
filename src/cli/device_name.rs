@@ -1,5 +1,7 @@
 use color_eyre::{eyre::eyre, Section};
+use tracing::info;
 
+use crate::prelude::*;
 use crate::{prelude::DeviceName, xcrun::simctl::XcRunSimctlInstance};
 
 #[derive(clap::Args, Debug)]
@@ -19,11 +21,16 @@ pub struct DeviceSimulatorUnBooted {
 }
 
 #[derive(clap::Args, Debug)]
-#[group(required = true, multiple = false)]
+#[group(required = true)]
 pub struct DeviceSimulatorBooted {
-	/// Will find any device that is already booted
+	/// Will find *any* device that is already booted
+	/// as opposed to [DeviceSimulatorBooted].ipad (--ipad) or [DeviceSimulatorBooted].iphone (--iphone)
 	#[arg(long, group = "device_name")]
 	booted: bool,
+
+	/// Will automatically boot a device if none matching the criteria is already booted
+	#[arg(long, requires = "device_name")]
+	auto_boot: bool,
 
 	/// Automatically selects a booted iPad simulator
 	#[arg(long, group = "device_name")]
@@ -40,11 +47,7 @@ pub struct DeviceSimulatorBooted {
 }
 
 impl DeviceSimulatorUnBooted {
-	#[tracing::instrument(level = "trace", skip(self, simctl_instance))]
-	pub fn resolve(
-		self,
-		simctl_instance: &XcRunSimctlInstance,
-	) -> Result<DeviceName, color_eyre::Report> {
+	pub fn resolve(self, simctl_instance: &XcRunSimctlInstance) -> color_eyre::Result<DeviceName> {
 		match (self.ipad, self.iphone, self.name) {
 			(false, false, Some(name)) => Ok(name),
 			(true, false, None) => {
@@ -61,7 +64,7 @@ impl DeviceSimulatorUnBooted {
 					.iphones()
 					.max()
 					.ok_or_else(|| eyre!("No simulator iPhones found!"))?;
-				Ok(latest_iphone.clone().into())
+				Ok((*latest_iphone).into())
 			}
 			_ => Err(eyre!("Clap arguments should prevent this")),
 		}
@@ -72,49 +75,106 @@ impl DeviceSimulatorBooted {
 	pub fn resolve(self, simctl_instance: &XcRunSimctlInstance) -> color_eyre::Result<DeviceName> {
 		let list = simctl_instance.list()?;
 		let booted_devices = list.devices().filter(|d| d.ready()).collect::<Vec<_>>();
-		if booted_devices.is_empty() {
-			Err(eyre!("No booted devices found!").with_suggestion(|| "try running `apple-clis xcrun simctl boot` to boot a simulator"))
+		if booted_devices.is_empty() && !self.auto_boot {
+			Err(
+				eyre!("No booted devices found!")
+					.with_suggestion(|| "try using the flag --auto-boot")
+					.with_suggestion(|| "try running `apple-clis xcrun simctl boot` to boot a simulator"),
+			)
 		} else {
-			match (self.booted, self.ipad, self.iphone, self.name) {
-				(true, false, false, None) => Ok(booted_devices[0].name.clone()),
-				(false, true, false, None) => booted_devices
-					.iter()
-					.filter_map(|d| d.name.get_ipad())
-					.max()
-					.cloned()
-					.map(DeviceName::from)
-					.ok_or_else(|| eyre!("No booted iPads found!"))
-					.with_suggestion(|| {
-						"try running `apple-clis xcrun simctl boot --ipad` to boot a simulator"
-					})
-					.with_note(|| format!("Booted devices: {:?}", &booted_devices)),
-				(false, false, true, None) => booted_devices
-					.iter()
-					.filter_map(|d| d.name.get_iphone())
-					.max()
-					.cloned()
-					.map(DeviceName::from)
-					.ok_or_else(|| {
-						eyre!("No booted iPhones found!")
+			match (
+				self.booted,
+				self.ipad,
+				self.iphone,
+				self.name,
+				self.auto_boot,
+			) {
+				(true, false, false, None, auto_boot) => {
+					if auto_boot {
+						let a_device_name = &list
+							.a_device()
+							.ok_or_else(|| eyre!("Couldn't find any simulators installed"))?
+							.name;
+						info!(device_name = %a_device_name, "Since auto-boot is enabled, booting a simulator");
+						simctl_instance.boot(a_device_name)?;
+						Ok(a_device_name.clone())
+					} else {
+						Ok(booted_devices[0].name.clone())
+					}
+				}
+				(false, true, false, None, auto_boot) => {
+					if !auto_boot {
+						booted_devices
+							.iter()
+							.filter_map(|d| d.name.get_ipad())
+							.max()
+							.cloned()
+							.map(DeviceName::from)
+							.ok_or_else(|| eyre!("No booted iPads found!"))
 							.with_suggestion(|| {
-								"try running `apple-clis xcrun simctl boot --iphone` to boot a simulator"
+								"try running `apple-clis xcrun simctl boot --ipad` to boot a simulator"
 							})
 							.with_note(|| format!("Booted devices: {:?}", &booted_devices))
-					}),
-				(false, false, false, Some(name)) => {
-					if booted_devices.iter().any(|d| d.name == name) {
-						Ok(name)
 					} else {
+						let a_device_name = (*list
+							.an_ipad()
+							.ok_or_else(|| eyre!("Couldn't find any iPad simulators installed"))?)
+						.into();
+						info!(device_name = %a_device_name, "Since auto-boot is enabled, booting an iPad simulator");
+						simctl_instance.boot(&a_device_name)?;
+						Ok(a_device_name)
+					}
+				}
+				(false, false, true, None, auto_boot) => {
+					if !auto_boot {
+						booted_devices
+							.iter()
+							.filter_map(|d| d.name.get_iphone())
+							.max()
+							.cloned()
+							.map(DeviceName::from)
+							.ok_or_else(|| {
+								eyre!("No booted iPhones found!")
+									.with_suggestion(|| {
+										"try running `apple-clis xcrun simctl boot --iphone` to boot a simulator"
+									})
+									.with_note(|| format!("Booted devices: {:?}", &booted_devices))
+							})
+					} else {
+						let a_device_name: DeviceName = (*list
+							.an_iphone()
+							.ok_or_else(|| eyre!("Couldn't find any iPhone simulators installed"))?)
+						.into();
+						info!(device_name = %a_device_name, "Since auto-boot is enabled, booting an iPhone simulator");
+						simctl_instance.boot(&a_device_name)?;
+						Ok(a_device_name)
+					}
+				}
+				(false, false, false, Some(name), auto_boot) => {
+					if !list.devices().map(|d| &d.name).any(|n| n == &name) {
 						Err(
-							eyre!("The provided device name is not booted")
+							eyre!("The provided device name is not installed")
 								.with_suggestion(|| {
 									format!(
 										"try running `apple-clis xcrun simctl boot --name {}` to boot a simulator",
 										name
 									)
 								})
-								.with_note(|| format!("Booted devices: {:?}", &booted_devices)),
+								.with_suggestion(|| {
+									"try running `apple-clis xcrun simctl list` to see installed simulators"
+								})
+								.with_note(|| {
+									format!(
+										"Installed devices: {:?}",
+										&list.devices().collect::<Vec<_>>()
+									)
+								}),
 						)
+					} else if auto_boot {
+						simctl_instance.boot(&name)?;
+						Ok(name)
+					} else {
+						Ok(name)
 					}
 				}
 				_ => Err(eyre!("Clap arguments should prevent this")),
