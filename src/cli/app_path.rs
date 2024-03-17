@@ -6,11 +6,11 @@ use tracing::{info, warn};
 #[group(required = true, multiple = false)]
 pub struct AppPath {
 	/// Provide an absolute path to the .app file
-	#[arg(long, long = "path", group = "app_path_group")]
+	#[arg(long, long = "path")]
 	app_path: Option<camino::Utf8PathBuf>,
 
 	/// Use glob to find the first .app file in the current directory or any subdirectories
-	#[arg(long, group = "app_path_group")]
+	#[arg(long)]
 	glob: bool,
 }
 

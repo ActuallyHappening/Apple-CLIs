@@ -2,10 +2,11 @@ use clap::{Args, Parser, Subcommand};
 
 use crate::{ios_deploy::detect::DetectDevicesConfig, open::well_known::WellKnown, xcrun::simctl};
 
-pub use self::{app_path::AppPath, device_name::{DeviceSimulatorUnBooted, DeviceSimulatorBooted}};
+pub use self::{app_path::AppPath, device_name::{DeviceSimulatorUnBootedArgs, DeviceSimulatorBootedArgs}, bundle_identifier::BundleIdentifierArgs};
 
 mod app_path;
 mod device_name;
+mod bundle_identifier;
 
 #[derive(Parser, Debug)]
 #[command(version, about, long_about = None)]
@@ -151,13 +152,17 @@ pub enum Simctl {
 	List,
 	Boot {
 		#[clap(flatten)]
-		simulator_id: DeviceSimulatorUnBooted,
+		simulator_id: DeviceSimulatorUnBootedArgs,
 	},
 	InstallBooted {
 		#[clap(flatten)]
 		app_path: app_path::AppPath,
 	},
 	Launch {
+		#[clap(flatten)]
+		args: simctl::launch::CliLaunchArgs,
+	},
+	LaunchBooted {
 		#[clap(flatten)]
 		args: simctl::launch::CliLaunchBootedArgs,
 	}

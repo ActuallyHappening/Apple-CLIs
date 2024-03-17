@@ -6,7 +6,7 @@ use crate::{prelude::DeviceName, xcrun::simctl::XcRunSimctlInstance};
 
 #[derive(clap::Args, Debug)]
 #[group(required = true, multiple = false)]
-pub struct DeviceSimulatorUnBooted {
+pub struct DeviceSimulatorUnBootedArgs {
 	/// Automatically selects the latest iPad simulator
 	#[arg(long, group = "device_name")]
 	ipad: bool,
@@ -22,7 +22,7 @@ pub struct DeviceSimulatorUnBooted {
 
 #[derive(clap::Args, Debug)]
 #[group(required = true)]
-pub struct DeviceSimulatorBooted {
+pub struct DeviceSimulatorBootedArgs {
 	/// Will find *any* device that is already booted
 	/// as opposed to [DeviceSimulatorBooted].ipad (--ipad) or [DeviceSimulatorBooted].iphone (--iphone)
 	#[arg(long, group = "device_name")]
@@ -46,7 +46,7 @@ pub struct DeviceSimulatorBooted {
 	name: Option<DeviceName>,
 }
 
-impl DeviceSimulatorUnBooted {
+impl DeviceSimulatorUnBootedArgs {
 	pub fn resolve(self, simctl_instance: &XcRunSimctlInstance) -> color_eyre::Result<DeviceName> {
 		match (self.ipad, self.iphone, self.name) {
 			(false, false, Some(name)) => Ok(name),
@@ -71,7 +71,7 @@ impl DeviceSimulatorUnBooted {
 	}
 }
 
-impl DeviceSimulatorBooted {
+impl DeviceSimulatorBootedArgs {
 	pub fn resolve(self, simctl_instance: &XcRunSimctlInstance) -> color_eyre::Result<DeviceName> {
 		let list = simctl_instance.list()?;
 		let booted_devices = list.devices().filter(|d| d.ready()).collect::<Vec<_>>();
