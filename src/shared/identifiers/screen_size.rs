@@ -1,10 +1,24 @@
+use std::hash::Hash;
+
 use crate::prelude::*;
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
+#[derive(Debug, Clone, Copy, Eq, PartialOrd, Ord)]
 pub struct ScreenSize {
 	/// divide by 10 to get number of actual inches
 	ten_inches: u16,
 	short: bool,
+}
+
+impl PartialEq for ScreenSize {
+	fn eq(&self, other: &Self) -> bool {
+		self.ten_inches == other.ten_inches
+	}
+}
+
+impl Hash for ScreenSize {
+	fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
+		self.ten_inches.hash(state);
+	}
 }
 
 impl ScreenSize {
@@ -43,11 +57,7 @@ fn screen_size_long(input: &str) -> IResult<&str, ScreenSize> {
 }
 
 fn screen_size_short(input: &str) -> IResult<&str, ScreenSize> {
-	delimited(
-		ws(tag("(")),
-		map(float, ScreenSize::short),
-		ws(tag("\")")),
-	)(input)
+	delimited(ws(tag("(")), map(float, ScreenSize::short), ws(tag("\")")))(input)
 }
 
 impl NomFromStr for ScreenSize {

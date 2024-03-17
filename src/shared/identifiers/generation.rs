@@ -1,9 +1,24 @@
+use std::hash::Hash;
+
 use crate::prelude::*;
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, PartialOrd, Ord)]
+/// Only considers the generation number for [Hash] and [PartialEq].
+#[derive(Debug, Clone, Copy, Eq, PartialOrd, Ord)]
 pub struct Generation {
 	num: NonZeroU8,
 	short: bool,
+}
+
+impl PartialEq for Generation {
+	fn eq(&self, other: &Self) -> bool {
+		self.num == other.num
+	}
+}
+
+impl Hash for Generation {
+	fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
+		self.num.hash(state);
+	}
 }
 
 impl Generation {

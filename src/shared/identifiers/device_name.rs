@@ -36,6 +36,20 @@ impl DeviceName {
 	pub fn is_ipad(&self) -> bool {
 		matches!(self, DeviceName::IPad(_))
 	}
+
+	pub fn get_ipad(&self) -> Option<&IPadVariant> {
+		match self {
+			DeviceName::IPad(ipad) => Some(ipad),
+			_ => None,
+		}
+	}
+
+	pub fn get_iphone(&self) -> Option<&IPhoneVariant> {
+		match self {
+			DeviceName::IPhone(iphone) => Some(iphone),
+			_ => None,
+		}
+	}
 }
 
 impl NomFromStr for DeviceName {
