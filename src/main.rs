@@ -56,6 +56,11 @@ fn main() {
 			.with(config.args.verbose().not().then_some(fmt_normal_layer))
 			.with(tracing_error::ErrorLayer::default())
 			.init();
+
+		match color_eyre::install() {
+			Ok(_) => {}
+			Err(err) => error!(?err, "Could not install `color_eyre` error handler"),
+		}
 	}
 
 	trace!(config = ?config, "Parsed CLI arguments");
@@ -71,7 +76,8 @@ fn main() {
 			}
 		}
 		Err(e) => {
-			error!(error = ?e, "Error!");
+			let err_msg = format!("{:?}", e);
+			error!(error = %err_msg, "Error!");
 			std::process::exit(1)
 		}
 	}
