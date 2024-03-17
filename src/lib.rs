@@ -26,6 +26,7 @@ pub mod prelude {
 	pub(crate) use std::collections::HashMap;
 	pub(crate) use std::fmt::Display;
 	pub(crate) use std::num::NonZeroU8;
+	pub(crate) use std::str::FromStr;
 	pub(crate) use strum::EnumDiscriminants;
 	pub(crate) use tracing::{debug, error, info, instrument, trace, warn};
 

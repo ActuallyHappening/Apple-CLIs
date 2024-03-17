@@ -6,7 +6,7 @@ use crate::prelude::*;
 pub struct AppPathArgs {
 	/// Provide an absolute path to the .app file
 	#[arg(long, long = "path")]
-	app_path: Option<Utf8PathBuf>,
+	app_path: Option<types::AppDirectory>,
 
 	/// Use glob to find the first .app file in the current directory or any subdirectories
 	#[arg(long)]
@@ -39,7 +39,7 @@ impl AppPathArgs {
 					match matches.first() {
 						Some(p) => {
 							info!(message = "Using the first matched .app file", "match" = ?p);
-							p.clone()
+							types::AppDirectory::new(p)?
 						}
 						None => Err(eyre!(
 							"No .app files found in the current directory or any subdirectories"
@@ -48,9 +48,9 @@ impl AppPathArgs {
 				}
 			},
 		};
-		if !path.exists() {
+		if !path.get().exists() {
 			Err(eyre!("Provided app path does not exist: {:?}", path))?
 		}
-		Ok(types::AppDirectory::new(path)?)
+		Ok(path)
 	}
 }
