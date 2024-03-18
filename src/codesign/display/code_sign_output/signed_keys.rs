@@ -63,7 +63,7 @@ impl FromStr for SignedKeys {
 			Ok((_, result)) => Self::from_parsed(result),
 			Err(err) => {
 				trace!(?err, "Failed to parse SignedKeys from string");
-				Err(Error::ParsingFailed {
+				Err(Error::NomParsingFailed {
 					name: "SignedKeys".to_owned(),
 					err: err.to_owned(),
 				})

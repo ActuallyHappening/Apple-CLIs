@@ -80,7 +80,7 @@ impl FromStr for CodeSignOutput {
 				remaining: remaining.to_owned(),
 				parsed_debug: format!("{:#?}", output),
 			}),
-			Err(e) => Err(Error::ParsingFailed {
+			Err(e) => Err(Error::NomParsingFailed {
 				name: "CodeSignOutput".to_owned(),
 				err: e.to_owned(),
 			}),

@@ -249,7 +249,7 @@ macro_rules! nom_from_str {
 							})
 						}
 					}
-					Err(e) => Err(Error::ParsingFailed {
+					Err(e) => Err(Error::NomParsingFailed {
 						err: e.to_owned(),
 						name: stringify!($type).into(),
 					}),

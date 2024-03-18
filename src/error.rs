@@ -12,14 +12,16 @@ pub enum Error {
 	#[error("Error parsing command JSON output: {0}")]
 	ParseJson(#[from] serde_json::Error),
 
+	/// Used for [nom] parsing errors
 	#[error("Failed to parse {}: {:?}", name, err)]
-	ParsingFailed {
+	NomParsingFailed {
 		/// What was being parsed
 		name: String,
 		#[source]
 		err: nom::Err<nom::error::Error<String>>,
 	},
 
+	/// Used for [nom] parsing errors
 	#[error(
 		"The parsed string was not completely consumed, with {:?} left from {:?}. Parsed: {:?}",
 		input,
@@ -33,6 +35,7 @@ pub enum Error {
 		parsed_debug: String,
 	},
 
+	/// [crate::open::well_known::WellKnown] was unable to locate the path on disk
 	#[error(
 		"The hard coded path {:?} was not found ({:?}: {err:?})",
 		hard_coded_path,
