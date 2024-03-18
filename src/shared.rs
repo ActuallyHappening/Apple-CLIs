@@ -243,15 +243,18 @@ mod traits {
 				fn from_str(input: &str) -> std::result::Result<Self, Self::Err> {
 					match <$type>::nom_from_str(input) {
 						Ok((remaining, output)) => {
-							if remaining.is_empty() {
-								Ok(output)
-							} else {
-								Err(Error::ParsingRemainingNotEmpty {
-									input: input.to_owned(),
-									remaining: remaining.to_owned(),
-									parsed_debug: format!("{:#?}", output),
-								})
+							if !remaining.is_empty() {
+								tracing::warn!(?remaining, ?output, "Remaining input after parsing. This likely indicates a potential improvement to the output parser. PRs welcome!")
 							}
+							// if remaining.is_empty() {
+								Ok(output)
+							// } else {
+								// Err(Error::ParsingRemainingNotEmpty {
+									// input: input.to_owned(),
+							// 		remaining: remaining.to_owned(),
+							// 		parsed_debug: format!("{:#?}", output),
+							// 	})
+							// }
 						}
 						Err(e) => Err(Error::NomParsingFailed {
 							err: e.to_owned(),
