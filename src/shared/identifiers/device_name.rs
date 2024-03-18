@@ -1,7 +1,11 @@
 use crate::prelude::*;
 
 /// [Deserialize]s from a [String] representation.
-#[derive(Debug, Clone, PartialEq, derive_more::Display, derive_more::From)]
+#[derive(
+	Debug, Clone, PartialEq, derive_more::Display, derive_more::From, Serialize, Deserialize,
+)]
+#[serde(try_from = "&str")]
+#[serde(into = "String")]
 pub enum DeviceName {
 	IPhone(IPhoneVariant),
 
@@ -12,8 +16,22 @@ pub enum DeviceName {
 	UnImplemented(String),
 }
 
+impl From<DeviceName> for String {
+	#[tracing::instrument(level = "trace", skip(variant))]
+	fn from(variant: DeviceName) -> Self {
+		variant.to_string()
+	}
+}
+
+impl TryFrom<&str> for DeviceName {
+	type Error = <Self as FromStr>::Err;
+
+	fn try_from(value: &str) -> std::result::Result<Self, Self::Error> {
+		value.parse()
+	}
+}
+
 nom_from_str!(DeviceName);
-impl_str_serde!(DeviceName);
 
 impl From<&IPhoneVariant> for DeviceName {
 	#[tracing::instrument(level = "trace", skip(variant))]

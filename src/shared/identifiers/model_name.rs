@@ -1,8 +1,12 @@
-use crate::{impl_str_serde, nom_from_str, prelude::*};
+use crate::{nom_from_str, prelude::*};
 
 /// Isomorphic to [DeviceName].
 /// [Deserialize]s and [Serialize]s from a [String] representation.
-#[derive(Debug, Clone, PartialEq, derive_more::Display, derive_more::From)]
+#[derive(
+	Debug, Clone, PartialEq, derive_more::Display, derive_more::From, Serialize, Deserialize,
+)]
+#[serde(try_from = "&str")]
+#[serde(into = "String")]
 pub enum ModelName {
 	IPhone(IPhoneVariant),
 
@@ -13,8 +17,22 @@ pub enum ModelName {
 	UnImplemented(String),
 }
 
+impl From<ModelName> for String {
+	#[tracing::instrument(level = "trace", skip(variant))]
+	fn from(variant: ModelName) -> Self {
+		variant.to_string()
+	}
+}
+
+impl TryFrom<&str> for ModelName {
+	type Error = <Self as FromStr>::Err;
+
+	fn try_from(value: &str) -> std::prelude::v1::Result<Self, Self::Error> {
+		value.parse()
+	}
+}
+
 nom_from_str!(ModelName);
-impl_str_serde!(ModelName);
 
 impl ModelName {
 	pub fn is_iphone(&self) -> bool {

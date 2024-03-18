@@ -1,5 +1,3 @@
-use time::macros;
-
 use crate::prelude::*;
 
 pub mod identifiers;
@@ -266,31 +264,6 @@ macro_rules! nom_from_str {
 		impl $crate::shared::SuccessfullyParsed for $type {
 			fn successfully_parsed(&self) -> bool {
 				matches!(self, $unimplemented)
-			}
-		}
-	};
-}
-
-#[macro_export]
-macro_rules! impl_str_serde {
-	($type:ty) => {
-		impl<'de> serde::Deserialize<'de> for $type {
-			fn deserialize<D>(deserializer: D) -> std::result::Result<Self, D::Error>
-			where
-				D: serde::Deserializer<'de>,
-			{
-				let string = String::deserialize(deserializer)?;
-				<$type as std::str::FromStr>::from_str(&string).map_err(serde::de::Error::custom)
-			}
-		}
-
-		// impl serialize
-		impl serde::Serialize for $type {
-			fn serialize<S>(&self, serializer: S) -> std::result::Result<S::Ok, S::Error>
-			where
-				S: serde::Serializer,
-			{
-				serializer.serialize_str(&self.to_string())
 			}
 		}
 	};
