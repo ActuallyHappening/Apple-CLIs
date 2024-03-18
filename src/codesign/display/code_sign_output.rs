@@ -1,29 +1,12 @@
-use std::str::FromStr;
-
-use camino::{Utf8Path, Utf8PathBuf};
-use nom::{
-	branch::alt,
-	bytes::complete::{tag, take_while},
-	combinator::{map, map_res, rest},
-	sequence::terminated,
-	IResult,
-};
-use serde::Serialize;
-use tracing::debug;
-
-use crate::{
-	error,
-	shared::{ws, NomFromStr},
-};
-
+use crate::prelude::*;
 use self::signed_keys::SignedKeys;
-
 use super::error::Error;
 
 mod signed_keys;
 
 #[derive(Debug, Serialize)]
 pub enum CodeSignOutput {
+	/// Basically an error case
 	NotSignedAtAll {
 		path: Utf8PathBuf,
 	},

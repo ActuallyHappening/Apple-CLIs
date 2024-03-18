@@ -1,12 +1,5 @@
-use std::{borrow::Cow, str::FromStr};
-
-use nom::{
-	bytes::complete::*, character::complete::multispace0, combinator::*, multi::fold_many1,
-	sequence::*, IResult,
-};
-use time::macros::format_description;
-
 use crate::prelude::*;
+use time::macros::format_description;
 
 /// This will not parse some multi-key value things
 /// e.g. "Sealed Resources version=2 rules=10 files=0"

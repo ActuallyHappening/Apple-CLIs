@@ -1,12 +1,6 @@
-use std::str::FromStr;
-
-use crate::prelude::*;
-
-use camino::Utf8Path;
-
 use self::code_sign_output::CodeSignOutput;
-
 use super::CodesignCLIInstance;
+use crate::prelude::*;
 
 mod code_sign_output;
 

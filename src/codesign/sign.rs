@@ -1,16 +1,6 @@
-use crate::prelude::*;
-
-use camino::Utf8Path;
-
-use crate::security::Certificate;
-
 use super::CodesignCLIInstance;
-
-#[derive(thiserror::Error, Debug)]
-pub enum CodeSignError {
-	#[error("Error running `codesign -s`: {0}")]
-	ExecuteError(#[from] bossy::Error),
-}
+use crate::prelude::*;
+use crate::security::Certificate;
 
 impl CodesignCLIInstance {
 	#[tracing::instrument(level = "trace", skip(self, cert, path))]
