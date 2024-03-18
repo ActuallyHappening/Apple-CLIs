@@ -19,11 +19,9 @@ mod output {
 			map(rest, |s: &str| CodeSignSignOutput::UnImplemented(s.to_owned()))(input)
 		}
 	}
-
 }
 
 impl CodesignCLIInstance {
-	#[tracing::instrument(level = "trace", skip(self, cert, path))]
 	pub fn sign(&self, cert: &Certificate, path: impl AsRef<Utf8Path>) -> Result<CodeSignSignOutput> {
 		let output = self
 			.bossy_command()

@@ -1,5 +1,5 @@
-use crate::prelude::*;
 use super::error::Error;
+use crate::prelude::*;
 
 pub use self::signed_keys::SignedKeys;
 mod signed_keys;
@@ -46,10 +46,10 @@ impl NomFromStr for CodeSignDisplayOutput {
 			map_res(rest, |s| {
 				SignedKeys::from_raw(s).map(CodeSignDisplayOutput::SignedKeys)
 			}),
-			// map(ws(rest), |s: &str| {
-			// 	debug!(?s, "Parsed SuccessUnimplemented");
-			// 	CodeSignOutput::UnImplemented(s.to_owned())
-			// }),
+			map(ws(rest), |s: &str| {
+				debug!(?s, "Parsed SuccessUnimplemented");
+				CodeSignDisplayOutput::UnImplemented(s.to_owned())
+			}),
 		))(input)
 	}
 }

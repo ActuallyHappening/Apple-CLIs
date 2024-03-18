@@ -9,3 +9,4 @@ nu test-bundle.nu
 cd ..
 
 cargo test
+cargo fuzz
