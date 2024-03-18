@@ -7,7 +7,7 @@ pub enum Error {
 
 	/// TODO: propagate more information
 	#[error("Calling `--version` failed")]
-	VersionCheckFailed,
+	VersionCheckFailed(#[source] Option<bossy::Error>),
 
 	#[error("Error parsing command JSON output: {0}")]
 	ParseJson(#[from] serde_json::Error),

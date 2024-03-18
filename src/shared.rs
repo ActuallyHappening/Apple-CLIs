@@ -24,11 +24,11 @@ pub trait ExecInstance: Sized {
 		self.bossy_command().with_arg("--version")
 	}
 
-	fn validate_version(&self) -> bool {
+	fn validate_version(&self) -> std::result::Result<bool, bossy::Error> {
 		self
 			.version_command()
 			.run_and_wait_for_output()
-			.is_ok_and(|status| status.success())
+			.map(|status| status.success())
 	}
 
 	fn from_path(path: impl AsRef<Utf8Path>) -> Result<Self> {
@@ -53,10 +53,10 @@ pub trait ExecInstance: Sized {
 		let path = Utf8PathBuf::try_from(path)?;
 		// Safety: `path` is a valid path to the binary
 		let instance = unsafe { Self::new_unchecked(path) };
-		if !instance.validate_version() {
-			Err(Error::VersionCheckFailed)
-		} else {
-			Ok(instance)
+		match instance.validate_version() {
+			Ok(true) => Ok(instance),
+			Ok(false) => Err(Error::VersionCheckFailed(None)),
+			Err(e) => Err(Error::VersionCheckFailed(Some(e))),
 		}
 	}
 }
@@ -88,19 +88,19 @@ pub trait ExecChild<'src>: Sized {
 		self.bossy_command().with_arg("--version")
 	}
 
-	fn validate_version(&self) -> bool {
+	fn validate_version(&self) -> std::result::Result<bool, bossy::Error> {
 		self
 			.version_command()
 			.run_and_wait_for_output()
-			.is_ok_and(|status| status.success())
+			.map(|status| status.success())
 	}
 
 	fn new(parent: &'src Self::Parent) -> Result<Self> {
 		let instance = unsafe { Self::new_unchecked(parent) };
-		if !instance.validate_version() {
-			Err(Error::VersionCheckFailed)
-		} else {
-			Ok(instance)
+		match instance.validate_version() {
+			Ok(true) => Ok(instance),
+			Ok(false) => Err(Error::VersionCheckFailed(None)),
+			Err(e) => Err(Error::VersionCheckFailed(Some(e))),
 		}
 	}
 }
@@ -143,8 +143,8 @@ macro_rules! impl_exec_instance {
 				&self.exec_path
 			}
 
-			fn validate_version(&self) -> bool {
-				true
+			fn validate_version(&self) -> std::result::Result<bool, bossy::Error> {
+				Ok(true)
 			}
 		}
 
@@ -173,8 +173,8 @@ macro_rules! impl_exec_instance {
 				bossy::Command::pure(&self.get_inner_exec_path()).with_args($extra_flags)
 			}
 
-			fn validate_version(&self) -> bool {
-				true
+			fn validate_version(&self) -> std::result::Result<bool, bossy::Error> {
+				Ok(true)
 			}
 		}
 
