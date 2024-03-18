@@ -6,7 +6,7 @@ pub mod prelude {
 	pub use crate::shared::identifiers::*;
 	pub(crate) use crate::shared::ExecInstance;
 	pub(crate) use crate::shared::{ws, NomFromStr};
-	pub(crate) use crate::{impl_exec_child, impl_exec_instance, nom_from_str};
+	pub(crate) use crate::{impl_exec_child, impl_exec_instance, impl_from_str_nom};
 
 	pub use bossy::{Command, ExitStatus, Output};
 	pub use camino::{Utf8Path, Utf8PathBuf};

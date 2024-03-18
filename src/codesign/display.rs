@@ -1,12 +1,11 @@
-use self::code_sign_output::CodeSignOutput;
 use super::CodesignCLIInstance;
 use crate::prelude::*;
 
-mod code_sign_output;
+pub use self::output::*;
+mod output;
 
 impl CodesignCLIInstance {
-	#[tracing::instrument(level = "trace", skip(path))]
-	pub fn display(&self, path: impl AsRef<Utf8Path>) -> Result<CodeSignOutput> {
+	pub fn display(&self, path: impl AsRef<Utf8Path>) -> Result<CodeSignDisplayOutput> {
 		let output = self
 			.bossy_command()
 			.with_arg("-d")
@@ -18,7 +17,7 @@ impl CodesignCLIInstance {
 				let stdout = String::from_utf8_lossy(output.stdout()).to_string();
 				let stderr = String::from_utf8_lossy(output.stderr()).to_string();
 				trace!(%stdout, %stderr, "codesign exited successfully");
-				Ok(CodeSignOutput::from_str(&stderr)?)
+				Ok(CodeSignDisplayOutput::from_str(&stderr)?)
 			}
 			Err(err) => {
 				match err.output() {
@@ -26,7 +25,7 @@ impl CodesignCLIInstance {
 					Some(output) => {
 						// handling not signed case
 						let stderr = String::from_utf8_lossy(output.stderr());
-						CodeSignOutput::from_str(&stderr)
+						CodeSignDisplayOutput::from_str(&stderr)
 					}
 				}
 			}

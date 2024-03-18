@@ -31,7 +31,7 @@ impl TryFrom<&str> for DeviceName {
 	}
 }
 
-nom_from_str!(DeviceName);
+impl_from_str_nom!(DeviceName);
 
 impl From<&IPhoneVariant> for DeviceName {
 	#[tracing::instrument(level = "trace", skip(variant))]

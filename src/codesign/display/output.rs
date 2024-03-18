@@ -1,11 +1,11 @@
 use crate::prelude::*;
-use self::signed_keys::SignedKeys;
 use super::error::Error;
 
+pub use self::signed_keys::SignedKeys;
 mod signed_keys;
 
 #[derive(Debug, Serialize)]
-pub enum CodeSignOutput {
+pub enum CodeSignDisplayOutput {
 	/// Basically an error case
 	NotSignedAtAll {
 		path: Utf8PathBuf,
@@ -24,49 +24,32 @@ pub enum CodeSignOutput {
 	UnImplemented(String),
 }
 
-fn parse_key_value(input: &str) -> IResult<&str, CodeSignOutput> {
+impl_from_str_nom!(CodeSignDisplayOutput);
+
+fn parse_key_value(input: &str) -> IResult<&str, CodeSignDisplayOutput> {
 	let (remaining, path) = map(
 		terminated(take_while(|c| c != ':'), tag(": ")),
 		Utf8Path::new,
 	)(input)?;
 	map(ws(tag("code object is not signed at all")), move |_| {
 		debug!("Parsed NotSignedAtAll");
-		CodeSignOutput::NotSignedAtAll {
+		CodeSignDisplayOutput::NotSignedAtAll {
 			path: path.to_owned(),
 		}
 	})(remaining)
 }
 
-impl NomFromStr for CodeSignOutput {
+impl NomFromStr for CodeSignDisplayOutput {
 	fn nom_from_str(input: &str) -> nom::IResult<&str, Self> {
 		alt((
 			parse_key_value,
 			map_res(rest, |s| {
-				SignedKeys::from_raw(s).map(CodeSignOutput::SignedKeys)
+				SignedKeys::from_raw(s).map(CodeSignDisplayOutput::SignedKeys)
 			}),
 			// map(ws(rest), |s: &str| {
 			// 	debug!(?s, "Parsed SuccessUnimplemented");
 			// 	CodeSignOutput::UnImplemented(s.to_owned())
 			// }),
 		))(input)
-	}
-}
-
-impl FromStr for CodeSignOutput {
-	type Err = error::Error;
-
-	fn from_str(s: &str) -> std::result::Result<Self, Self::Err> {
-		match CodeSignOutput::nom_from_str(s) {
-			Ok(("", output)) => Ok(output),
-			Ok((remaining, output)) => Err(Error::ParsingRemainingNotEmpty {
-				input: s.to_owned(),
-				remaining: remaining.to_owned(),
-				parsed_debug: format!("{:#?}", output),
-			}),
-			Err(e) => Err(Error::NomParsingFailed {
-				name: "CodeSignOutput".to_owned(),
-				err: e.to_owned(),
-			}),
-		}
 	}
 }

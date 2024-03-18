@@ -1,4 +1,4 @@
-use crate::{nom_from_str, prelude::*};
+use crate::{impl_from_str_nom, prelude::*};
 
 /// Isomorphic to [DeviceName].
 /// [Deserialize]s and [Serialize]s from a [String] representation.
@@ -32,7 +32,7 @@ impl TryFrom<&str> for ModelName {
 	}
 }
 
-nom_from_str!(ModelName);
+impl_from_str_nom!(ModelName);
 
 impl ModelName {
 	pub fn is_iphone(&self) -> bool {

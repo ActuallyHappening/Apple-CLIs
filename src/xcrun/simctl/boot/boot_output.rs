@@ -10,7 +10,7 @@ use nom::{
 };
 
 use crate::{
-	nom_from_str,
+	impl_from_str_nom,
 	prelude::*,
 	shared::{ws, NomFromStr},
 };
@@ -52,7 +52,7 @@ impl NomFromStr for BootOutput {
 	}
 }
 
-nom_from_str!(BootOutput);
+impl_from_str_nom!(BootOutput);
 
 impl BootOutput {
 	pub(crate) fn from_output(output: bossy::Result<bossy::Output>) -> Result<Self> {

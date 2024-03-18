@@ -234,7 +234,7 @@ mod traits {
 	/// [impl]s [std::str::FromStr] for a type that already implements
 	/// [NomFromStr]
 	#[macro_export]
-	macro_rules! nom_from_str {
+	macro_rules! impl_from_str_nom {
 		($type:ty) => {
 			impl std::str::FromStr for $type {
 				type Err = $crate::error::Error;

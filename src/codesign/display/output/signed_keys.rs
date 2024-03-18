@@ -5,7 +5,7 @@ use time::macros::format_description;
 /// e.g. "Sealed Resources version=2 rules=10 files=0"
 /// becomes => "Sealed Resources version": "2 rules=10 files=0"
 #[instrument(level = "trace")]
-pub(super) fn parse_display_output(input: &str) -> IResult<&str, HashMap<Cow<str>, &str>> {
+fn parse_display_output(input: &str) -> IResult<&str, HashMap<Cow<str>, &str>> {
 	let parse_key_value = pair(
 		terminated(take_till1(|c| c == '='), tag("=")),
 		terminated(take_till1(|c| c == '\n'), multispace0),
