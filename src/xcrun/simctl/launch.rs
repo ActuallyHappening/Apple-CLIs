@@ -39,27 +39,30 @@ impl LaunchConfig {
 
 pub use output::LaunchOutput;
 mod output {
-	use crate::{prelude::*, shared::resolve_stream};
+	use crate::prelude::*;
 
 	#[derive(Debug, Serialize)]
 	pub enum LaunchOutput {
 		#[doc = include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/docs/inline/TODO.md"))]
-		UnImplemented(String),
+		ErrorUnImplemented(String),
+
+		#[doc = include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/docs/inline/TODO.md"))]
+		SuccessUnImplemented(String),
 	}
 
-	impl_from_str_nom!(LaunchOutput);
-
-	impl NomFromStr for LaunchOutput {
-		fn nom_from_str(input: &str) -> IResult<&str, Self> {
-			map(rest, |s: &str| LaunchOutput::UnImplemented(s.to_owned()))(input)
+	impl DebugNamed for LaunchOutput {
+		fn name() -> &'static str {
+			"LaunchOutput"
 		}
 	}
 
-	impl TryFrom<bossy::Result<Output>> for LaunchOutput {
-		type Error = Error;
+	impl CommandNomParsable for LaunchOutput {
+		fn success_unimplemented(str: String) -> Self {
+			Self::SuccessUnImplemented(str)
+		}
 
-		fn try_from(value: bossy::Result<Output>) -> std::result::Result<Self, Self::Error> {
-			Self::from_str(&resolve_stream(value)?)
+		fn error_unimplemented(str: String) -> Self {
+			Self::ErrorUnImplemented(str)
 		}
 	}
 }
@@ -77,7 +80,7 @@ impl XcRunSimctlInstance<'_> {
 		cmd.add_arg(simulator_name.to_string());
 		cmd.add_arg(config.bundle_id());
 
-		LaunchOutput::try_from(cmd.run_and_wait_for_output())
+		LaunchOutput::from_bossy_result(cmd.run_and_wait_for_output())
 	}
 
 	pub fn launch_booted(&self, config: &LaunchConfig) -> error::Result<LaunchOutput> {
@@ -88,6 +91,6 @@ impl XcRunSimctlInstance<'_> {
 		cmd.add_arg("booted");
 		cmd.add_arg(config.bundle_id());
 
-		LaunchOutput::try_from(cmd.run_and_wait_for_output())
+		LaunchOutput::from_bossy_result(cmd.run_and_wait_for_output())
 	}
 }

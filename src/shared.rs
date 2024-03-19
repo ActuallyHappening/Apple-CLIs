@@ -231,6 +231,63 @@ mod traits {
 		}
 	}
 
+	pub(crate) trait DebugNamed {
+		fn name() -> &'static str;
+	}
+
+	/// Used to wrap command output types
+	pub(crate) trait CommandNomParsable: Sized + std::fmt::Debug + DebugNamed {
+		fn success_unimplemented(str: String) -> Self;
+		fn error_unimplemented(str: String) -> Self;
+
+		fn success_nom_from_str(input: &str) -> IResult<&str, Self> {
+			map(rest, |s: &str| Self::success_unimplemented(s.to_owned()))(input)
+		}
+
+		fn success_from_str(input: &str) -> Result<Self> {
+			match Self::success_nom_from_str(input) {
+				Ok((remaining, output)) => {
+					if !remaining.is_empty() {
+						tracing::warn!(?remaining, ?output, "Remaining input after parsing a command success output. This likely indicates a potential improvement to the output parser. PRs welcome!")
+					}
+					Ok(output)
+				}
+				Err(err) => Err(Error::NomParsingFailed {
+					name: Self::name().to_owned(),
+					err: err.to_owned(),
+				}),
+			}
+		}
+
+		fn errored_nom_from_str(input: &str) -> IResult<&str, Self> {
+			map(rest, |s: &str| Self::error_unimplemented(s.to_owned()))(input)
+		}
+
+		fn errored_from_str(input: &str) -> Result<Self> {
+			match Self::errored_nom_from_str(input) {
+				Ok((remaining, output)) => {
+					if !remaining.is_empty() {
+						tracing::warn!(?remaining, ?output, "Remaining input after parsing a command error output. This likely indicates a potential improvement to the output parser. PRs welcome!")
+					}
+					Ok(output)
+				}
+				Err(err) => Err(Error::NomParsingFailed {
+					name: Self::name().to_owned(),
+					err: err.to_owned(),
+				}),
+			}
+		}
+
+		fn from_bossy_result(result: bossy::Result<Output>) -> Result<Self> {
+			let (is_success, output) = crate::shared::resolve_stream(result)?;
+			if is_success {
+				Self::success_from_str(&output)
+			} else {
+				Self::errored_from_str(&output)
+			}
+		}
+	}
+
 	/// [impl]s [std::str::FromStr] for a type that already implements
 	/// [NomFromStr]
 	#[macro_export]
@@ -335,14 +392,12 @@ fn assert_nom_parses<T: NomFromStr + std::fmt::Display + std::fmt::Debug>(
 	}
 }
 
-pub(crate) fn resolve_stream(result: bossy::Result<Output>) -> Result<String> {
+pub(crate) fn resolve_stream(result: bossy::Result<Output>) -> Result<(bool, String)> {
 	match result {
-		Ok(output) => Ok(output.stdout_str()?.to_owned()),
-		Err(err) => {
-			match err.output() {
-				Some(output) => Ok(output.stderr_str()?.to_owned()),
-				None => Err(Error::CannotLocateStream { err })
-			}
-		}
+		Ok(output) => Ok((true, output.stdout_str()?.to_owned())),
+		Err(err) => match err.output() {
+			Some(output) => Ok((false, output.stderr_str()?.to_owned())),
+			None => Err(Error::CannotLocateStderrStream { err }),
+		},
 	}
 }

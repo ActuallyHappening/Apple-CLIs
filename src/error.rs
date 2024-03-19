@@ -77,7 +77,7 @@ pub enum Error {
 	},
 
 	#[error("Couldn't locate the stderr output stream even though the command errored: {err}")]
-	CannotLocateStream {
+	CannotLocateStderrStream {
 		err: bossy::Error,
 	}
 }
