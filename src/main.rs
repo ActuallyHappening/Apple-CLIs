@@ -14,7 +14,7 @@ use color_eyre::eyre::{eyre, Context, ContextCompat};
 use serde::Serialize;
 use serde_json::json;
 use tracing::*;
-use tracing_subscriber::filter::LevelFilter;
+use tracing_subscriber::filter::{Directive, LevelFilter};
 use tracing_subscriber::prelude::*;
 use tracing_subscriber::{fmt, EnvFilter};
 
@@ -44,14 +44,18 @@ fn main() {
 		// tracing_subscriber::fmt().with_env_filter(env_filter).init();
 
 		let fmt_normal_layer = fmt::layer().with_target(false).without_time();
-		let fmt_verbose_layer = fmt::layer().pretty();
-
-		let filter_layer = EnvFilter::builder()
+		let normal_filter = EnvFilter::builder()
 			.with_default_directive(LevelFilter::INFO.into())
 			.from_env_lossy();
+		let fmt_verbose_layer = fmt::layer().pretty();
+		let verbose_filter = EnvFilter::new("info,apple_clis=trace");
 
 		tracing_subscriber::registry()
-			.with(filter_layer)
+			.with(if config.args.verbose() {
+				verbose_filter
+			} else {
+				normal_filter
+			})
 			.with(config.args.verbose().then_some(fmt_verbose_layer))
 			.with(config.args.verbose().not().then_some(fmt_normal_layer))
 			.with(tracing_error::ErrorLayer::default())
@@ -272,14 +276,20 @@ fn run(command: Commands) -> std::result::Result<Option<serde_json::Value>, colo
 							let output = simctl_instance.boot(device_name)?;
 							to_json(output)
 						}
-						Simctl::Install { app_path, booted_simulator } => {
+						Simctl::Install {
+							app_path,
+							booted_simulator,
+						} => {
 							let path = app_path.resolve()?;
 							let booted_simulator = booted_simulator.resolve(&simctl_instance)?;
 							simctl_instance.install(path, &booted_simulator)?;
 							// simctl_instance.install_booted(path)?;
 							Ok(None)
 						}
-						Simctl::Launch { booted_simulator, args } => {
+						Simctl::Launch {
+							booted_simulator,
+							args,
+						} => {
 							let device = booted_simulator.resolve(&simctl_instance)?;
 							let config = args.resolve()?;
 							let output = simctl_instance.launch(&config, device)?;

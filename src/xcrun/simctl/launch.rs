@@ -12,6 +12,7 @@ pub struct CliLaunchArgs {
 	bundle_id: String,
 }
 
+#[cfg(feature = "cli")]
 impl CliLaunchArgs {
 	pub fn resolve(self) -> Result<LaunchConfig> {
 		Ok(LaunchConfig {
