@@ -50,8 +50,23 @@ cargo run --example ios-deploy-detect
 ### xcrun simctl list
 ```sh
 apple-clis xcrun simctl list --json | from json | get device_type_identifier
+```
+<!-- TODO: Add documentation examples -->
 
+## Example build script
+This uses `cargo bundle`, which you can install with `cargo install cargo-bundle`, and nushell, as an example script to build an iOS app.
+```sh
+# example Cargo.toml
+# [package.metadata.bundle]
+# identifier = "com.example-id"
+let BUNDLE_ID = open Cargo.toml | get package.metadata.bundle.identifier | to text
 
+cargo bundle --target aarch64-apple-ios-sim
+apple-clis codesign sign --glob
+apple-clis xcrun simctl boot --ipad
+apple-clis open --well-known simulator
+apple-clis xcrun simctl install --booted --glob
+apple-clis xcrun simctl launch --booted --bundle-id $BUNDLE_ID
 ```
 
 ## Contributions
@@ -66,9 +81,4 @@ cargo install nu # nushell is really awesome
 
 # build an example bundle from the included example project + run tests
 nu test.nu
-
-# example commands using nushell
-cargo r -- codesign display --glob --machine | from json
-cargo r -- codesign sign --glob
-cargo r -- ios-deploy detect --machine | from json
 ```

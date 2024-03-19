@@ -251,7 +251,7 @@ fn run(command: Commands) -> std::result::Result<Option<serde_json::Value>, colo
 						None => Err(eyre!("No developer certs found to sign with"))?,
 					};
 					let output = codesign_instance.sign(cert, path)?;
-					to_raw_json(output)
+					to_json(output)
 				}
 			}
 		}
@@ -283,7 +283,7 @@ fn run(command: Commands) -> std::result::Result<Option<serde_json::Value>, colo
 							let device = booted_simulator.resolve(&simctl_instance)?;
 							let config = args.resolve()?;
 							let output = simctl_instance.launch(&config, device)?;
-							to_raw_json(output)
+							to_json(output)
 						}
 					}
 				}
