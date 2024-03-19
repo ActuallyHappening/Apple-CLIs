@@ -237,18 +237,18 @@ pub(crate) trait CommandNomParsable: Sized + std::fmt::Debug + DebugNamed {
 		map(rest, |s: &str| Self::success_unimplemented(s.to_owned()))(input)
 	}
 
-	fn success_from_str(input: &str) -> Result<Self> {
+	fn success_from_str(input: &str) -> Self {
 		match Self::success_nom_from_str(input) {
 			Ok((remaining, output)) => {
 				if !remaining.is_empty() {
 					tracing::warn!(?remaining, ?output, "Remaining input after parsing a command success output. This likely indicates a potential improvement to the output parser. PRs welcome!")
 				}
-				Ok(output)
+				output
 			}
-			Err(err) => Err(Error::NomParsingFailed {
-				name: Self::name().to_owned(),
-				err: err.to_owned(),
-			}),
+			Err(err) => {
+				error!(?err, "Failed to parse success output");
+				Self::success_unimplemented(input.to_owned())
+			}
 		}
 	}
 
@@ -256,18 +256,30 @@ pub(crate) trait CommandNomParsable: Sized + std::fmt::Debug + DebugNamed {
 		map(rest, |s: &str| Self::error_unimplemented(s.to_owned()))(input)
 	}
 
-	fn errored_from_str(input: &str) -> Result<Self> {
+	fn errored_from_str(input: &str) -> Self {
 		match Self::errored_nom_from_str(input) {
 			Ok((remaining, output)) => {
 				if !remaining.is_empty() {
-					tracing::warn!(?remaining, ?output, "Remaining input after parsing a command error output. This likely indicates a potential improvement to the output parser. PRs welcome!")
+					warn!(?remaining, ?output, "Remaining input after parsing a command error output. This likely indicates a potential improvement to the output parser. PRs welcome!")
 				}
-				Ok(output)
+				output
 			}
-			Err(err) => Err(Error::NomParsingFailed {
-				name: Self::name().to_owned(),
-				err: err.to_owned(),
-			}),
+			// Err(err) => Err(Error::NomParsingFailed {
+			// 	name: Self::name().to_owned(),
+			// 	err: err.to_owned(),
+			// }),
+			Err(err) => {
+				tracing::error!(?err, "Failed to parse error output");
+				Self::error_unimplemented(input.to_owned())
+			}
+		}
+	}
+
+	fn from_success_stream(success: bool, string: String) -> Self {
+		if success {
+			Self::success_from_str(&string)
+		} else {
+			Self::errored_from_str(&string)
 		}
 	}
 
@@ -279,11 +291,7 @@ pub(crate) trait CommandNomParsable: Sized + std::fmt::Debug + DebugNamed {
 				None => Err(Error::CannotLocateStderrStream { err })?,
 			},
 		};
-		if success {
-			Self::success_from_str(&string)
-		} else {
-			Self::errored_from_str(&string)
-		}
+		Ok(Self::from_success_stream(success, string))
 	}
 }
 
@@ -291,43 +299,43 @@ pub(crate) trait CommandNomParsable: Sized + std::fmt::Debug + DebugNamed {
 /// [NomFromStr]
 #[macro_export]
 macro_rules! impl_from_str_nom {
-		($type:ty) => {
-			impl std::str::FromStr for $type {
-				type Err = $crate::error::Error;
+	($type:ty) => {
+		impl std::str::FromStr for $type {
+			type Err = $crate::error::Error;
 
-				#[tracing::instrument(level = "trace", skip(input))]
-				fn from_str(input: &str) -> std::result::Result<Self, Self::Err> {
-					match <$type>::nom_from_str(input) {
-						Ok((remaining, output)) => {
-							if !remaining.is_empty() {
-								tracing::warn!(?remaining, ?output, "Remaining input after parsing. This likely indicates a potential improvement to the output parser. PRs welcome!")
-							}
-							// if remaining.is_empty() {
-								Ok(output)
-							// } else {
-								// Err(Error::ParsingRemainingNotEmpty {
-									// input: input.to_owned(),
-							// 		remaining: remaining.to_owned(),
-							// 		parsed_debug: format!("{:#?}", output),
-							// 	})
-							// }
+			#[tracing::instrument(level = "trace", skip(input))]
+			fn from_str(input: &str) -> std::result::Result<Self, Self::Err> {
+				match <$type>::nom_from_str(input) {
+					Ok((remaining, output)) => {
+						if !remaining.is_empty() {
+							tracing::warn!(?remaining, ?output, "Remaining input after parsing. This likely indicates a potential improvement to the output parser. PRs welcome!")
 						}
-						Err(e) => Err(Error::NomParsingFailed {
-							err: e.to_owned(),
-							name: stringify!($type).into(),
-						}),
+						// if remaining.is_empty() {
+							Ok(output)
+						// } else {
+							// Err(Error::ParsingRemainingNotEmpty {
+								// input: input.to_owned(),
+						// 		remaining: remaining.to_owned(),
+						// 		parsed_debug: format!("{:#?}", output),
+						// 	})
+						// }
 					}
+					Err(e) => Err(Error::NomParsingFailed {
+						err: e.to_owned(),
+						name: stringify!($type).into(),
+					}),
 				}
 			}
-		};
+		}
+	};
 
-		($type:ty, unimplemented = $unimplemented:expr) => {
-			$crate::nom_from_str!($type);
+	($type:ty, unimplemented = $unimplemented:expr) => {
+		$crate::nom_from_str!($type);
 
-			impl $crate::shared::SuccessfullyParsed for $type {
-				fn successfully_parsed(&self) -> bool {
-					matches!(self, $unimplemented)
-				}
+		impl $crate::shared::SuccessfullyParsed for $type {
+			fn successfully_parsed(&self) -> bool {
+				matches!(self, $unimplemented)
 			}
-		};
-	}
+		}
+	};
+}
