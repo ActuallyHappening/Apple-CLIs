@@ -43,6 +43,16 @@ fn main() {
 		// 	.from_env_lossy();
 		// tracing_subscriber::fmt().with_env_filter(env_filter).init();
 
+		if config.args.verbose() {
+			// set env RUST_BACKTRACE=full
+			// SAFETY: This is a single-threaded program and does not spawn different threads
+			#[allow(unused_unsafe)]
+			unsafe {
+				std::env::set_var("RUST_BACKTRACE", "full");
+				// std::env::set_var("COLORBT_SHOW_HIDDEN", "1");
+			};
+		}
+
 		let fmt_normal_layer = fmt::layer().with_target(false).without_time();
 		let normal_filter = EnvFilter::builder()
 			.with_default_directive(LevelFilter::INFO.into())
@@ -87,7 +97,7 @@ fn main() {
 	}
 }
 
-#[tracing::instrument(level = "trace", skip(command))]
+#[tracing::instrument(level = "debug")]
 fn run(command: Commands) -> std::result::Result<Option<serde_json::Value>, color_eyre::Report> {
 	match command {
 		Commands::Init(Init::NuShell { auto, raw_script }) => match (auto, raw_script) {

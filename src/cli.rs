@@ -23,9 +23,12 @@ pub struct CliArgs {
 #[derive(Args, Debug)]
 #[group(required = false, multiple = false)]
 pub struct TopLevelCliArgs {
+	/// Outputs data as JSON. Aliased to --json.
+	/// Is global, hence can be used with any command/subcommand except help messages
 	#[arg(long, global = true, group = "top_level_args", alias = "json")]
 	machine: bool,
 
+	/// Overrides the RUST_LOG env variable to use a very verbose log level
 	#[arg(long, global = true, group = "top_level_args")]
 	verbose: bool,
 }
