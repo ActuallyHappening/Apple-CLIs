@@ -279,14 +279,10 @@ fn run(command: Commands) -> std::result::Result<Option<serde_json::Value>, colo
 							// simctl_instance.install_booted(path)?;
 							Ok(None)
 						}
-						Simctl::Launch { args } => {
-							let config = args.resolve(&simctl_instance)?;
-							let output = simctl_instance.launch(&config)?;
-							to_raw_json(output)
-						}
-						Simctl::LaunchBooted { args }  => {
+						Simctl::Launch { booted_simulator, args } => {
+							let device = booted_simulator.resolve(&simctl_instance)?;
 							let config = args.resolve()?;
-							let output = simctl_instance.launch_booted(&config)?;
+							let output = simctl_instance.launch(&config, device)?;
 							to_raw_json(output)
 						}
 					}

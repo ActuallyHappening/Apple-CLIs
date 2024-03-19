@@ -169,12 +169,11 @@ pub enum Simctl {
 	},
 	Launch {
 		#[clap(flatten)]
+		booted_simulator: DeviceSimulatorBootedArgs,
+
+		#[clap(flatten)]
 		args: simctl::launch::CliLaunchArgs,
 	},
-	LaunchBooted {
-		#[clap(flatten)]
-		args: simctl::launch::CliLaunchBootedArgs,
-	}
 }
 
 #[derive(Args, Debug)]

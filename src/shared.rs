@@ -334,3 +334,15 @@ fn assert_nom_parses<T: NomFromStr + std::fmt::Display + std::fmt::Debug>(
 		}
 	}
 }
+
+pub(crate) fn resolve_stream(result: bossy::Result<Output>) -> Result<String> {
+	match result {
+		Ok(output) => Ok(output.stdout_str()?.to_owned()),
+		Err(err) => {
+			match err.output() {
+				Some(output) => Ok(output.stderr_str()?.to_owned()),
+				None => Err(Error::CannotLocateStream { err })
+			}
+		}
+	}
+}

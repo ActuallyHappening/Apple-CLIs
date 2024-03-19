@@ -74,6 +74,11 @@ pub enum Error {
 	AppDirectoryConstructorError {
 		path: Utf8PathBuf,
 		err: Option<std::io::Error>,
+	},
+
+	#[error("Couldn't locate the stderr output stream even though the command errored: {err}")]
+	CannotLocateStream {
+		err: bossy::Error,
 	}
 }
 

@@ -3,166 +3,84 @@ use crate::prelude::*;
 use super::XcRunSimctlInstance;
 
 #[cfg(feature = "cli")]
-#[derive(clap::Args, Debug)]
+#[derive(Args, Debug)]
 pub struct CliLaunchArgs {
 	#[clap(long, default_value_t = true)]
 	console: bool,
 
-	#[clap(flatten)]
-	simulator_name: crate::cli::DeviceSimulatorBootedArgs,
-
-	#[clap(flatten)]
-	bundle_id: crate::cli::BundleIdentifierArgs,
+	#[clap(long)]
+	bundle_id: String,
 }
 
-#[cfg(feature = "cli")]
-#[derive(clap::Args, Debug)]
-pub struct CliLaunchBootedArgs {
-	#[clap(long, default_value_t = true)]
-	console: bool,
-
-	#[clap(flatten)]
-	bundle_id: crate::cli::BundleIdentifierArgs,
+impl CliLaunchArgs {
+	pub fn resolve(self) -> Result<LaunchConfig> {
+		Ok(LaunchConfig {
+			console: self.console,
+			bundle_id: self.bundle_id,
+		})
+	}
 }
 
 #[derive(Debug)]
-pub struct FullLaunchConfig {
-	/// Access using [LaunchConfig]
-	booted_config: BootedLaunchConfig,
-	pub simulator_name: DeviceName,
-}
-
-#[derive(Debug)]
-pub struct BootedLaunchConfig {
+pub struct LaunchConfig {
 	pub console: bool,
 	pub bundle_id: String,
 }
 
-impl FullLaunchConfig {
-	pub fn new(console: bool, simulator_name: DeviceName, bundle_id: String) -> Self {
-		Self {
-			booted_config: BootedLaunchConfig { console, bundle_id },
-			simulator_name,
+impl LaunchConfig {
+	pub fn console(&self) -> bool {
+		self.console
+	}
+
+	pub fn bundle_id(&self) -> &str {
+		&self.bundle_id
+	}
+}
+
+pub use output::LaunchOutput;
+mod output {
+	use crate::{prelude::*, shared::resolve_stream};
+
+	#[derive(Debug, Serialize)]
+	pub enum LaunchOutput {
+		#[doc = include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/docs/inline/TODO.md"))]
+		UnImplemented(String),
+	}
+
+	impl_from_str_nom!(LaunchOutput);
+
+	impl NomFromStr for LaunchOutput {
+		fn nom_from_str(input: &str) -> IResult<&str, Self> {
+			map(rest, |s: &str| LaunchOutput::UnImplemented(s.to_owned()))(input)
 		}
 	}
 
-	pub fn simulator_name(&self) -> &DeviceName {
-		&self.simulator_name
-	}
-	pub fn with_simulator_name(mut self, simulator_name: DeviceName) -> Self {
-		self.set_simulator_name(simulator_name);
-		self
-	}
-	pub fn set_simulator_name(&mut self, simulator_name: DeviceName) {
-		self.simulator_name = simulator_name;
-	}
-}
+	impl TryFrom<bossy::Result<Output>> for LaunchOutput {
+		type Error = Error;
 
-impl BootedLaunchConfig {
-	pub fn new(console: bool, bundle_id: String) -> Self {
-		Self { console, bundle_id }
-	}
-}
-
-pub trait LaunchConfig: Sized {
-	fn console(&self) -> bool;
-	fn with_console(mut self, console: bool) -> Self {
-		self.set_console(console);
-		self
-	}
-	fn set_console(&mut self, console: bool);
-
-	fn bundle_id(&self) -> &str;
-	fn with_bundle_id(mut self, bundle_id: String) -> Self {
-		self.set_bundle_id(bundle_id);
-		self
-	}
-	fn set_bundle_id(&mut self, bundle_id: String);
-}
-
-impl AsRef<BootedLaunchConfig> for FullLaunchConfig {
-	fn as_ref(&self) -> &BootedLaunchConfig {
-		&self.booted_config
-	}
-}
-
-impl AsMut<BootedLaunchConfig> for FullLaunchConfig {
-	fn as_mut(&mut self) -> &mut BootedLaunchConfig {
-		&mut self.booted_config
-	}
-}
-
-impl AsRef<BootedLaunchConfig> for BootedLaunchConfig {
-	fn as_ref(&self) -> &BootedLaunchConfig {
-		self
-	}
-}
-
-impl AsMut<BootedLaunchConfig> for BootedLaunchConfig {
-	fn as_mut(&mut self) -> &mut BootedLaunchConfig {
-		self
-	}
-}
-
-impl<T> LaunchConfig for T
-where
-	T: AsRef<BootedLaunchConfig> + AsMut<BootedLaunchConfig>,
-{
-	fn console(&self) -> bool {
-		self.as_ref().console
-	}
-	fn set_console(&mut self, console: bool) {
-		self.as_mut().console = console;
-	}
-
-	fn bundle_id(&self) -> &str {
-		&self.as_ref().bundle_id
-	}
-	fn set_bundle_id(&mut self, bundle_id: String) {
-		self.as_mut().bundle_id = bundle_id;
-	}
-}
-
-static_assertions::assert_impl_all!(FullLaunchConfig: LaunchConfig);
-static_assertions::assert_impl_all!(BootedLaunchConfig: LaunchConfig);
-
-#[cfg(feature = "cli")]
-impl CliLaunchArgs {
-	pub fn resolve(
-		self,
-		simctl_instance: &XcRunSimctlInstance,
-	) -> color_eyre::Result<FullLaunchConfig> {
-		Ok(FullLaunchConfig::new(
-			self.console,
-			self.simulator_name.resolve(simctl_instance)?,
-			self.bundle_id.resolve()?,
-		))
-	}
-}
-
-#[cfg(feature = "cli")]
-impl CliLaunchBootedArgs {
-	pub fn resolve(self) -> color_eyre::Result<BootedLaunchConfig> {
-		Ok(BootedLaunchConfig::new(
-			self.console,
-			self.bundle_id.resolve()?,
-		))
+		fn try_from(value: bossy::Result<Output>) -> std::result::Result<Self, Self::Error> {
+			Self::from_str(&resolve_stream(value)?)
+		}
 	}
 }
 
 impl XcRunSimctlInstance<'_> {
-	pub fn launch(&self, config: &FullLaunchConfig) -> error::Result<ExitStatus> {
+	pub fn launch(
+		&self,
+		config: &LaunchConfig,
+		simulator_name: DeviceName,
+	) -> error::Result<LaunchOutput> {
 		let mut cmd = self.bossy_command().with_arg("launch");
 		if config.console() {
 			cmd.add_arg("--console");
 		}
-		cmd.add_arg(config.simulator_name().to_string());
+		cmd.add_arg(simulator_name.to_string());
 		cmd.add_arg(config.bundle_id());
 
-		Ok(cmd.run_and_wait()?)
+		LaunchOutput::try_from(cmd.run_and_wait_for_output())
 	}
 
-	pub fn launch_booted(&self, config: &BootedLaunchConfig) -> error::Result<ExitStatus> {
+	pub fn launch_booted(&self, config: &LaunchConfig) -> error::Result<LaunchOutput> {
 		let mut cmd = self.bossy_command().with_arg("launch");
 		if config.console {
 			cmd.add_arg("--console");
@@ -170,6 +88,6 @@ impl XcRunSimctlInstance<'_> {
 		cmd.add_arg("booted");
 		cmd.add_arg(config.bundle_id());
 
-		Ok(cmd.run_and_wait()?)
+		LaunchOutput::try_from(cmd.run_and_wait_for_output())
 	}
 }

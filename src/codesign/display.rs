@@ -5,7 +5,7 @@ pub use self::output::*;
 mod output;
 
 impl CodesignCLIInstance {
-	pub fn display(&self, path: impl AsRef<Utf8Path>) -> Result<CodeSignDisplayOutput> {
+	pub fn display(&self, path: impl AsRef<Utf8Path>) -> Result<DisplayOutput> {
 		let output = self
 			.bossy_command()
 			.with_arg("-d")
@@ -17,7 +17,7 @@ impl CodesignCLIInstance {
 				let stdout = String::from_utf8_lossy(output.stdout()).to_string();
 				let stderr = String::from_utf8_lossy(output.stderr()).to_string();
 				trace!(%stdout, %stderr, "codesign exited successfully");
-				Ok(CodeSignDisplayOutput::from_str(&stderr)?)
+				Ok(DisplayOutput::from_str(&stderr)?)
 			}
 			Err(err) => {
 				match err.output() {
@@ -25,7 +25,7 @@ impl CodesignCLIInstance {
 					Some(output) => {
 						// handling not signed case
 						let stderr = String::from_utf8_lossy(output.stderr());
-						CodeSignDisplayOutput::from_str(&stderr)
+						DisplayOutput::from_str(&stderr)
 					}
 				}
 			}

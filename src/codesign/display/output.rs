@@ -5,7 +5,7 @@ pub use self::signed_keys::SignedKeys;
 mod signed_keys;
 
 #[derive(Debug, Serialize)]
-pub enum CodeSignDisplayOutput {
+pub enum DisplayOutput {
 	/// Basically an error case
 	NotSignedAtAll {
 		path: Utf8PathBuf,
@@ -24,31 +24,31 @@ pub enum CodeSignDisplayOutput {
 	UnImplemented(String),
 }
 
-impl_from_str_nom!(CodeSignDisplayOutput);
+impl_from_str_nom!(DisplayOutput);
 
-fn parse_key_value(input: &str) -> IResult<&str, CodeSignDisplayOutput> {
+fn parse_key_value(input: &str) -> IResult<&str, DisplayOutput> {
 	let (remaining, path) = map(
 		terminated(take_while(|c| c != ':'), tag(": ")),
 		Utf8Path::new,
 	)(input)?;
 	map(ws(tag("code object is not signed at all")), move |_| {
 		debug!("Parsed NotSignedAtAll");
-		CodeSignDisplayOutput::NotSignedAtAll {
+		DisplayOutput::NotSignedAtAll {
 			path: path.to_owned(),
 		}
 	})(remaining)
 }
 
-impl NomFromStr for CodeSignDisplayOutput {
+impl NomFromStr for DisplayOutput {
 	fn nom_from_str(input: &str) -> nom::IResult<&str, Self> {
 		alt((
 			parse_key_value,
 			map_res(rest, |s| {
-				SignedKeys::from_raw(s).map(CodeSignDisplayOutput::SignedKeys)
+				SignedKeys::from_raw(s).map(DisplayOutput::SignedKeys)
 			}),
 			map(ws(rest), |s: &str| {
 				debug!(?s, "Parsed SuccessUnimplemented");
-				CodeSignDisplayOutput::UnImplemented(s.to_owned())
+				DisplayOutput::UnImplemented(s.to_owned())
 			}),
 		))(input)
 	}
