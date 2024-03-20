@@ -92,6 +92,16 @@ fn main() {
 		Err(e) => {
 			let err_msg = format!("{:?}", e);
 			error!(error = %err_msg, "Error!");
+			if config.args.machine() {
+				let json = json!({
+					"msg": "An error ocurred while running the command",
+					"err": err_msg,
+				});
+				println!(
+					"{}",
+					serde_json::to_string_pretty(&json).expect("Couldn't pretty print JSON")
+				);
+			}
 			std::process::exit(1)
 		}
 	}
