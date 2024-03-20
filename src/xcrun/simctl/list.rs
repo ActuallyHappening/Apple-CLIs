@@ -1,92 +1,101 @@
-use serde::Serialize;
-
 use crate::prelude::*;
-use crate::shared::identifiers::IPadVariant;
-use crate::shared::identifiers::{DeviceName, IPhoneVariant, RuntimeIdentifier};
 
 use super::XcRunSimctlInstance;
 
-#[derive(Deserialize, Debug)]
-pub struct ListOutput {
-	devices: HashMap<RuntimeIdentifier, Vec<ListDevice>>,
-}
+pub use output::*;
+mod output {
+	use crate::prelude::*;
+	use crate::shared::identifiers::IPadVariant;
+	use crate::shared::identifiers::{DeviceName, IPhoneVariant, RuntimeIdentifier};
 
-impl ListOutput {
-	#[tracing::instrument(level = "trace", skip(self))]
-	pub fn devices(&self) -> impl Iterator<Item = &ListDevice> {
-		self.devices.values().flatten()
+	#[derive(Debug, Serialize)]
+	#[non_exhaustive]
+	pub enum ListOutput {
+		SuccessUnImplemented {
+			stdout: String,
+		},
+
+		ErrorUnImplemented {
+			stderr: String,
+		},
 	}
 
-	#[tracing::instrument(level = "trace", skip(self))]
-	pub fn iphones(&self) -> impl Iterator<Item = &IPhoneVariant> {
-		self.devices().filter_map(|device| match device.name {
-			DeviceName::IPhone(ref variant) => Some(variant),
-			_ => None,
-		})
+	#[derive(Deserialize, Debug)]
+	pub struct ListJson {
+		devices: HashMap<RuntimeIdentifier, Vec<ListDevice>>,
 	}
 
-	#[tracing::instrument(level = "trace", skip(self))]
-	pub fn ipads(&self) -> impl Iterator<Item = &IPadVariant> {
-		self.devices().filter_map(|device| match device.name {
-			DeviceName::IPad(ref variant) => Some(variant),
-			_ => None,
-		})
+	impl ListJson {
+		pub fn devices(&self) -> impl Iterator<Item = &ListDevice> {
+			self.devices.values().flatten()
+		}
+
+		pub fn iphones(&self) -> impl Iterator<Item = &IPhoneVariant> {
+			self.devices().filter_map(|device| match device.name {
+				DeviceName::IPhone(ref variant) => Some(variant),
+				_ => None,
+			})
+		}
+
+		pub fn ipads(&self) -> impl Iterator<Item = &IPadVariant> {
+			self.devices().filter_map(|device| match device.name {
+				DeviceName::IPad(ref variant) => Some(variant),
+				_ => None,
+			})
+		}
+
+		pub fn a_device(&self) -> Option<&ListDevice> {
+			self.devices().next()
+		}
+
+		/// Tries to find the latest iPad in the list of devices
+		/// Not necessarily booted already
+		pub fn an_ipad(&self) -> Option<&IPadVariant> {
+			self.ipads().max()
+		}
+
+		/// Tries to find the latest iPhone in the list of devices
+		/// Not necessarily booted already
+		pub fn an_iphone(&self) -> Option<&IPhoneVariant> {
+			self.iphones().max()
+		}
 	}
 
-	pub fn a_device(&self) -> Option<&ListDevice> {
-		self.devices().next()
+	#[derive(Deserialize, Serialize, Debug)]
+	#[serde(rename_all(deserialize = "camelCase"))]
+	pub struct ListDevice {
+		pub availability_error: Option<String>,
+		pub data_path: Utf8PathBuf,
+		pub log_path: Utf8PathBuf,
+		pub udid: String,
+		pub is_available: bool,
+		pub device_type_identifier: String,
+		pub state: State,
+
+		pub name: DeviceName,
 	}
 
-	/// Tries to find the latest iPad in the list of devices
-	/// Not necessarily booted already
-	pub fn an_ipad(&self) -> Option<&IPadVariant> {
-		self.ipads().max()
+	#[derive(Deserialize, Serialize, Debug)]
+	pub enum State {
+		Shutdown,
+		Booted,
 	}
 
-	/// Tries to find the latest iPhone in the list of devices
-	/// Not necessarily booted already
-	pub fn an_iphone(&self) -> Option<&IPhoneVariant> {
-		self.iphones().max()
+	impl State {
+		pub fn ready(&self) -> bool {
+			matches!(self, State::Booted)
+		}
 	}
-}
 
-#[derive(Deserialize, Serialize, Debug)]
-#[serde(rename_all(deserialize = "camelCase"))]
-pub struct ListDevice {
-	pub availability_error: Option<String>,
-	pub data_path: Utf8PathBuf,
-	pub log_path: Utf8PathBuf,
-	pub udid: String,
-	pub is_available: bool,
-	pub device_type_identifier: String,
-	pub state: State,
-
-	pub name: DeviceName,
-}
-
-#[derive(Deserialize, Serialize, Debug)]
-pub enum State {
-	Shutdown,
-	Booted,
-}
-
-impl State {
-	#[tracing::instrument(level = "trace", skip(self))]
-	pub fn ready(&self) -> bool {
-		matches!(self, State::Booted)
-	}
-}
-
-impl ListDevice {
-	#[tracing::instrument(level = "trace", skip(self))]
-	pub fn ready(&self) -> bool {
-		self.state.ready() && self.is_available
+	impl ListDevice {
+		pub fn ready(&self) -> bool {
+			self.state.ready() && self.is_available
+		}
 	}
 }
 
 impl<'src> XcRunSimctlInstance<'src> {
-	#[tracing::instrument(level = "trace", skip(self))]
-	pub fn list(&self) -> Result<ListOutput> {
+	pub fn list(&self) -> Result<ListJson> {
 		let output = self
 			.bossy_command()
 			.with_arg("list")
@@ -106,7 +115,7 @@ mod tests {
 	#[test]
 	fn test_simctl_list() {
 		let example = include_str!("../../../tests/simctl-list-full.json");
-		let output = serde_json::from_str::<ListOutput>(example);
+		let output = serde_json::from_str::<ListJson>(example);
 		match output {
 			Ok(output) => {
 				debug!("Output: {:?}", output);

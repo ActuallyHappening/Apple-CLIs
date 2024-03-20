@@ -1,10 +1,10 @@
-use super::error::Error;
 use crate::prelude::*;
 
 pub use self::signed_keys::SignedKeys;
 mod signed_keys;
 
 #[derive(Debug, Serialize)]
+#[non_exhaustive]
 pub enum DisplayOutput {
 	/// Basically an error case
 	NotSignedAtAll {
@@ -21,10 +21,35 @@ pub enum DisplayOutput {
 	},
 
 	#[doc = include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/docs/inline/TODO.md"))]
-	UnImplemented(String),
+	ErrorUnImplemented {
+		stderr: String,
+	},
 }
 
-impl_from_str_nom!(DisplayOutput);
+impl DebugNamed for DisplayOutput {
+	fn name() -> &'static str {
+		"DisplayOutput"
+	}
+}
+
+impl CommandNomParsable for DisplayOutput {
+	fn success_unimplemented(str: String) -> Self {
+		Self::SuccessUnimplemented { stdout: str }
+	}
+
+	fn error_unimplemented(str: String) -> Self {
+		Self::ErrorUnImplemented { stderr: str }
+	}
+
+	fn success_nom_from_str(input: &str) -> IResult<&str, Self> {
+		alt((
+			parse_key_value,
+			map_res(rest, |s| {
+				SignedKeys::from_raw(s).map(DisplayOutput::SignedKeys)
+			}),
+		))(input)
+	}
+}
 
 fn parse_key_value(input: &str) -> IResult<&str, DisplayOutput> {
 	let (remaining, path) = map(
@@ -37,19 +62,4 @@ fn parse_key_value(input: &str) -> IResult<&str, DisplayOutput> {
 			path: path.to_owned(),
 		}
 	})(remaining)
-}
-
-impl NomFromStr for DisplayOutput {
-	fn nom_from_str(input: &str) -> nom::IResult<&str, Self> {
-		alt((
-			parse_key_value,
-			map_res(rest, |s| {
-				SignedKeys::from_raw(s).map(DisplayOutput::SignedKeys)
-			}),
-			map(ws(rest), |s: &str| {
-				debug!(?s, "Parsed SuccessUnimplemented");
-				DisplayOutput::UnImplemented(s.to_owned())
-			}),
-		))(input)
-	}
 }

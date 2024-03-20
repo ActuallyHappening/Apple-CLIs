@@ -1,21 +1,7 @@
-use std::str::FromStr;
-
-use nom::{
-	branch::alt,
-	bytes::complete::{tag, take_till},
-	character::complete::digit1,
-	combinator::{all_consuming, map, rest},
-	sequence::delimited,
-	IResult,
-};
-
-use crate::{
-	impl_from_str_nom,
-	prelude::*,
-	shared::{ws, NomFromStr},
-};
+use crate::prelude::*;
 
 #[derive(Debug, Serialize)]
+#[non_exhaustive]
 pub enum BootOutput {
 	Success,
 	AlreadyBooted,

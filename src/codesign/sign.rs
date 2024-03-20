@@ -7,6 +7,7 @@ mod output {
 	use crate::prelude::*;
 
 	#[derive(Debug, Serialize)]
+	#[non_exhaustive]
 	pub enum SignOutput {
 		#[doc = include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/docs/inline/TODO.md"))]
 		UnImplemented(String),
