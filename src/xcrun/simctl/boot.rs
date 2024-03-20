@@ -1,10 +1,10 @@
 use crate::{prelude::*, shared::identifiers::DeviceName};
 
-pub use self::boot_output::BootOutput;
 
 use super::XcRunSimctlInstance;
 
-mod boot_output;
+pub use self::output::BootOutput;
+mod output;
 
 impl XcRunSimctlInstance<'_> {
 	/// This will not fail if the device is already booted,
