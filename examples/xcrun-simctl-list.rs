@@ -7,7 +7,7 @@ fn main() -> Result<(), apple_clis::error::Error> {
 	let output = simctl_instance.list()?;
 	println!("Output: {:#?}", output);
 
-	let devices = output.devices();
+	let devices = output.success()?.devices();
 	for device in devices {
 		println!("Device: {:#?}", device);
 	}

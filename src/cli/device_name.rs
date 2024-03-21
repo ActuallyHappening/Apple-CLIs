@@ -166,12 +166,9 @@ impl DeviceSimulatorBootedArgs {
 					}
 				}
 				(false, false, false, Some(name), auto_boot) => {
-					if !list
-						.get_success_reported()?
-						.devices()
-						.map(|d| &d.name)
-						.any(|n| n == &name)
-					{
+					let output = list.get_success_reported()?;
+					let devices = output.devices().names().collect::<Vec<_>>();
+					if !devices.iter().any(|n| n == &&name) {
 						Err(
 							eyre!("The provided device name is not installed")
 								.with_suggestion(|| {
@@ -183,12 +180,7 @@ impl DeviceSimulatorBootedArgs {
 								.with_suggestion(|| {
 									"try running `apple-clis xcrun simctl list` to see installed simulators"
 								})
-								.with_note(|| {
-									format!(
-										"Installed devices: {:?}",
-										&list.unwrap_success().devices().collect::<Vec<_>>()
-									)
-								}),
+								.with_note(|| format!("Installed devices: {:?}", &devices)),
 						)
 					} else if auto_boot {
 						simctl_instance.boot(&name)?;

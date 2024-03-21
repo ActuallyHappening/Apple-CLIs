@@ -13,7 +13,18 @@ pub enum ListOutput {
 }
 
 impl ListOutput {
-	pub fn unwrap_success(self) -> ListJson {
+	/// Returns [Error::OutputErrored] if it didn't succeed.
+	/// Used to make error handling of non-successful commands explicit
+	pub fn success(&self) -> Result<&ListJson> {
+		match self {
+			ListOutput::SuccessJson(output) => Ok(output),
+			_ => Err(Error::OutputErrored {
+				debug_msg: format!("{:#?}", self),
+			}),
+		}
+	}
+
+	pub fn unwrap_success(&self) -> &ListJson {
 		match self {
 			ListOutput::SuccessJson(output) => output,
 			_ => {
@@ -23,7 +34,7 @@ impl ListOutput {
 		}
 	}
 
-	pub fn get_success(self) -> Option<ListJson> {
+	pub fn get_success(&self) -> Option<&ListJson> {
 		match self {
 			ListOutput::SuccessJson(output) => Some(output),
 			_ => None,
@@ -33,11 +44,17 @@ impl ListOutput {
 	/// Only used in CLI
 	/// prefer [Self::get_success]
 	#[cfg(feature = "cli")]
-	pub fn get_success_reported(self) -> std::result::Result<ListJson, color_eyre::Report> {
+	pub fn get_success_reported(&self) -> std::result::Result<&ListJson, color_eyre::Report> {
 		match self {
 			Self::SuccessJson(output) => Ok(output),
-			Self::ErrorUnImplemented { stderr } => Err(eyre!("xcrun simctl list output didn't exist successfully: {:?}", stderr)),
-			Self::SuccessUnImplemented { stdout } => Err(eyre!("xcrun simctl list output didn't produce valid output: {:?}", stdout)),
+			Self::ErrorUnImplemented { stderr } => Err(eyre!(
+				"xcrun simctl list output didn't exist successfully: {:?}",
+				stderr
+			)),
+			Self::SuccessUnImplemented { stdout } => Err(eyre!(
+				"xcrun simctl list output didn't produce valid output: {:?}",
+				stdout
+			)),
 		}
 	}
 }
@@ -69,6 +86,7 @@ impl CommandNomParsable for ListOutput {
 }
 
 impl ListJson {
+	/// Returns an iterator over the returned devices
 	pub fn devices(&self) -> impl Iterator<Item = &ListDevice> + '_ {
 		self.devices.values().flatten()
 	}
@@ -86,6 +104,7 @@ impl<'src, T> T
 where
 	T: Iterator<Item = &'src ListDevice>,
 {
+	/// Consumes self,
 	fn names(self) -> impl Iterator<Item = &'src DeviceName> {
 		self.map(|device| &device.name)
 	}
@@ -127,7 +146,7 @@ where
 	}
 }
 
-#[derive(Deserialize, Serialize, Debug)]
+#[derive(Deserialize, Serialize, Debug, Clone)]
 #[serde(rename_all(deserialize = "camelCase"))]
 pub struct ListDevice {
 	pub availability_error: Option<String>,
@@ -141,7 +160,7 @@ pub struct ListDevice {
 	pub name: DeviceName,
 }
 
-#[derive(Deserialize, Serialize, Debug)]
+#[derive(Deserialize, Serialize, Debug, Clone, PartialEq, Eq)]
 pub enum State {
 	Shutdown,
 	Booted,

@@ -5,7 +5,7 @@ fn main() -> Result<(), apple_clis::error::Error> {
 	let simctl_instance = xcrun_instance.simctl();
 
 	let output = simctl_instance.list()?;
-	let devices: Vec<&simctl::list::ListDevice> = output.devices().collect();
+	let devices: Vec<&simctl::list::ListDevice> = output.success()?.devices().collect();
 	for device in devices {
 		println!(
 			"Simulator device {name} is {state:?} and is ready = {ready:?}",
@@ -19,6 +19,8 @@ fn main() -> Result<(), apple_clis::error::Error> {
 	// use apple_clis::prelude::*;
 	// to make finding devices easier and more ergonomic
 	let ipad_simulator: &IPadVariant = output
+		.get_success()
+		.expect("to succeed")
 		.devices()
 		.names()
 		.ipads()

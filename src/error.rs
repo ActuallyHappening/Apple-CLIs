@@ -5,6 +5,12 @@ pub enum Error {
 	#[error("Command exited with an error: {0}")]
 	ExecuteErrored(#[from] bossy::Error),
 
+	/// Gained by calling an `success` method on a command output
+	#[error("The output of a command did not succeed as expected")]
+	OutputErrored {
+		debug_msg: String,
+	},
+
 	/// TODO: propagate more information
 	#[error("Calling `--version` failed")]
 	VersionCheckFailed(#[source] Option<bossy::Error>),

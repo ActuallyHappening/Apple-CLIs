@@ -287,7 +287,7 @@ fn run(command: Commands) -> std::result::Result<Option<serde_json::Value>, colo
 					match simctl {
 						Simctl::List => {
 							let devices = simctl_instance.list()?;
-							let devices = devices.devices().collect::<Vec<_>>();
+							let devices = devices.success()?.devices().collect::<Vec<_>>();
 							to_json(devices)
 						}
 						Simctl::Boot { simulator_id } => {
