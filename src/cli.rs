@@ -33,7 +33,7 @@ pub struct TopLevelCliArgs {
 	verbose: bool,
 
 	/// Only displays warnings and errors
-	#[arg(long, global = true, group = "top_level_args")]
+	#[arg(long, short, global = true, group = "top_level_args")]
 	quiet: bool,
 }
 

@@ -1,6 +1,6 @@
 [package]
 name = "apple-clis"
-version = "0.0.10"
+version = "0.0.11"
 edition = "2021"
 default-run = "apple-clis"
 description = "A collection of Apple command-line tool wrappers, library and CLI"
