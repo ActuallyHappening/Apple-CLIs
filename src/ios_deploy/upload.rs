@@ -1,17 +1,17 @@
 use crate::prelude::*;
 
-use bossy::ExitStatus;
-use camino::Utf8Path;
-
 use super::{detect::Device, IosDeployCLIInstance};
 
+pub use output::*;
+mod output;
+
 impl IosDeployCLIInstance {
-	#[tracing::instrument(level = "trace", skip(self, device, bundle_path))]
+	#[instrument(ret, skip_all)]
 	pub fn upload_bundle(
 		&self,
 		device: &Device,
 		bundle_path: impl AsRef<Utf8Path>,
-	) -> Result<ExitStatus> {
+	) -> Result<UploadOutput> {
 		let mut command = self
 			.bossy_command()
 			.with_args(["--id", &device.device_identifier])
@@ -21,6 +21,6 @@ impl IosDeployCLIInstance {
 		command.add_arg("--debug");
 		// }
 
-		Ok(command.run_and_wait()?)
+		UploadOutput::from_bossy_result(command.run_and_wait_for_output())
 	}
 }

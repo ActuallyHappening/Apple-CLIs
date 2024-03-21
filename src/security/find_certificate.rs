@@ -7,16 +7,9 @@ use thiserror::Error;
 
 use super::SecurityCLIInstance;
 
-#[derive(thiserror::Error, Debug)]
-pub enum FindCertificatesError {
-	#[error("Error running `security find-certificate -a -p`: {0}")]
-	ExecuteError(#[from] bossy::Error),
-}
-
 impl SecurityCLIInstance {
 	const DEVELOPER_NAME_SCHEMAS: [&'static str; 2] = ["Developer:", "Development:"];
 
-	#[tracing::instrument(level = "trace", skip(self, name_substr))]
 	fn get_pem_list(&self, name_substr: &str) -> bossy::Result<bossy::Output> {
 		self
 			.bossy_command()
@@ -24,7 +17,6 @@ impl SecurityCLIInstance {
 			.run_and_wait_for_output()
 	}
 
-	#[tracing::instrument(level = "trace", skip(self))]
 	fn get_developer_pem_list(&self) -> bossy::Result<Vec<bossy::Output>> {
 		Self::DEVELOPER_NAME_SCHEMAS
 			.iter()
@@ -32,7 +24,6 @@ impl SecurityCLIInstance {
 			.collect()
 	}
 
-	#[tracing::instrument(level = "trace", skip(self))]
 	pub fn get_developer_pems(&self) -> Result<Vec<X509>> {
 		let certs = self
 			.get_developer_pem_list()?
@@ -43,7 +34,7 @@ impl SecurityCLIInstance {
 		Ok(certs.collect())
 	}
 
-	#[tracing::instrument(level = "trace", skip(self))]
+	#[instrument(ret)]
 	pub fn get_developer_certs(&self) -> Result<Vec<Certificate>> {
 		Ok(
 			self

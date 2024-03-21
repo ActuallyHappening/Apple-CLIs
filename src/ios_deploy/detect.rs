@@ -1,43 +1,8 @@
 use super::IosDeployCLIInstance;
 use crate::prelude::*;
 
-#[derive(Debug)]
-#[cfg_attr(feature = "cli", derive(clap::Args))]
-pub struct DetectDevicesConfig {
-	#[cfg_attr(feature = "cli", clap(long, default_value_t = 1))]
-	pub timeout: u8,
-
-	#[cfg_attr(feature = "cli", clap(long, default_value_t = false))]
-	pub wifi: bool,
-}
-
-impl Default for DetectDevicesConfig {
-	#[instrument(level = "trace", skip())]
-	fn default() -> Self {
-		DetectDevicesConfig {
-			timeout: 1,
-			wifi: true,
-		}
-	}
-}
-
-#[derive(Debug, Serialize, Deserialize)]
-pub struct Device {
-	pub device_identifier: String,
-	pub device_name: String,
-	pub model_name: ModelName,
-	pub interface: DeviceInterface,
-}
-
-#[derive(Debug, Serialize, Deserialize)]
-#[serde(rename_all = "SCREAMING_SNAKE_CASE")]
-pub enum DeviceInterface {
-	Usb,
-	Wifi,
-}
-
 impl IosDeployCLIInstance {
-	#[instrument(level = "trace")]
+	#[instrument(ret)]
 	pub fn detect_devices(&self, config: &DetectDevicesConfig) -> Result<Vec<Device>> {
 		let mut command = self
 			.bossy_command()
@@ -99,4 +64,39 @@ impl IosDeployCLIInstance {
 
 		Ok(devices)
 	}
+}
+
+#[derive(Debug)]
+#[cfg_attr(feature = "cli", derive(clap::Args))]
+pub struct DetectDevicesConfig {
+	#[cfg_attr(feature = "cli", clap(long, default_value_t = 1))]
+	pub timeout: u8,
+
+	#[cfg_attr(feature = "cli", clap(long, default_value_t = false))]
+	pub wifi: bool,
+}
+
+impl Default for DetectDevicesConfig {
+	#[instrument(level = "trace", skip())]
+	fn default() -> Self {
+		DetectDevicesConfig {
+			timeout: 1,
+			wifi: true,
+		}
+	}
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct Device {
+	pub device_identifier: String,
+	pub device_name: String,
+	pub model_name: ModelName,
+	pub interface: DeviceInterface,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+#[serde(rename_all = "SCREAMING_SNAKE_CASE")]
+pub enum DeviceInterface {
+	Usb,
+	Wifi,
 }
