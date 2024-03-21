@@ -1,11 +1,13 @@
 use crate::prelude::*;
 
 #[derive(Debug, Serialize)]
+#[non_exhaustive]
+#[must_use = include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/docs/inline/must_use_command_output.md"))]
 pub enum LaunchOutput {
-	#[doc = include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/docs/inline/TODO.md"))]
+	#[doc = include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/docs/inline/command_error.md"))]
 	ErrorUnImplemented(String),
 
-	#[doc = include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/docs/inline/TODO.md"))]
+	#[doc = include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/docs/inline/command_success.md"))]
 	SuccessUnImplemented(String),
 }
 
@@ -23,13 +25,9 @@ impl PublicCommandOutput for LaunchOutput {
 	type PrimarySuccess = ();
 
 	fn success(&self) -> Result<&Self::PrimarySuccess> {
-		match self.successful() {
-			true => Ok(&()),
-			false => Err(Error::output_errored(self)),
+		match self {
+			LaunchOutput::SuccessUnImplemented(_) => Ok(&()),
+			LaunchOutput::ErrorUnImplemented(_) => Err(Error::output_errored(self)),
 		}
-	}
-
-	fn successful(&self) -> bool {
-		matches!(self, LaunchOutput::SuccessUnImplemented { .. })
 	}
 }

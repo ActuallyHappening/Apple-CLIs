@@ -2,26 +2,20 @@ use crate::prelude::*;
 
 #[derive(Debug, Serialize)]
 #[non_exhaustive]
-#[must_use = "`BootOutput` includes an error case, `match` on it or at least check `.successful()`"]
+#[must_use = include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/docs/inline/must_use_command_output.md"))]
 pub enum BootOutput {
 	/// NOT considered an error case, since the simulator is *already* booted.
 	AlreadyBooted,
 
-	#[doc = include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/docs/inline/TODO.md"))]
+	#[doc = include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/docs/inline/command_success.md"))]
 	SuccessUnImplemented {
 		stdout: String,
 	},
 
-	#[doc = include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/docs/inline/TODO.md"))]
+	#[doc = include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/docs/inline/command_error.md"))]
 	ErrorUnImplemented {
 		stderr: String,
 	},
-}
-
-impl BootOutput {
-	pub fn successful(&self) -> bool {
-		matches!(self, BootOutput::SuccessUnImplemented { .. } | BootOutput::AlreadyBooted)
-	}
 }
 
 impl CommandNomParsable for BootOutput {
@@ -43,14 +37,10 @@ impl PublicCommandOutput for BootOutput {
 	type PrimarySuccess = ();
 
 	fn success(&self) -> Result<&Self::PrimarySuccess> {
-		match self.successful() {
-			true => Ok(&()),
-			false => Err(Error::output_errored(self)),
+		match self {
+			BootOutput::SuccessUnImplemented { .. } | BootOutput::AlreadyBooted => Ok(&()),
+			BootOutput::ErrorUnImplemented { .. } => Err(Error::output_errored(self)),
 		}
-	}
-
-	fn successful(&self) -> bool {
-		matches!(self, BootOutput::SuccessUnImplemented { .. } | BootOutput::AlreadyBooted)
 	}
 }
 
@@ -62,7 +52,7 @@ fn parse_already_booted(input: &str) -> IResult<&str, BootOutput> {
 	let (_, msg) =
 		all_consuming(ws(tag("Unable to boot device in current state: Booted")))(remaining)?;
 
-	error!(?domain, ?error_code, ?msg, "Parsed xcrun simctl boot error");
+	warn!(?domain, ?error_code, ?msg, "Parsed xcrun simctl boot error");
 
 	Ok(("", BootOutput::AlreadyBooted))
 }

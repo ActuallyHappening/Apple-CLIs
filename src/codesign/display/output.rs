@@ -5,22 +5,22 @@ mod signed_keys;
 
 #[derive(Debug, Serialize)]
 #[non_exhaustive]
+#[must_use = include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/docs/inline/must_use_command_output.md"))]
 pub enum DisplayOutput {
-	/// Basically an error case
+	/// Considered an error case
 	NotSignedAtAll {
 		path: Utf8PathBuf,
 	},
 
+	/// Successfully extracted key-value pairs from codesign -d
 	SignedKeys(signed_keys::SignedKeys),
 
-	/// Represents a successful call to `codesign -d`
-	///
-	#[doc = include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/docs/inline/TODO.md"))]
+	#[doc = include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/docs/inline/command_success.md"))]
 	SuccessUnimplemented {
 		stdout: String,
 	},
 
-	#[doc = include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/docs/inline/TODO.md"))]
+	#[doc = include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/docs/inline/command_error.md"))]
 	ErrorUnImplemented {
 		stderr: String,
 	},

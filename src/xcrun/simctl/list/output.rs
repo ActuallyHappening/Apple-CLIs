@@ -6,10 +6,13 @@ use crate::shared::identifiers::{DeviceName, IPhoneVariant, RuntimeIdentifier};
 #[non_exhaustive]
 #[must_use = include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/docs/inline/must_use_command_output.md"))]
 pub enum ListOutput {
+	/// Contains the actual output of the command, parsed
 	SuccessJson(ListJson),
 
+	#[doc = include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/docs/inline/command_success.md"))]
 	SuccessUnImplemented { stdout: String },
 
+	#[doc = include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/docs/inline/command_error.md"))]
 	ErrorUnImplemented { stderr: String },
 }
 
