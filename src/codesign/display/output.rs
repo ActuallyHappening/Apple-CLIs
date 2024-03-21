@@ -26,12 +26,6 @@ pub enum DisplayOutput {
 	},
 }
 
-impl DebugNamed for DisplayOutput {
-	fn name() -> &'static str {
-		"DisplayOutput"
-	}
-}
-
 impl CommandNomParsable for DisplayOutput {
 	fn success_unimplemented(str: String) -> Self {
 		Self::SuccessUnimplemented { stdout: str }
@@ -48,6 +42,17 @@ impl CommandNomParsable for DisplayOutput {
 				SignedKeys::from_raw(s).map(DisplayOutput::SignedKeys)
 			}),
 		))(input)
+	}
+}
+
+impl PublicCommandOutput for DisplayOutput {
+	type PrimarySuccess = signed_keys::SignedKeys;
+
+	fn success(&self) -> Result<&Self::PrimarySuccess> {
+		match self {
+			DisplayOutput::SignedKeys(keys) => Ok(keys),
+			_ => Err(Error::output_errored(self)),
+		}
 	}
 }
 

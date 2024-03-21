@@ -88,4 +88,12 @@ pub enum Error {
 	}
 }
 
+impl Error {
+	pub(crate) fn output_errored(debug_msg: impl std::fmt::Debug) -> Self {
+		Self::OutputErrored {
+			debug_msg: format!("{:#?}", debug_msg),
+		}
+	}
+}
+
 pub type Result<T> = std::result::Result<T, crate::error::Error>;

@@ -6,7 +6,7 @@ pub mod prelude {
 	pub use crate::shared::identifiers::*;
 	pub use crate::shared::types;
 	pub(crate) use crate::shared::ExecInstance;
-	pub(crate) use crate::shared::{ws, CommandNomParsable, DebugNamed, NomFromStr};
+	pub(crate) use crate::shared::{ws, CommandNomParsable, PublicCommandOutput, NomFromStr};
 	pub use crate::xcrun::simctl::list::{ListDeviceNamesExt, ListDevicesExt};
 	pub use crate::{codesign, ios_deploy, open, security, shared, spctl, xcrun, xcrun::simctl};
 	pub(crate) use crate::{impl_exec_child, impl_exec_instance, impl_from_str_nom};

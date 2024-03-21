@@ -2,33 +2,7 @@ use super::XcRunSimctlInstance;
 use crate::prelude::*;
 
 pub use output::*;
-mod output {
-	use crate::prelude::*;
-
-	#[derive(Debug, Serialize)]
-	pub enum InstallOutput {
-		#[doc = include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/docs/inline/TODO.md"))]
-		SuccessUnImplemented(String),
-
-		#[doc = include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/docs/inline/TODO.md"))]
-		ErrorUnImplemented(String),
-	}
-	impl DebugNamed for InstallOutput {
-		fn name() -> &'static str {
-			"InstallOutput"
-		}
-	}
-
-	impl CommandNomParsable for InstallOutput {
-		fn success_unimplemented(str: String) -> Self {
-			Self::SuccessUnImplemented(str)
-		}
-
-		fn error_unimplemented(str: String) -> Self {
-			Self::ErrorUnImplemented(str)
-		}
-	}
-}
+mod output;
 
 impl XcRunSimctlInstance<'_> {
 	#[instrument(skip_all, ret)]

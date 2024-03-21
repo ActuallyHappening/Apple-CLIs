@@ -224,12 +224,32 @@ impl NomFromStr for NonZeroU8 {
 	}
 }
 
-pub(crate) trait DebugNamed {
-	fn name() -> &'static str;
+/// Common operations that should be implemented on all command outputs.
+/// Often the 'success' of a command is a semantics issue, and is hence
+/// not by default implemented as a plain [std::result::Result].
+/// This trait bridges the gap between custom command output types and
+/// [Result], but it is good to check the documentation for the specific command
+/// to see if you agree with what outputs are classes as 'errors'.
+pub trait PublicCommandOutput: std::fmt::Debug + Serialize + CommandNomParsable {
+	/// If applicable, what the commands successful output should be.
+	/// If no output is application, often a [bool] as returned in [PublicCommandOutput::successful]
+	type PrimarySuccess: std::fmt::Debug;
+
+	/// Will return [Error::OutputErrored] if the command was not successful.
+	fn success(&self) -> Result<&Self::PrimarySuccess>;
+
+	/// Did command exit with an 'expected' success case?
+	fn successful(&self) -> bool {
+		self.success().is_ok()
+	}
+
+	fn failed(&self) -> bool {
+		!self.successful()
+	}
 }
 
 /// Used to wrap command output types
-pub(crate) trait CommandNomParsable: Sized + std::fmt::Debug + DebugNamed {
+pub(crate) trait CommandNomParsable: Sized + std::fmt::Debug {
 	fn success_unimplemented(stdout: String) -> Self;
 	fn error_unimplemented(stderr: String) -> Self;
 

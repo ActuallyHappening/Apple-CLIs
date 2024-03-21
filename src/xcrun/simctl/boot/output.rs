@@ -2,17 +2,55 @@ use crate::prelude::*;
 
 #[derive(Debug, Serialize)]
 #[non_exhaustive]
+#[must_use = "`BootOutput` includes an error case, `match` on it or at least check `.successful()`"]
 pub enum BootOutput {
-	Success,
+	/// NOT considered an error case, since the simulator is *already* booted.
 	AlreadyBooted,
 
 	#[doc = include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/docs/inline/TODO.md"))]
-	UnImplemented(String),
+	SuccessUnImplemented {
+		stdout: String,
+	},
+
+	#[doc = include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/docs/inline/TODO.md"))]
+	ErrorUnImplemented {
+		stderr: String,
+	},
 }
 
 impl BootOutput {
-	pub fn success(&self) -> bool {
-		matches!(self, BootOutput::Success)
+	pub fn successful(&self) -> bool {
+		matches!(self, BootOutput::SuccessUnImplemented { .. } | BootOutput::AlreadyBooted)
+	}
+}
+
+impl CommandNomParsable for BootOutput {
+	fn success_unimplemented(stdout: String) -> Self {
+		Self::SuccessUnImplemented { stdout }
+	}
+
+	fn error_unimplemented(stderr: String) -> Self {
+		Self::ErrorUnImplemented { stderr }
+	}
+
+	fn errored_nom_from_str(input: &str) -> IResult<&str, Self> {
+		parse_already_booted(input)
+	}
+}
+
+impl PublicCommandOutput for BootOutput {
+	/// If successful, the simulator is booted successfully
+	type PrimarySuccess = ();
+
+	fn success(&self) -> Result<&Self::PrimarySuccess> {
+		match self.successful() {
+			true => Ok(&()),
+			false => Err(Error::output_errored(self)),
+		}
+	}
+
+	fn successful(&self) -> bool {
+		matches!(self, BootOutput::SuccessUnImplemented { .. } | BootOutput::AlreadyBooted)
 	}
 }
 
@@ -27,30 +65,4 @@ fn parse_already_booted(input: &str) -> IResult<&str, BootOutput> {
 	error!(?domain, ?error_code, ?msg, "Parsed xcrun simctl boot error");
 
 	Ok(("", BootOutput::AlreadyBooted))
-}
-
-impl NomFromStr for BootOutput {
-	fn nom_from_str(input: &str) -> nom::IResult<&str, Self> {
-		alt((
-			parse_already_booted,
-			map(rest, |s: &str| BootOutput::UnImplemented(s.to_owned())),
-		))(input)
-	}
-}
-
-impl_from_str_nom!(BootOutput);
-
-impl BootOutput {
-	pub(crate) fn from_output(output: bossy::Result<bossy::Output>) -> Result<Self> {
-		match output {
-			Ok(_) => Ok(BootOutput::Success),
-			Err(err) => match err.output() {
-				Some(output) => {
-					let stderr = String::from_utf8_lossy(output.stderr());
-					BootOutput::from_str(&stderr)
-				}
-				None => Err(err.into()),
-			},
-		}
-	}
 }

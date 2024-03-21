@@ -59,12 +59,6 @@ impl ListOutput {
 	}
 }
 
-impl DebugNamed for ListOutput {
-	fn name() -> &'static str {
-		"ListOutput"
-	}
-}
-
 impl CommandNomParsable for ListOutput {
 	fn success_unimplemented(stdout: String) -> Self {
 		Self::SuccessUnImplemented { stdout }
@@ -81,6 +75,17 @@ impl CommandNomParsable for ListOutput {
 				error!(?e, "Failed to parse JSON");
 				Self::success_unimplemented(input.to_owned())
 			}
+		}
+	}
+}
+
+impl PublicCommandOutput for ListOutput {
+	type PrimarySuccess = ListJson;
+
+	fn success(&self) -> Result<&Self::PrimarySuccess> {
+		match self {
+			ListOutput::SuccessJson(output) => Ok(output),
+			_ => Err(Error::output_errored(self)),
 		}
 	}
 }

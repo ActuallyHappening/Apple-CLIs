@@ -39,36 +39,10 @@ impl LaunchConfig {
 }
 
 pub use output::LaunchOutput;
-mod output {
-	use crate::prelude::*;
-
-	#[derive(Debug, Serialize)]
-	pub enum LaunchOutput {
-		#[doc = include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/docs/inline/TODO.md"))]
-		ErrorUnImplemented(String),
-
-		#[doc = include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/docs/inline/TODO.md"))]
-		SuccessUnImplemented(String),
-	}
-
-	impl DebugNamed for LaunchOutput {
-		fn name() -> &'static str {
-			"LaunchOutput"
-		}
-	}
-
-	impl CommandNomParsable for LaunchOutput {
-		fn success_unimplemented(str: String) -> Self {
-			Self::SuccessUnImplemented(str)
-		}
-
-		fn error_unimplemented(str: String) -> Self {
-			Self::ErrorUnImplemented(str)
-		}
-	}
-}
+mod output;
 
 impl XcRunSimctlInstance<'_> {
+	#[instrument(ret)]
 	pub fn launch(
 		&self,
 		config: &LaunchConfig,
@@ -84,6 +58,7 @@ impl XcRunSimctlInstance<'_> {
 		LaunchOutput::from_bossy_result(cmd.run_and_wait_for_output())
 	}
 
+	#[instrument(ret)]
 	pub fn launch_booted(&self, config: &LaunchConfig) -> error::Result<LaunchOutput> {
 		let mut cmd = self.bossy_command().with_arg("launch");
 		if config.console {
