@@ -31,7 +31,7 @@ mod output {
 }
 
 impl XcRunSimctlInstance<'_> {
-	#[tracing::instrument(level = "trace", skip(self, app_path))]
+	#[instrument(skip_all, ret)]
 	pub fn install_booted(&self, app_path: impl AsRef<Utf8Path>) -> Result<InstallOutput> {
 		let app_path = app_path.as_ref();
 		InstallOutput::from_bossy_result(
@@ -44,6 +44,7 @@ impl XcRunSimctlInstance<'_> {
 		)
 	}
 
+	#[instrument(skip_all, ret)]
 	pub fn install(
 		&self,
 		app_path: impl AsRef<Utf8Path>,

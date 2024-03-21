@@ -7,6 +7,7 @@ pub mod install;
 pub mod list;
 pub mod launch;
 
+#[derive(Debug)]
 pub struct XcRunSimctlInstance<'src> {
 	exec_parent: &'src XcRunInstance,
 }
