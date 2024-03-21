@@ -18,6 +18,7 @@ impl_exec_child!(
 );
 
 impl XcRunInstance {
+	/// Instantiates an xcrun simctl CLI instance
 	pub fn simctl(&self) -> XcRunSimctlInstance {
 		XcRunSimctlInstance { exec_parent: self }
 	}

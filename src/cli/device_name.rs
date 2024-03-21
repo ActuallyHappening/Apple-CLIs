@@ -50,6 +50,7 @@ impl DeviceSimulatorUnBootedArgs {
 			(true, false, None) => {
 				let list = simctl_instance.list()?;
 				let latest_ipad = list
+					.get_success_reported()?
 					.devices()
 					.names()
 					.ipads()
@@ -60,6 +61,7 @@ impl DeviceSimulatorUnBootedArgs {
 			(false, true, None) => {
 				let list_output = &simctl_instance.list()?;
 				let latest_iphone = list_output
+					.get_success_reported()?
 					.devices()
 					.names()
 					.iphones()
@@ -75,7 +77,11 @@ impl DeviceSimulatorUnBootedArgs {
 impl DeviceSimulatorBootedArgs {
 	pub fn resolve(self, simctl_instance: &XcRunSimctlInstance) -> color_eyre::Result<DeviceName> {
 		let list = simctl_instance.list()?;
-		let booted_devices = list.devices().filter(|d| d.ready()).collect::<Vec<_>>();
+		let booted_devices = list
+			.get_success_reported()?
+			.devices()
+			.filter(|d| d.ready())
+			.collect::<Vec<_>>();
 		if booted_devices.is_empty() && !self.auto_boot {
 			Err(
 				eyre!("No booted devices found!")
@@ -93,6 +99,7 @@ impl DeviceSimulatorBootedArgs {
 				(true, false, false, None, auto_boot) => {
 					if auto_boot {
 						let a_device_name = &list
+							.get_success_reported()?
 							.devices()
 							.a_device()
 							.ok_or_else(|| eyre!("Couldn't find any simulators installed"))?
@@ -119,6 +126,7 @@ impl DeviceSimulatorBootedArgs {
 							.with_note(|| format!("Booted devices: {:?}", &booted_devices))
 					} else {
 						let a_device_name = (*list
+							.get_success_reported()?
 							.devices()
 							.names()
 							.an_ipad()
@@ -146,6 +154,7 @@ impl DeviceSimulatorBootedArgs {
 							})
 					} else {
 						let a_device_name: DeviceName = (*list
+							.get_success_reported()?
 							.devices()
 							.names()
 							.an_iphone()
@@ -157,7 +166,12 @@ impl DeviceSimulatorBootedArgs {
 					}
 				}
 				(false, false, false, Some(name), auto_boot) => {
-					if !list.devices().map(|d| &d.name).any(|n| n == &name) {
+					if !list
+						.get_success_reported()?
+						.devices()
+						.map(|d| &d.name)
+						.any(|n| n == &name)
+					{
 						Err(
 							eyre!("The provided device name is not installed")
 								.with_suggestion(|| {
@@ -172,7 +186,7 @@ impl DeviceSimulatorBootedArgs {
 								.with_note(|| {
 									format!(
 										"Installed devices: {:?}",
-										&list.devices().collect::<Vec<_>>()
+										&list.unwrap_success().devices().collect::<Vec<_>>()
 									)
 								}),
 						)

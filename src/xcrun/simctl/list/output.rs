@@ -12,6 +12,68 @@ pub enum ListOutput {
 	ErrorUnImplemented { stderr: String },
 }
 
+impl ListOutput {
+	pub fn unwrap_success(self) -> ListJson {
+		match self {
+			ListOutput::SuccessJson(output) => output,
+			_ => {
+				error!(?self, "Tried to unwrap a non-successful ListOutput");
+				panic!("Tried to unwrap a non-successful ListOutput")
+			}
+		}
+	}
+
+	pub fn get_success(self) -> Option<ListJson> {
+		match self {
+			ListOutput::SuccessJson(output) => Some(output),
+			_ => None,
+		}
+	}
+
+	/// Only used in CLI
+	/// prefer [Self::get_success]
+	#[cfg(feature = "cli")]
+	pub fn get_success_reported(self) -> std::result::Result<ListJson, color_eyre::Report> {
+		match self {
+			Self::SuccessJson(output) => Ok(output),
+			Self::ErrorUnImplemented { stderr } => Err(eyre!("xcrun simctl list output didn't exist successfully: {:?}", stderr)),
+			Self::SuccessUnImplemented { stdout } => Err(eyre!("xcrun simctl list output didn't produce valid output: {:?}", stdout)),
+		}
+	}
+}
+
+impl DebugNamed for ListOutput {
+	fn name() -> &'static str {
+		"ListOutput"
+	}
+}
+
+impl CommandNomParsable for ListOutput {
+	fn success_unimplemented(stdout: String) -> Self {
+		Self::SuccessUnImplemented { stdout }
+	}
+
+	fn error_unimplemented(stderr: String) -> Self {
+		Self::ErrorUnImplemented { stderr }
+	}
+
+	fn success_from_str(input: &str) -> Self {
+		match serde_json::from_str(input) {
+			Ok(output) => Self::SuccessJson(output),
+			Err(e) => {
+				error!(?e, "Failed to parse JSON");
+				Self::success_unimplemented(input.to_owned())
+			}
+		}
+	}
+}
+
+impl ListJson {
+	pub fn devices(&self) -> impl Iterator<Item = &ListDevice> + '_ {
+		self.devices.values().flatten()
+	}
+}
+
 #[derive(Deserialize, Debug, Serialize)]
 pub struct ListJson {
 	devices: HashMap<RuntimeIdentifier, Vec<ListDevice>>,
@@ -65,12 +127,6 @@ where
 	}
 }
 
-impl ListJson {
-	pub fn devices(&self) -> impl Iterator<Item = &ListDevice> + '_ {
-		self.devices.values().flatten()
-	}
-}
-
 #[derive(Deserialize, Serialize, Debug)]
 #[serde(rename_all(deserialize = "camelCase"))]
 pub struct ListDevice {
@@ -100,5 +156,29 @@ impl State {
 impl ListDevice {
 	pub fn ready(&self) -> bool {
 		self.state.ready() && self.is_available
+	}
+}
+
+#[cfg(test)]
+mod tests {
+	use tracing::debug;
+
+	use super::*;
+
+	#[test]
+	fn test_simctl_list() {
+		let example = include_str!(concat!(
+			env!("CARGO_MANIFEST_DIR"),
+			"/tests/simctl-list-full.json"
+		));
+		let output = serde_json::from_str::<ListJson>(example);
+		match output {
+			Ok(output) => {
+				debug!("Output: {:?}", output);
+			}
+			Err(e) => {
+				panic!("Error parsing: {:?}", e)
+			}
+		}
 	}
 }

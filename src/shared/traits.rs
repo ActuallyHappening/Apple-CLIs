@@ -230,8 +230,8 @@ pub(crate) trait DebugNamed {
 
 /// Used to wrap command output types
 pub(crate) trait CommandNomParsable: Sized + std::fmt::Debug + DebugNamed {
-	fn success_unimplemented(str: String) -> Self;
-	fn error_unimplemented(str: String) -> Self;
+	fn success_unimplemented(stdout: String) -> Self;
+	fn error_unimplemented(stderr: String) -> Self;
 
 	fn success_nom_from_str(input: &str) -> IResult<&str, Self> {
 		map(rest, |s: &str| Self::success_unimplemented(s.to_owned()))(input)
