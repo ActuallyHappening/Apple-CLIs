@@ -6,7 +6,7 @@ pub use output::*;
 mod output;
 
 impl<'src> XcRunSimctlInstance<'src> {
-	#[instrument(skip_all, ret)]
+	#[instrument(skip_all)]
 	pub fn list(&self) -> Result<ListOutput> {
 		ListOutput::from_bossy_result(self
 			.bossy_command()
