@@ -321,9 +321,14 @@ fn run(command: Commands) -> std::result::Result<Option<serde_json::Value>, colo
 							args,
 						} => {
 							let device = booted_simulator.resolve(&simctl_instance)?;
-							let config = args.resolve()?;
-							let output = simctl_instance.launch(&config, device)?;
-							to_json(output)
+							let (piped, config) = args.resolve()?;
+							match piped {
+								true => to_raw_json(simctl_instance.launch_piped(&config, device)),
+								false => {
+									let output = simctl_instance.launch(&config, device)?;
+									to_json(output)
+								}
+							}
 						}
 					}
 				}
