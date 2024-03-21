@@ -31,22 +31,27 @@ pub struct TopLevelCliArgs {
 	/// Overrides the RUST_LOG env variable to use a very verbose log level
 	#[arg(long, global = true, group = "top_level_args")]
 	verbose: bool,
+
+	/// Only displays warnings and errors
+	#[arg(long, global = true, group = "top_level_args")]
+	quiet: bool,
 }
 
 impl TopLevelCliArgs {
-	#[tracing::instrument(level = "trace", skip(self))]
 	pub fn machine(&self) -> bool {
 		self.machine
 	}
 
-	#[tracing::instrument(level = "trace", skip(self))]
 	pub fn human(&self) -> bool {
 		!self.machine()
 	}
 
-	#[tracing::instrument(level = "trace", skip(self))]
 	pub fn verbose(&self) -> bool {
 		self.verbose
+	}
+
+	pub fn quiet(&self) -> bool {
+		self.quiet
 	}
 }
 

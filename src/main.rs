@@ -52,21 +52,30 @@ fn main() {
 			};
 		}
 
+		let fmt_quiet_layer = fmt::layer().with_target(false).without_time();
+		let quiet_filter = EnvFilter::builder()
+			.with_default_directive(LevelFilter::WARN.into())
+			.from_env_lossy();
+
 		let fmt_normal_layer = fmt::layer().with_target(false).without_time();
 		let normal_filter = EnvFilter::builder()
 			.with_default_directive(LevelFilter::INFO.into())
 			.from_env_lossy();
+
 		let fmt_verbose_layer = fmt::layer().pretty();
 		let verbose_filter = EnvFilter::new("info,apple_clis=trace");
 
 		tracing_subscriber::registry()
 			.with(if config.args.verbose() {
 				verbose_filter
+			} else if config.args.quiet() {
+				quiet_filter
 			} else {
 				normal_filter
 			})
 			.with(config.args.verbose().then_some(fmt_verbose_layer))
 			.with(config.args.verbose().not().then_some(fmt_normal_layer))
+			.with(config.args.quiet().then_some(fmt_quiet_layer))
 			.with(tracing_error::ErrorLayer::default())
 			.init();
 
@@ -301,7 +310,9 @@ fn run(command: Commands) -> std::result::Result<Option<serde_json::Value>, colo
 						} => {
 							let path = app_path.resolve()?;
 							let booted_simulator = booted_simulator.resolve(&simctl_instance)?;
-							simctl_instance.install(path, &booted_simulator)?.success()?;
+							simctl_instance
+								.install(path, &booted_simulator)?
+								.success()?;
 							// simctl_instance.install_booted(path)?;
 							Ok(None)
 						}
