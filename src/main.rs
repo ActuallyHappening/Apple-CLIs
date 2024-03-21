@@ -3,18 +3,17 @@ use std::io::{BufRead, Write};
 use std::ops::Not;
 
 use apple_clis::cli::{self, CodeSign, Commands, Init, IosDeploy, Security, Simctl, Spctl, XcRun};
-use apple_clis::codesign;
+use apple_clis::ios_deploy::IosDeployCLIInstance;
 use apple_clis::open::OpenCLIInstance;
+use apple_clis::prelude::*;
 use apple_clis::shared::identifiers::DeviceName;
 use apple_clis::xcrun::XcRunInstance;
-use apple_clis::{ios_deploy::IosDeployCLIInstance, security, spctl};
-use camino::Utf8PathBuf;
 use clap::{CommandFactory, Parser};
 use color_eyre::eyre::{eyre, Context, ContextCompat};
 use serde::Serialize;
 use serde_json::json;
 use tracing::*;
-use tracing_subscriber::filter::{Directive, LevelFilter};
+use tracing_subscriber::filter::LevelFilter;
 use tracing_subscriber::prelude::*;
 use tracing_subscriber::{fmt, EnvFilter};
 
@@ -155,7 +154,7 @@ fn run(command: Commands) -> std::result::Result<Option<serde_json::Value>, colo
 						.context("Running `nu -c '$nu.config-path'` failed")?;
 					let config_path = config_path.trim();
 
-					let config_path = Utf8PathBuf::from(config_path);
+					let config_path = camino::Utf8PathBuf::from(config_path);
 					let file = File::open(&config_path)
 						.context(format!("Cannot open config.nu file at {:?}", &config_path))?;
 					let reader = std::io::BufReader::new(file);
@@ -205,7 +204,7 @@ fn run(command: Commands) -> std::result::Result<Option<serde_json::Value>, colo
 						Some(d) => d,
 						None => Err(eyre!("No devices found to upload to"))?,
 					};
-					ios_deploy_instance.upload_bundle(device, path)?;
+					ios_deploy_instance.upload_bundle(device, path)?.success()?;
 					Ok(None)
 				}
 			}
@@ -302,7 +301,7 @@ fn run(command: Commands) -> std::result::Result<Option<serde_json::Value>, colo
 						} => {
 							let path = app_path.resolve()?;
 							let booted_simulator = booted_simulator.resolve(&simctl_instance)?;
-							simctl_instance.install(path, &booted_simulator)?;
+							simctl_instance.install(path, &booted_simulator)?.success()?;
 							// simctl_instance.install_booted(path)?;
 							Ok(None)
 						}

@@ -5,6 +5,7 @@ pub mod types;
 
 pub(crate) use traits::*;
 pub(crate) use traits::impl_from_str_nom;
+pub use traits::PublicCommandOutput;
 mod traits;
 
 /// A combinator that takes a parser `inner` and produces a parser that also consumes both leading and

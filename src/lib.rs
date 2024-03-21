@@ -1,20 +1,28 @@
 pub mod prelude {
-	pub use crate::error;
+	// public exports
 	pub use crate::error::Error;
-	pub(crate) use crate::error::Result;
-	pub use crate::shared::identifiers;
 	pub use crate::shared::identifiers::*;
-	pub use crate::shared::types;
-	pub(crate) use crate::shared::ExecInstance;
-	pub(crate) use crate::shared::{ws, CommandNomParsable, PublicCommandOutput, NomFromStr};
-	pub use crate::xcrun::simctl::list::{ListDeviceNamesExt, ListDevicesExt};
-	pub use crate::{codesign, ios_deploy, open, security, shared, spctl, xcrun, xcrun::simctl};
-	pub(crate) use crate::shared::{impl_exec_child, impl_exec_instance, impl_from_str_nom};
+	pub use crate::{
+		codesign, error, ios_deploy, open, security, shared, shared::identifiers, shared::types, spctl,
+		xcrun, xcrun::simctl,
+	};
 
+	// trait exts
+	pub use crate::shared::PublicCommandOutput;
+	pub use crate::xcrun::simctl::list::{ListDeviceNamesExt, ListDevicesExt};
+
+	// dep re-exports
 	pub use bossy;
 	pub use camino;
 
-	pub(crate) use bossy::{Command, ExitStatus, Output};
+	// internal re-exports
+	pub(crate) use crate::error::Result;
+	pub(crate) use crate::shared::ExecInstance;
+	pub(crate) use crate::shared::{impl_exec_child, impl_exec_instance, impl_from_str_nom};
+	pub(crate) use crate::shared::{ws, CommandNomParsable, NomFromStr};
+
+	// internal dep imports
+	pub(crate) use bossy::{ExitStatus, Output};
 	pub(crate) use camino::{Utf8Path, Utf8PathBuf};
 	#[allow(unused_imports)]
 	pub(crate) use nom::{
@@ -36,6 +44,7 @@ pub mod prelude {
 	pub(crate) use strum::EnumDiscriminants;
 	pub(crate) use tracing::{debug, error, info, instrument, trace, warn};
 
+	// cli only exports
 	#[cfg(feature = "cli")]
 	pub(crate) use clap::{Args, Parser, Subcommand, ValueEnum};
 	#[cfg(feature = "cli")]
@@ -47,15 +56,17 @@ pub mod cli;
 pub mod error;
 pub mod shared;
 
-pub mod cargo_bundle;
+// pub mod cargo_bundle;
 pub mod codesign;
 pub mod ios_deploy;
 pub mod open;
+pub mod security;
+pub mod spctl;
+pub mod xcrun;
+
+// pub mod xcodebuild;
 // pub mod pkgbuild;
+// pub mod hdiutil;
 // pub mod pkgutil;
 // pub mod productbuild;
 // pub mod productsign;
-pub mod security;
-pub mod spctl;
-// pub mod xcodebuild;
-pub mod xcrun;

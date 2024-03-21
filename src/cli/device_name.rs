@@ -105,7 +105,7 @@ impl DeviceSimulatorBootedArgs {
 							.ok_or_else(|| eyre!("Couldn't find any simulators installed"))?
 							.name;
 						info!(device_name = %a_device_name, "Since auto-boot is enabled, booting a simulator");
-						simctl_instance.boot(a_device_name)?;
+						simctl_instance.boot(a_device_name)?.success()?;
 						Ok(a_device_name.clone())
 					} else {
 						Ok(booted_devices[0].name.clone())
@@ -133,7 +133,7 @@ impl DeviceSimulatorBootedArgs {
 							.ok_or_else(|| eyre!("Couldn't find any iPad simulators installed"))?)
 						.into();
 						info!(device_name = %a_device_name, "Since auto-boot is enabled, booting an iPad simulator");
-						simctl_instance.boot(&a_device_name)?;
+						simctl_instance.boot(&a_device_name)?.success()?;
 						Ok(a_device_name)
 					}
 				}
@@ -161,7 +161,7 @@ impl DeviceSimulatorBootedArgs {
 							.ok_or_else(|| eyre!("Couldn't find any iPhone simulators installed"))?)
 						.into();
 						info!(device_name = %a_device_name, "Since auto-boot is enabled, booting an iPhone simulator");
-						simctl_instance.boot(&a_device_name)?;
+						simctl_instance.boot(&a_device_name)?.success()?;
 						Ok(a_device_name)
 					}
 				}
@@ -183,7 +183,7 @@ impl DeviceSimulatorBootedArgs {
 								.with_note(|| format!("Installed devices: {:?}", &devices)),
 						)
 					} else if auto_boot {
-						simctl_instance.boot(&name)?;
+						simctl_instance.boot(&name)?.success()?;
 						Ok(name)
 					} else {
 						Ok(name)

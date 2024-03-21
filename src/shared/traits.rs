@@ -230,6 +230,7 @@ impl NomFromStr for NonZeroU8 {
 /// This trait bridges the gap between custom command output types and
 /// [Result], but it is good to check the documentation for the specific command
 /// to see if you agree with what outputs are classes as 'errors'.
+#[allow(private_bounds)] // private bounds seals this trait
 pub trait PublicCommandOutput: std::fmt::Debug + Serialize + CommandNomParsable {
 	/// If applicable, what the commands successful output should be.
 	/// If no output is application, often a [bool] as returned in [PublicCommandOutput::successful]
