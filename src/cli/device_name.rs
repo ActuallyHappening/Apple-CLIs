@@ -50,6 +50,8 @@ impl DeviceSimulatorUnBootedArgs {
 			(true, false, None) => {
 				let list = simctl_instance.list()?;
 				let latest_ipad = list
+					.devices()
+					.names()
 					.ipads()
 					.max()
 					.ok_or_else(|| eyre!("No simulator iPads found!"))?;
@@ -58,6 +60,8 @@ impl DeviceSimulatorUnBootedArgs {
 			(false, true, None) => {
 				let list_output = &simctl_instance.list()?;
 				let latest_iphone = list_output
+					.devices()
+					.names()
 					.iphones()
 					.max()
 					.ok_or_else(|| eyre!("No simulator iPhones found!"))?;
@@ -89,6 +93,7 @@ impl DeviceSimulatorBootedArgs {
 				(true, false, false, None, auto_boot) => {
 					if auto_boot {
 						let a_device_name = &list
+							.devices()
 							.a_device()
 							.ok_or_else(|| eyre!("Couldn't find any simulators installed"))?
 							.name;
@@ -114,6 +119,8 @@ impl DeviceSimulatorBootedArgs {
 							.with_note(|| format!("Booted devices: {:?}", &booted_devices))
 					} else {
 						let a_device_name = (*list
+							.devices()
+							.names()
 							.an_ipad()
 							.ok_or_else(|| eyre!("Couldn't find any iPad simulators installed"))?)
 						.into();
@@ -139,6 +146,8 @@ impl DeviceSimulatorBootedArgs {
 							})
 					} else {
 						let a_device_name: DeviceName = (*list
+							.devices()
+							.names()
 							.an_iphone()
 							.ok_or_else(|| eyre!("Couldn't find any iPhone simulators installed"))?)
 						.into();

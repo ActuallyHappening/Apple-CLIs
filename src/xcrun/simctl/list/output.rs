@@ -5,49 +5,69 @@ use crate::shared::identifiers::{DeviceName, IPhoneVariant, RuntimeIdentifier};
 #[derive(Debug, Serialize)]
 #[non_exhaustive]
 pub enum ListOutput {
+	SuccessJson(ListJson),
+
 	SuccessUnImplemented { stdout: String },
 
 	ErrorUnImplemented { stderr: String },
 }
 
-#[derive(Deserialize, Debug)]
+#[derive(Deserialize, Debug, Serialize)]
 pub struct ListJson {
 	devices: HashMap<RuntimeIdentifier, Vec<ListDevice>>,
 }
 
-impl ListJson {
-	pub fn devices(&self) -> impl Iterator<Item = &ListDevice> {
-		self.devices.values().flatten()
+/// Allows for easier extraction of semantic information from
+/// an iterator over [ListDevice]s.
+#[extension_traits::extension(pub trait ListDevicesExt)]
+impl<'src, T> T
+where
+	T: Iterator<Item = &'src ListDevice>,
+{
+	fn names(self) -> impl Iterator<Item = &'src DeviceName> {
+		self.map(|device| &device.name)
 	}
 
-	pub fn iphones(&self) -> impl Iterator<Item = &IPhoneVariant> {
-		self.devices().filter_map(|device| match device.name {
-			DeviceName::IPhone(ref variant) => Some(variant),
-			_ => None,
-		})
+	fn a_device(mut self) -> Option<&'src ListDevice> {
+		self.next()
 	}
+}
 
-	pub fn ipads(&self) -> impl Iterator<Item = &IPadVariant> {
-		self.devices().filter_map(|device| match device.name {
-			DeviceName::IPad(ref variant) => Some(variant),
-			_ => None,
-		})
-	}
-
-	pub fn a_device(&self) -> Option<&ListDevice> {
-		self.devices().next()
-	}
-
+#[extension_traits::extension(pub trait ListDeviceNamesExt)]
+impl<'src, T> T
+where
+	T: Iterator<Item = &'src DeviceName>,
+{
 	/// Tries to find the latest iPad in the list of devices
 	/// Not necessarily booted already
-	pub fn an_ipad(&self) -> Option<&IPadVariant> {
+	fn an_ipad(self) -> Option<&'src IPadVariant> {
 		self.ipads().max()
 	}
 
 	/// Tries to find the latest iPhone in the list of devices
 	/// Not necessarily booted already
-	pub fn an_iphone(&self) -> Option<&IPhoneVariant> {
+	fn an_iphone(self) -> Option<&'src IPhoneVariant> {
 		self.iphones().max()
+	}
+
+	fn iphones(self) -> impl Iterator<Item = &'src IPhoneVariant> {
+		self.filter_map(|names| match names {
+			DeviceName::IPhone(ref variant) => Some(variant),
+			_ => None,
+		})
+	}
+
+	fn ipads(self) -> impl Iterator<Item = &'src IPadVariant> {
+		self.filter_map(|names| match names {
+			DeviceName::IPad(ref variant) => Some(variant),
+			_ => None,
+		})
+	}
+}
+
+impl ListJson {
+	pub fn devices(&self) -> impl Iterator<Item = &ListDevice> + '_ {
+		self.devices.values().flatten()
 	}
 }
 

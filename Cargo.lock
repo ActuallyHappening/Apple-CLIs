@@ -88,6 +88,7 @@ dependencies = [
  "derive_more",
  "dirs",
  "ext-trait",
+ "extension-traits",
  "glob",
  "nom",
  "openssl",
@@ -355,6 +356,15 @@ dependencies = [
  "proc-macro2",
  "quote",
  "syn 1.0.109",
+]
+
+[[package]]
+name = "extension-traits"
+version = "1.0.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "a296e5a895621edf9fa8329c83aa1cb69a964643e36cf54d8d7a69b789089537"
+dependencies = [
+ "ext-trait",
 ]
 
 [[package]]

@@ -1,18 +1,11 @@
-use apple_clis::{
-	open::{well_known::WellKnown, OpenCLIInstance},
-	shared::identifiers::{DeviceName, IPadVariant},
-	xcrun::{
-		simctl::{boot::BootOutput, list::ListDevice},
-		XcRunInstance,
-	},
-};
+use apple_clis::prelude::*;
 
 fn main() -> Result<(), apple_clis::error::Error> {
-	let xcrun_instance = XcRunInstance::new()?;
+	let xcrun_instance = xcrun::XcRunInstance::new()?;
 	let simctl_instance = xcrun_instance.simctl();
 
 	let output = simctl_instance.list()?;
-	let devices: Vec<&ListDevice> = output.devices().collect();
+	let devices: Vec<&simctl::list::ListDevice> = output.devices().collect();
 	for device in devices {
 		println!(
 			"Simulator device {name} is {state:?} and is ready = {ready:?}",
@@ -22,7 +15,12 @@ fn main() -> Result<(), apple_clis::error::Error> {
 		);
 	}
 
+	// the .names() and .ipads() are implemented on extension traits imported with
+	// use apple_clis::prelude::*;
+	// to make finding devices easier and more ergonomic
 	let ipad_simulator: &IPadVariant = output
+		.devices()
+		.names()
 		.ipads()
 		.max()
 		.expect("an iPad simulator to be available");
@@ -41,16 +39,16 @@ fn main() -> Result<(), apple_clis::error::Error> {
 	}
 
 	// boot the simulator
-	let boot_result = simctl_instance.boot(&DeviceName::from(*ipad_simulator))?;
+	let boot_result = simctl_instance.boot(DeviceName::from(*ipad_simulator))?;
 	match boot_result {
-		BootOutput::Success => println!("Booted the simulator"),
-		BootOutput::AlreadyBooted => println!("Simulator was already booted"),
+		simctl::boot::BootOutput::Success => println!("Booted the simulator"),
+		simctl::boot::BootOutput::AlreadyBooted => println!("Simulator was already booted"),
 		_ => println!("PRs welcome to cover more cases"),
 	}
 
 	// open the simulator
-	let open_instance = OpenCLIInstance::new()?;
-	open_instance.open_well_known(&WellKnown::Simulator)?;
+	let open_instance = open::OpenCLIInstance::new()?;
+	open_instance.open_well_known(&open::well_known::WellKnown::Simulator)?;
 
 	Ok(())
 }
