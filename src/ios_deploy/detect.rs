@@ -2,7 +2,7 @@ use super::IosDeployCLIInstance;
 use crate::prelude::*;
 
 impl IosDeployCLIInstance {
-	#[instrument(ret)]
+	#[instrument(ret, skip_all)]
 	pub fn detect_devices(&self, config: &DetectDevicesConfig) -> Result<Vec<Device>> {
 		let mut command = self
 			.bossy_command()

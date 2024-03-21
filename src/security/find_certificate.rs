@@ -34,7 +34,7 @@ impl SecurityCLIInstance {
 		Ok(certs.collect())
 	}
 
-	#[instrument(ret)]
+	#[instrument(skip_all, ret)]
 	pub fn get_developer_certs(&self) -> Result<Vec<Certificate>> {
 		Ok(
 			self

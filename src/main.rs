@@ -32,7 +32,7 @@ fn to_raw_json<T: std::fmt::Debug>(
 	})))
 }
 
-#[tracing::instrument(level = "trace", skip())]
+#[instrument]
 fn main() {
 	let config = cli::CliArgs::parse();
 
@@ -115,7 +115,7 @@ fn main() {
 	}
 }
 
-#[tracing::instrument(level = "debug")]
+#[instrument(skip_all)]
 fn run(command: Commands) -> std::result::Result<Option<serde_json::Value>, color_eyre::Report> {
 	match command {
 		Commands::Init(Init::NuShell { auto, raw_script }) => match (auto, raw_script) {
@@ -302,7 +302,7 @@ fn run(command: Commands) -> std::result::Result<Option<serde_json::Value>, colo
 							let device_name: DeviceName = simulator_id.resolve(&simctl_instance)?;
 							info!(simulator_id = %device_name, "Booting device");
 							let output = simctl_instance.boot(device_name)?;
-							to_json(output)
+							to_json(output.success()?)
 						}
 						Simctl::Install {
 							app_path,

@@ -46,7 +46,7 @@ impl WellKnown {
 }
 
 impl OpenCLIInstance {
-	#[tracing::instrument(level = "trace", skip(self, well_known))]
+	#[instrument(skip_all, ret)]
 	pub fn open_well_known(&self, well_known: &WellKnown) -> Result<ExitStatus> {
 		let path = well_known.get_path()?;
 		Ok(self.bossy_command().with_arg(path).run_and_wait()?)

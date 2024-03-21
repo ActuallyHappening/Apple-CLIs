@@ -42,7 +42,7 @@ pub use output::LaunchOutput;
 mod output;
 
 impl XcRunSimctlInstance<'_> {
-	#[instrument(ret)]
+	#[instrument(skip_all, ret)]
 	pub fn launch(
 		&self,
 		config: &LaunchConfig,
