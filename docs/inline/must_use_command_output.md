@@ -1,0 +1,1 @@
+You must use this command's output, since it encapsulates the error case. Call `.success()` to convert it to an `apple_clis::Result<_>`, or see [apple_clis::shared::PublicCommandOutput].

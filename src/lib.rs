@@ -9,7 +9,7 @@ pub mod prelude {
 	pub(crate) use crate::shared::{ws, CommandNomParsable, PublicCommandOutput, NomFromStr};
 	pub use crate::xcrun::simctl::list::{ListDeviceNamesExt, ListDevicesExt};
 	pub use crate::{codesign, ios_deploy, open, security, shared, spctl, xcrun, xcrun::simctl};
-	pub(crate) use crate::{impl_exec_child, impl_exec_instance, impl_from_str_nom};
+	pub(crate) use crate::shared::{impl_exec_child, impl_exec_instance, impl_from_str_nom};
 
 	pub use bossy;
 	pub use camino;

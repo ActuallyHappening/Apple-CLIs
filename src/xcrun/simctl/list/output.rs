@@ -4,6 +4,7 @@ use crate::shared::identifiers::{DeviceName, IPhoneVariant, RuntimeIdentifier};
 
 #[derive(Debug, Serialize)]
 #[non_exhaustive]
+#[must_use = include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/docs/inline/must_use_command_output.md"))]
 pub enum ListOutput {
 	SuccessJson(ListJson),
 

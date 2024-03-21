@@ -1,4 +1,4 @@
-use crate::{impl_from_str_nom, prelude::*};
+use crate::prelude::*;
 
 /// Isomorphic to [DeviceName].
 /// [Deserialize]s and [Serialize]s from a [String] representation.

@@ -43,7 +43,7 @@ fn main() -> Result<(), apple_clis::error::Error> {
 	// boot the simulator
 	let boot_result = simctl_instance.boot(DeviceName::from(*ipad_simulator))?;
 	match boot_result {
-		simctl::boot::BootOutput::Success => println!("Booted the simulator"),
+		simctl::boot::BootOutput::SuccessUnImplemented { .. } => println!("Booted the simulator"),
 		simctl::boot::BootOutput::AlreadyBooted => println!("Simulator was already booted"),
 		_ => println!("PRs welcome to cover more cases"),
 	}

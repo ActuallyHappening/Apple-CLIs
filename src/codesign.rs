@@ -1,6 +1,6 @@
-//! See https://developer.apple.com/documentation/xcode/creating-distribution-signed-code-for-the-mac
+//! See <https://developer.apple.com/documentation/xcode/creating-distribution-signed-code-for-the-mac>
 
-use crate::{impl_exec_instance, prelude::*};
+use crate::prelude::*;
 
 pub mod display;
 pub mod sign;

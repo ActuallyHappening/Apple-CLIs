@@ -102,7 +102,6 @@ pub trait ExecChild<'src>: Sized {
 	}
 }
 
-#[macro_export]
 macro_rules! impl_exec_instance {
 	($t:ty, $name:expr) => {
 		impl $crate::shared::ExecInstance for $t {
@@ -183,8 +182,8 @@ macro_rules! impl_exec_instance {
 		}
 	};
 }
+pub(crate) use impl_exec_instance;
 
-#[macro_export]
 macro_rules! impl_exec_child {
 	($t:ty, parent = $parent:ty, subcommand = $name:expr) => {
 		impl<'src> $crate::shared::ExecChild<'src> for $t {
@@ -212,6 +211,7 @@ macro_rules! impl_exec_child {
 		}
 	};
 }
+pub(crate) use impl_exec_child;
 
 pub(crate) trait NomFromStr: Sized {
 	fn nom_from_str(input: &str) -> IResult<&str, Self>;
@@ -315,11 +315,10 @@ pub(crate) trait CommandNomParsable: Sized + std::fmt::Debug {
 	}
 }
 
-/// [impl]s [std::str::FromStr] for a type that already implements
-/// [NomFromStr]
-#[macro_export]
+/// Not public API. [impl]s [std::str::FromStr] for a type
+// #[macro_export]
 macro_rules! impl_from_str_nom {
-	($type:ty) => {
+($type:ty) => {
 		impl std::str::FromStr for $type {
 			type Err = $crate::error::Error;
 
@@ -359,3 +358,4 @@ macro_rules! impl_from_str_nom {
 		}
 	};
 }
+pub(crate) use impl_from_str_nom;
