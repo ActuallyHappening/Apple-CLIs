@@ -662,6 +662,72 @@
       "name": "iPad Pro (12.9-inch) (6th generation) (16GB)"
     },
     {
+      "productFamily": "iPad",
+      "bundlePath": "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Library/Developer/CoreSimulator/Profiles/DeviceTypes/iPad Air 11-inch (M2).simdevicetype",
+      "maxRuntimeVersion": 4294967295,
+      "maxRuntimeVersionString": "65535.255.255",
+      "identifier": "com.apple.CoreSimulator.SimDeviceType.iPad-Air-11-inch-M2",
+      "modelIdentifier": "iPad14,9",
+      "minRuntimeVersionString": "17.4.0",
+      "minRuntimeVersion": 1115136,
+      "name": "iPad Air 11-inch (M2)"
+    },
+    {
+      "productFamily": "iPad",
+      "bundlePath": "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Library/Developer/CoreSimulator/Profiles/DeviceTypes/iPad Air 13-inch (M2).simdevicetype",
+      "maxRuntimeVersion": 4294967295,
+      "maxRuntimeVersionString": "65535.255.255",
+      "identifier": "com.apple.CoreSimulator.SimDeviceType.iPad-Air-13-inch-M2",
+      "modelIdentifier": "iPad14,11",
+      "minRuntimeVersionString": "17.4.0",
+      "minRuntimeVersion": 1115136,
+      "name": "iPad Air 13-inch (M2)"
+    },
+    {
+      "productFamily": "iPad",
+      "bundlePath": "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Library/Developer/CoreSimulator/Profiles/DeviceTypes/iPad Pro 11-inch (M4).simdevicetype",
+      "maxRuntimeVersion": 4294967295,
+      "maxRuntimeVersionString": "65535.255.255",
+      "identifier": "com.apple.CoreSimulator.SimDeviceType.iPad-Pro-11-inch-M4-8GB",
+      "modelIdentifier": "iPad16,4",
+      "minRuntimeVersionString": "17.4.0",
+      "minRuntimeVersion": 1115136,
+      "name": "iPad Pro 11-inch (M4)"
+    },
+    {
+      "productFamily": "iPad",
+      "bundlePath": "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Library/Developer/CoreSimulator/Profiles/DeviceTypes/iPad Pro 11-inch (M4) (16GB).simdevicetype",
+      "maxRuntimeVersion": 4294967295,
+      "maxRuntimeVersionString": "65535.255.255",
+      "identifier": "com.apple.CoreSimulator.SimDeviceType.iPad-Pro-11-inch-M4-16GB",
+      "modelIdentifier": "iPad16,4",
+      "minRuntimeVersionString": "17.4.0",
+      "minRuntimeVersion": 1115136,
+      "name": "iPad Pro 11-inch (M4) (16GB)"
+    },
+    {
+      "productFamily": "iPad",
+      "bundlePath": "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Library/Developer/CoreSimulator/Profiles/DeviceTypes/iPad Pro 13-inch (M4).simdevicetype",
+      "maxRuntimeVersion": 4294967295,
+      "maxRuntimeVersionString": "65535.255.255",
+      "identifier": "com.apple.CoreSimulator.SimDeviceType.iPad-Pro-13-inch-M4-8GB",
+      "modelIdentifier": "iPad16,6",
+      "minRuntimeVersionString": "17.4.0",
+      "minRuntimeVersion": 1115136,
+      "name": "iPad Pro 13-inch (M4)"
+    },
+    {
+      "productFamily": "iPad",
+      "bundlePath": "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Library/Developer/CoreSimulator/Profiles/DeviceTypes/iPad Pro 13-inch (M4) (16GB).simdevicetype",
+      "maxRuntimeVersion": 4294967295,
+      "maxRuntimeVersionString": "65535.255.255",
+      "identifier": "com.apple.CoreSimulator.SimDeviceType.iPad-Pro-13-inch-M4-16GB",
+      "modelIdentifier": "iPad16,6",
+      "minRuntimeVersionString": "17.4.0",
+      "minRuntimeVersion": 1115136,
+      "name": "iPad Pro 13-inch (M4) (16GB)"
+    },
+    {
       "productFamily": "Apple TV",
       "bundlePath": "/Applications/Xcode.app/Contents/Developer/Platforms/AppleTVOS.platform/Library/Developer/CoreSimulator/Profiles/DeviceTypes/Apple TV.simdevicetype",
       "maxRuntimeVersion": 4294967295,
@@ -1281,6 +1347,42 @@
           "name": "iPad Pro (12.9-inch) (6th generation) (16GB)",
           "identifier": "com.apple.CoreSimulator.SimDeviceType.iPad-Pro-12-9-inch-6th-generation-16GB",
           "productFamily": "iPad"
+        },
+        {
+          "bundlePath": "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Library/Developer/CoreSimulator/Profiles/DeviceTypes/iPad Air 11-inch (M2).simdevicetype",
+          "name": "iPad Air 11-inch (M2)",
+          "identifier": "com.apple.CoreSimulator.SimDeviceType.iPad-Air-11-inch-M2",
+          "productFamily": "iPad"
+        },
+        {
+          "bundlePath": "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Library/Developer/CoreSimulator/Profiles/DeviceTypes/iPad Air 13-inch (M2).simdevicetype",
+          "name": "iPad Air 13-inch (M2)",
+          "identifier": "com.apple.CoreSimulator.SimDeviceType.iPad-Air-13-inch-M2",
+          "productFamily": "iPad"
+        },
+        {
+          "bundlePath": "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Library/Developer/CoreSimulator/Profiles/DeviceTypes/iPad Pro 11-inch (M4).simdevicetype",
+          "name": "iPad Pro 11-inch (M4)",
+          "identifier": "com.apple.CoreSimulator.SimDeviceType.iPad-Pro-11-inch-M4-8GB",
+          "productFamily": "iPad"
+        },
+        {
+          "bundlePath": "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Library/Developer/CoreSimulator/Profiles/DeviceTypes/iPad Pro 11-inch (M4) (16GB).simdevicetype",
+          "name": "iPad Pro 11-inch (M4) (16GB)",
+          "identifier": "com.apple.CoreSimulator.SimDeviceType.iPad-Pro-11-inch-M4-16GB",
+          "productFamily": "iPad"
+        },
+        {
+          "bundlePath": "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Library/Developer/CoreSimulator/Profiles/DeviceTypes/iPad Pro 13-inch (M4).simdevicetype",
+          "name": "iPad Pro 13-inch (M4)",
+          "identifier": "com.apple.CoreSimulator.SimDeviceType.iPad-Pro-13-inch-M4-8GB",
+          "productFamily": "iPad"
+        },
+        {
+          "bundlePath": "/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Library/Developer/CoreSimulator/Profiles/DeviceTypes/iPad Pro 13-inch (M4) (16GB).simdevicetype",
+          "name": "iPad Pro 13-inch (M4) (16GB)",
+          "identifier": "com.apple.CoreSimulator.SimDeviceType.iPad-Pro-13-inch-M4-16GB",
+          "productFamily": "iPad"
         }
       ]
     }
@@ -1403,11 +1505,13 @@
     "com.apple.CoreSimulator.SimRuntime.iOS-17-4":
     [
       {
+        "lastBootedAt": "2024-03-20T00:33:56Z",
         "dataPath": "/Users/ah/Library/Developer/CoreSimulator/Devices/89755AAA-1AA0-438A-B78E-6662DAFDAEC0/data",
-        "dataPathSize": 18337792,
+        "dataPathSize": 610975744,
         "logPath": "/Users/ah/Library/Logs/CoreSimulator/89755AAA-1AA0-438A-B78E-6662DAFDAEC0",
         "udid": "89755AAA-1AA0-438A-B78E-6662DAFDAEC0",
         "isAvailable": true,
+        "logPathSize": 53248,
         "deviceTypeIdentifier": "com.apple.CoreSimulator.SimDeviceType.iPhone-SE-3rd-generation",
         "state": "Shutdown",
         "name": "iPhone SE (3rd generation)"
@@ -1423,11 +1527,13 @@
         "name": "iPhone 15"
       },
       {
+        "lastBootedAt": "2024-05-15T22:45:03Z",
         "dataPath": "/Users/ah/Library/Developer/CoreSimulator/Devices/70FF0154-4E54-4B90-AE9D-536E168ED7E3/data",
-        "dataPathSize": 18337792,
+        "dataPathSize": 18362368,
         "logPath": "/Users/ah/Library/Logs/CoreSimulator/70FF0154-4E54-4B90-AE9D-536E168ED7E3",
         "udid": "70FF0154-4E54-4B90-AE9D-536E168ED7E3",
         "isAvailable": true,
+        "logPathSize": 0,
         "deviceTypeIdentifier": "com.apple.CoreSimulator.SimDeviceType.iPhone-15-Plus",
         "state": "Shutdown",
         "name": "iPhone 15 Plus"
@@ -1465,13 +1571,13 @@
         "name": "iPad Air (5th generation)"
       },
       {
-        "lastBootedAt": "2024-03-13T08:45:22Z",
+        "lastBootedAt": "2024-03-17T03:07:54Z",
         "dataPath": "/Users/ah/Library/Developer/CoreSimulator/Devices/E4BBA9F2-DEB7-4276-84AF-E85A6971018E/data",
-        "dataPathSize": 1392979968,
+        "dataPathSize": 1395445760,
         "logPath": "/Users/ah/Library/Logs/CoreSimulator/E4BBA9F2-DEB7-4276-84AF-E85A6971018E",
         "udid": "E4BBA9F2-DEB7-4276-84AF-E85A6971018E",
         "isAvailable": true,
-        "logPathSize": 110592,
+        "logPathSize": 114688,
         "deviceTypeIdentifier": "com.apple.CoreSimulator.SimDeviceType.iPad-10th-generation",
         "state": "Shutdown",
         "name": "iPad (10th generation)"
@@ -1499,16 +1605,56 @@
         "name": "iPad Pro (11-inch) (4th generation)"
       },
       {
-        "lastBootedAt": "2024-03-16T07:57:34Z",
+        "lastBootedAt": "2024-05-15T22:50:21Z",
         "dataPath": "/Users/ah/Library/Developer/CoreSimulator/Devices/082A3477-208B-474D-918D-7AFD64BD634E/data",
-        "dataPathSize": 1255604224,
+        "dataPathSize": 1798623232,
         "logPath": "/Users/ah/Library/Logs/CoreSimulator/082A3477-208B-474D-918D-7AFD64BD634E",
         "udid": "082A3477-208B-474D-918D-7AFD64BD634E",
         "isAvailable": true,
-        "logPathSize": 118784,
+        "logPathSize": 262144,
         "deviceTypeIdentifier": "com.apple.CoreSimulator.SimDeviceType.iPad-Pro-12-9-inch-6th-generation-8GB",
-        "state": "Shutdown",
+        "state": "Booted",
         "name": "iPad Pro (12.9-inch) (6th generation)"
+      },
+      {
+        "dataPath": "/Users/ah/Library/Developer/CoreSimulator/Devices/C0D150B7-C280-4294-8FF0-8830BB33F63A/data",
+        "dataPathSize": 18337792,
+        "logPath": "/Users/ah/Library/Logs/CoreSimulator/C0D150B7-C280-4294-8FF0-8830BB33F63A",
+        "udid": "C0D150B7-C280-4294-8FF0-8830BB33F63A",
+        "isAvailable": true,
+        "deviceTypeIdentifier": "com.apple.CoreSimulator.SimDeviceType.iPad-Air-11-inch-M2",
+        "state": "Shutdown",
+        "name": "iPad Air 11-inch (M2)"
+      },
+      {
+        "dataPath": "/Users/ah/Library/Developer/CoreSimulator/Devices/4E76ABFF-04C0-4540-B3AD-A9E3DF520776/data",
+        "dataPathSize": 18337792,
+        "logPath": "/Users/ah/Library/Logs/CoreSimulator/4E76ABFF-04C0-4540-B3AD-A9E3DF520776",
+        "udid": "4E76ABFF-04C0-4540-B3AD-A9E3DF520776",
+        "isAvailable": true,
+        "deviceTypeIdentifier": "com.apple.CoreSimulator.SimDeviceType.iPad-Air-13-inch-M2",
+        "state": "Shutdown",
+        "name": "iPad Air 13-inch (M2)"
+      },
+      {
+        "dataPath": "/Users/ah/Library/Developer/CoreSimulator/Devices/3D861387-B39A-4CD8-9CD0-7B61BAEF25DA/data",
+        "dataPathSize": 18337792,
+        "logPath": "/Users/ah/Library/Logs/CoreSimulator/3D861387-B39A-4CD8-9CD0-7B61BAEF25DA",
+        "udid": "3D861387-B39A-4CD8-9CD0-7B61BAEF25DA",
+        "isAvailable": true,
+        "deviceTypeIdentifier": "com.apple.CoreSimulator.SimDeviceType.iPad-Pro-11-inch-M4-8GB",
+        "state": "Shutdown",
+        "name": "iPad Pro 11-inch (M4)"
+      },
+      {
+        "dataPath": "/Users/ah/Library/Developer/CoreSimulator/Devices/01E399AA-455B-42D5-B7AA-477E1DB21EC9/data",
+        "dataPathSize": 18337792,
+        "logPath": "/Users/ah/Library/Logs/CoreSimulator/01E399AA-455B-42D5-B7AA-477E1DB21EC9",
+        "udid": "01E399AA-455B-42D5-B7AA-477E1DB21EC9",
+        "isAvailable": true,
+        "deviceTypeIdentifier": "com.apple.CoreSimulator.SimDeviceType.iPad-Pro-13-inch-M4-8GB",
+        "state": "Shutdown",
+        "name": "iPad Pro 13-inch (M4)"
       }
     ]
   },

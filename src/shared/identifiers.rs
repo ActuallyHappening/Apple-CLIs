@@ -9,6 +9,7 @@ mod device_name;
 mod model_name;
 mod generation;
 mod screen_size;
+mod m_status;
 
 /// e.g. "com.apple.CoreSimulator.SimRuntime.iOS-16-4"
 #[derive(Serialize, Deserialize, Debug, Hash, PartialEq, Eq)]

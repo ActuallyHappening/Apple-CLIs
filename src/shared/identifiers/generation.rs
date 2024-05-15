@@ -31,7 +31,6 @@ impl Generation {
 		}
 	}
 
-	#[tracing::instrument(level = "trace", skip(number))]
 	#[cfg_attr(not(test), allow(dead_code))]
 	pub(crate) fn long(number: impl Into<u8>) -> Self {
 		Self {

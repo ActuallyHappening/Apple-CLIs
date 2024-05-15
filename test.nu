@@ -8,4 +8,4 @@ cd example-bundle
 nu test-bundle.nu
 cd ..
 
-cargo test
+cargo t

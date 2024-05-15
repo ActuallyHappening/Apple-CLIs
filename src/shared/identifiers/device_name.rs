@@ -61,17 +61,14 @@ pub use ipad::*;
 mod ipad;
 
 impl DeviceName {
-	#[tracing::instrument(level = "trace", skip(self))]
 	pub fn parsed_successfully(&self) -> bool {
 		!matches!(self, DeviceName::UnImplemented(_))
 	}
 
-	#[tracing::instrument(level = "trace", skip(self))]
 	pub fn is_iphone(&self) -> bool {
 		matches!(self, DeviceName::IPhone(_))
 	}
 
-	#[tracing::instrument(level = "trace", skip(self))]
 	pub fn is_ipad(&self) -> bool {
 		matches!(self, DeviceName::IPad(_))
 	}
@@ -92,7 +89,6 @@ impl DeviceName {
 }
 
 impl NomFromStr for DeviceName {
-	#[tracing::instrument(level = "trace", skip(input))]
 	fn nom_from_str(input: &str) -> IResult<&str, Self> {
 		alt((
 			map(ws(IPadVariant::nom_from_str), DeviceName::IPad),
