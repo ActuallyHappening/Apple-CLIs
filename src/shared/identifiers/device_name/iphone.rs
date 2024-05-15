@@ -5,7 +5,7 @@ use crate::prelude::*;
 #[derive(Debug, Clone, Copy, PartialEq, Eq, EnumDiscriminants, PartialOrd, Ord)]
 pub enum IPhoneVariant {
 	SE {
-		generation: Generation,
+		generation: NumGeneration,
 	},
 
 	Number {
@@ -36,7 +36,7 @@ impl NomFromStr for IPhoneVariant {
 
 		match discriminate {
 			IPhoneVariantDiscriminants::SE => {
-				let (remaining, generation) = Generation::nom_from_str(remaining)?;
+				let (remaining, generation) = NumGeneration::nom_from_str(remaining)?;
 				Ok((remaining, IPhoneVariant::SE { generation }))
 			}
 			IPhoneVariantDiscriminants::Number => {
@@ -92,7 +92,7 @@ mod tests {
 	#[test]
 	fn iphone_ordering() {
 		let old = IPhoneVariant::SE {
-			generation: Generation::long(1),
+			generation: NumGeneration::long(1),
 		};
 		let new = IPhoneVariant::Number {
 			num: NonZeroU8::new(69).unwrap(),

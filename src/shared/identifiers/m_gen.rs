@@ -1,14 +1,14 @@
 use crate::prelude::*;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, PartialOrd, Ord)]
-pub struct MStatus(NonZeroU8);
+pub struct MGen(NonZeroU8);
 
 /// Wrapper around `Option<MStatus>` to allow for convenient [Display] impl.
 /// *The [Display] impl has a prefix space!*
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, PartialOrd, Ord)]
-pub struct MaybeMStatus(Option<MStatus>);
+pub struct MaybeMGen(Option<MGen>);
 
-impl MStatus {
+impl MGen {
 	pub fn get_u8(&self) -> u8 {
 		self.0.get()
 	}
@@ -27,7 +27,7 @@ impl MStatus {
 	}
 }
 
-impl Display for MaybeMStatus {
+impl Display for MaybeMGen {
 	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
 		match self.0 {
 			Some(m) => write!(f, " {}", m),
@@ -36,43 +36,43 @@ impl Display for MaybeMStatus {
 	}
 }
 
-impl MaybeMStatus {
+impl MaybeMGen {
 	#[allow(dead_code)]
-	pub fn get(&self) -> Option<&MStatus> {
+	pub fn get(&self) -> Option<&MGen> {
 		self.0.as_ref()
 	}
 
-	pub(crate) fn new(m: Option<MStatus>) -> Self {
+	pub(crate) fn new(m: Option<MGen>) -> Self {
 		Self(m)
 	}
 
 	#[cfg(test)]
 	pub(crate) fn default_testing() -> Self {
-		Self::new(Some(MStatus::default_testing()))
+		Self::new(Some(MGen::default_testing()))
 	}
 }
 
 /// parses (M1) -> MStatus(NonZeroU8(1))
-fn parse_m_status(input: &str) -> IResult<&str, MStatus> {
+fn parse_m_status(input: &str) -> IResult<&str, MGen> {
 	delimited(
 		tag("(M"),
-		map(NonZeroU8::nom_from_str, MStatus::new),
+		map(NonZeroU8::nom_from_str, MGen::new),
 		tag(")"),
 	)(input)
 }
 
-impl Display for MStatus {
+impl Display for MGen {
 	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
 		write!(f, "(M{})", self.get())
 	}
 }
 
-impl NomFromStr for MaybeMStatus {
+impl NomFromStr for MaybeMGen {
 	fn nom_from_str(input: &str) -> IResult<&str, Self> {
 		map(alt((
 			map(parse_m_status, Some),
 			value(None, tag("")),
-		)), MaybeMStatus::new)(input)
+		)), MaybeMGen::new)(input)
 	}
 }
 
