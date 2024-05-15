@@ -20,6 +20,7 @@ pub mod prelude {
 	pub(crate) use crate::shared::ExecInstance;
 	pub(crate) use crate::shared::{impl_exec_child, impl_exec_instance, impl_from_str_nom};
 	pub(crate) use crate::shared::{ws, CommandNomParsable, NomFromStr};
+	pub(crate) use crate::include_doc;
 
 	// internal dep imports
 	pub(crate) use bossy::{ExitStatus, Output};
@@ -70,3 +71,16 @@ pub mod xcrun;
 // pub mod pkgutil;
 // pub mod productbuild;
 // pub mod productsign;
+
+macro_rules! include_doc {
+		(cmd_error) => {
+			include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/docs/inline/command_error.md"))
+		};
+		(cmd_success) => {
+			include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/docs/inline/command_success.md"))
+		};
+		(must_use_cmd_output) => {
+			include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/docs/inline/must_use_command_output.md"))
+		};
+}
+pub(crate) use include_doc;
