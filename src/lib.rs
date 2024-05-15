@@ -23,6 +23,7 @@ pub mod prelude {
 	pub(crate) use crate::include_doc;
 
 	// internal dep imports
+	pub(crate) use stability::unstable;
 	pub(crate) use bossy::{ExitStatus, Output};
 	pub(crate) use camino::{Utf8Path, Utf8PathBuf};
 	#[allow(unused_imports)]

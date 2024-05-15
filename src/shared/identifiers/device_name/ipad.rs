@@ -129,7 +129,7 @@ mod test {
 			generation: Generation::long(NonZeroU8::new(1).unwrap()),
 		};
 		let new = IPadVariant::Pro {
-			size: ScreenSize::long(12.9),
+			size: ScreenSize::long_brackets(12.9),
 			generation: Generation::long(NonZeroU8::new(2).unwrap()),
 			size_before_generation: false,
 			m_status: MaybeMStatus::default_testing(),
