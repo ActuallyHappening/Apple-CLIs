@@ -7,21 +7,19 @@ use self::identifiers::m_gen::{MGen, MaybeMGen};
 #[derive(Debug, Clone, Copy, PartialEq, Eq, EnumDiscriminants, PartialOrd, Ord)]
 pub enum IPadVariant {
 	Air {
-		generation: NumGeneration,
-		m_status: MaybeMGen,
+		generation: Generation,
 	},
 	Mini {
-		generation: NumGeneration,
+		generation: Generation,
 	},
 	Plain {
-		generation: NumGeneration,
+		generation: Generation,
 	},
 	Pro {
 		size: ScreenSize,
-		generation: NumGeneration,
+		generation: Generation,
 		/// For lossless parsing
 		size_before_generation: bool,
-		m_status: MaybeMGen,
 	},
 }
 

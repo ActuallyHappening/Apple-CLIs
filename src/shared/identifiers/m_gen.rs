@@ -25,6 +25,11 @@ impl MGen {
 	fn default_testing() -> Self {
 		Self(NonZeroU8::new(1).unwrap())
 	}
+
+	#[cfg(test)]
+	pub(super) fn new_testing(num: NonZeroU8) -> Self {
+		Self::new(num)
+	}
 }
 
 impl Display for MaybeMGen {

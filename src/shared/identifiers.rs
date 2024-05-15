@@ -2,6 +2,8 @@ use crate::prelude::*;
 
 pub use device_name::{DeviceName, IPadVariant, IPhoneVariant};
 pub use num_generation::NumGeneration;
+pub use m_gen::MGen;
+pub use generation::Generation;
 pub use screen_size::ScreenSize;
 pub use model_name::ModelName;
 
