@@ -5,7 +5,6 @@ use crate::prelude::*;
 pub mod display;
 pub mod sign;
 
-
 #[derive(Debug)]
 pub struct CodesignCLIInstance {
 	exec_path: Utf8PathBuf,

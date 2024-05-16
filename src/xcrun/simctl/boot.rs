@@ -1,6 +1,5 @@
 use crate::{prelude::*, shared::identifiers::DeviceName};
 
-
 use super::XcRunSimctlInstance;
 
 pub use self::output::BootOutput;

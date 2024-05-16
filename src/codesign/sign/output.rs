@@ -27,7 +27,7 @@ impl PublicCommandOutput for SignOutput {
 	fn success(&self) -> Result<&Self::PrimarySuccess> {
 		match self.successful() {
 			true => Ok(&()),
-			false => Err(Error::output_errored(self))
+			false => Err(Error::output_errored(self)),
 		}
 	}
 

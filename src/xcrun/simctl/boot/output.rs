@@ -8,28 +8,22 @@ pub enum BootOutput {
 	AlreadyBooted,
 
 	#[doc = include_doc!(cmd_success)]
-	SuccessUnImplemented {
-		stdout: String,
-	},
+	SuccessUnImplemented { stdout: String },
 
 	#[doc = include_doc!(cmd_error)]
-	ErrorUnImplemented {
-		stderr: String,
-	},
+	ErrorUnImplemented { stderr: String },
 
 	/// Added so a special recommendation of running a fixing command can be displayed:
 	/// ```sh
 	/// sudo rm -rf ~/Library/Developer/CoreSimulator/Caches
 	/// ```
-	/// 
+	///
 	/// An error was encountered processing the command (domain=NSPOSIXErrorDomain, code=60):
 	/// Unable to boot the Simulator.
 	/// launchd failed to respond.
 	/// Underlying error (domain=com.apple.SimLaunchHostService.RequestError, code=4):
 	///         Failed to start launchd_sim: could not bind to session, launchd_sim may have crashed or quit responding
-	ErrorLaunchDFailed {
-		stderr: String,
-	}
+	ErrorLaunchDFailed { stderr: String },
 }
 
 impl CommandNomParsable for BootOutput {
@@ -53,9 +47,10 @@ impl PublicCommandOutput for BootOutput {
 	fn success(&self) -> Result<&Self::PrimarySuccess> {
 		match self {
 			BootOutput::SuccessUnImplemented { .. } | BootOutput::AlreadyBooted => Ok(&()),
-			BootOutput::ErrorLaunchDFailed { .. } => {
-				Err(Error::output_errored_with_hint(self, "Try running `sudo rm -rf ~/Library/Developer/CoreSimulator/Caches` to fix this issue."))
-			}
+			BootOutput::ErrorLaunchDFailed { .. } => Err(Error::output_errored_with_hint(
+				self,
+				"Try running `sudo rm -rf ~/Library/Developer/CoreSimulator/Caches` to fix this issue.",
+			)),
 			BootOutput::ErrorUnImplemented { .. } => Err(Error::output_errored(self)),
 		}
 	}
@@ -86,7 +81,18 @@ fn parse_launchd_failed(input: &str) -> IResult<&str, BootOutput> {
 	let (remaining, error_code) = delimited(ws(tag("code=")), digit1, ws(tag("):")))(remaining)?;
 	let (underlying_error, msg) = ws(tag("launchd failed to respond."))(remaining)?;
 
-	warn!(?domain, ?error_code, ?msg, ?underlying_error, "Parsed xcrun simctl boot error");
+	warn!(
+		?domain,
+		?error_code,
+		?msg,
+		?underlying_error,
+		"Parsed xcrun simctl boot error"
+	);
 
-	Ok(("", BootOutput::ErrorLaunchDFailed { stderr: input.into() }))
+	Ok((
+		"",
+		BootOutput::ErrorLaunchDFailed {
+			stderr: input.into(),
+		},
+	))
 }

@@ -8,14 +8,18 @@ mod output;
 impl SpctlCLIInstance {
 	#[instrument(skip_all, ret)]
 	#[doc = include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/docs/inline/TODO.md"))]
-	pub fn assess(&self, path: impl AsRef<Utf8Path>, assess_type: AssessType) -> Result<AssessOutput> {
+	pub fn assess(
+		&self,
+		path: impl AsRef<Utf8Path>,
+		assess_type: AssessType,
+	) -> Result<AssessOutput> {
 		AssessOutput::from_bossy_result(
 			self
 				.bossy_command()
 				.with_arg("--asses")
 				.with_args(["--type", assess_type.into_type()])
 				.with_arg(path.as_ref())
-				.run_and_wait_for_output()
+				.run_and_wait_for_output(),
 		)
 	}
 

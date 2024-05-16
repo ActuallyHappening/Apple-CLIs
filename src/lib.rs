@@ -17,10 +17,10 @@ pub mod prelude {
 
 	// internal re-exports
 	pub(crate) use crate::error::Result;
+	pub(crate) use crate::include_doc;
 	pub(crate) use crate::shared::ExecInstance;
 	pub(crate) use crate::shared::{impl_exec_child, impl_exec_instance, impl_from_str_nom};
 	pub(crate) use crate::shared::{ws, CommandNomParsable, NomFromStr};
-	pub(crate) use crate::include_doc;
 
 	// internal dep imports
 	pub(crate) use bossy::{ExitStatus, Output};
@@ -30,7 +30,7 @@ pub mod prelude {
 		branch::{alt, permutation},
 		bytes::complete::{tag, take_till, take_till1, take_until, take_while},
 		character::complete::{alpha0, alpha1, digit1, multispace0, multispace1, space0, space1},
-		combinator::{all_consuming, cut, map, map_res, peek, rest, success, value, opt},
+		combinator::{all_consuming, cut, map, map_res, opt, peek, rest, success, value},
 		multi::fold_many1,
 		number::complete::float,
 		sequence::{delimited, pair, preceded, terminated, tuple},
@@ -73,17 +73,26 @@ pub mod xcrun;
 // pub mod productsign;
 
 macro_rules! include_doc {
-		(cmd_error) => {
-			include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/docs/inline/command_error.md"))
-		};
-		(cmd_success) => {
-			include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/docs/inline/command_success.md"))
-		};
-		(must_use_cmd_output) => {
-			include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/docs/inline/must_use_command_output.md"))
-		};
-		(todo) => {
-			include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/docs/inline/TODO.md"))
-		};
+	(cmd_error) => {
+		include_str!(concat!(
+			env!("CARGO_MANIFEST_DIR"),
+			"/docs/inline/command_error.md"
+		))
+	};
+	(cmd_success) => {
+		include_str!(concat!(
+			env!("CARGO_MANIFEST_DIR"),
+			"/docs/inline/command_success.md"
+		))
+	};
+	(must_use_cmd_output) => {
+		include_str!(concat!(
+			env!("CARGO_MANIFEST_DIR"),
+			"/docs/inline/must_use_command_output.md"
+		))
+	};
+	(todo) => {
+		include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/docs/inline/TODO.md"))
+	};
 }
 pub(crate) use include_doc;

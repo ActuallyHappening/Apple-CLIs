@@ -39,8 +39,7 @@ mod maybe {
 	}
 
 	#[cfg(test)]
-	mod test {
-	}
+	mod test {}
 }
 
 #[derive(Debug, Clone, Copy, Eq, PartialOrd, Ord)]

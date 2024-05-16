@@ -8,10 +8,12 @@ mod output;
 impl<'src> XcRunSimctlInstance<'src> {
 	#[instrument(skip_all)]
 	pub fn list(&self) -> Result<ListOutput> {
-		ListOutput::from_bossy_result(self
-			.bossy_command()
-			.with_arg("list")
-			.with_arg("--json")
-			.run_and_wait_for_output())
+		ListOutput::from_bossy_result(
+			self
+				.bossy_command()
+				.with_arg("list")
+				.with_arg("--json")
+				.run_and_wait_for_output(),
+		)
 	}
 }

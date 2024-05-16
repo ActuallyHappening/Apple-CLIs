@@ -35,7 +35,7 @@ fn main() -> Result<(), apple_clis::error::Error> {
 		let inches: f32 = size.inches();
 		let gen: u8 = match generation {
 			// generations can be M1 or gen 6
-			Generation::Num(num) => num.get(),	
+			Generation::Num(num) => num.get(),
 			Generation::M(m_gen) => m_gen.get_u8(),
 		};
 		println!(

@@ -4,8 +4,8 @@ use super::XcRunInstance;
 
 pub mod boot;
 pub mod install;
-pub mod list;
 pub mod launch;
+pub mod list;
 
 #[derive(Debug)]
 pub struct XcRunSimctlInstance<'src> {

@@ -33,24 +33,15 @@ impl NumGeneration {
 
 	#[cfg_attr(not(test), allow(dead_code))]
 	pub(super) fn testing_new(num: NonZeroU8) -> Self {
-		Self {
-			num,
-			short: false,
-		}
+		Self { num, short: false }
 	}
 
 	fn long(num: NonZeroU8) -> Self {
-		Self {
-			num,
-			short: false,
-		}
+		Self { num, short: false }
 	}
 
 	fn short(num: NonZeroU8) -> Self {
-		Self {
-			num,
-			short: true,
-		}
+		Self { num, short: true }
 	}
 
 	pub fn get(&self) -> u8 {
@@ -72,10 +63,7 @@ fn generation_brackets(input: &str) -> IResult<&str, NumGeneration> {
 }
 
 fn generation_model(input: &str) -> IResult<&str, NumGeneration> {
-	terminated(
-		map(NonZeroU8::nom_from_str, NumGeneration::short),
-		tag("G"),
-	)(input)
+	terminated(map(NonZeroU8::nom_from_str, NumGeneration::short), tag("G"))(input)
 }
 
 impl NomFromStr for NumGeneration {

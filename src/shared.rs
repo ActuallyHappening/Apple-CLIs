@@ -3,9 +3,9 @@ use crate::prelude::*;
 pub mod identifiers;
 pub mod types;
 
-pub(crate) use traits::*;
 pub(crate) use traits::impl_from_str_nom;
 pub use traits::PublicCommandOutput;
+pub(crate) use traits::*;
 mod traits;
 
 /// A combinator that takes a parser `inner` and produces a parser that also consumes both leading and
@@ -22,7 +22,7 @@ where
 /// Simplify testing
 /// ```ignore
 /// use apple_clis::prelude::*;
-/// 
+///
 /// let examples = ["123", "456"]
 /// let func = |parsed| parsed.not_unimplemented();
 /// assert_nom_parses<YourT>(examples, func);

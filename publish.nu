@@ -5,6 +5,7 @@ plugin add $"($env.HOME)/.cargo/bin/nu_plugin_semver"
 
 # test suite
 cargo update
+cargo fmt
 nu test.nu
 
 # bumps patch version

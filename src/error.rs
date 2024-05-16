@@ -84,9 +84,7 @@ pub enum Error {
 	},
 
 	#[error("Couldn't locate the stderr output stream even though the command errored: {err}")]
-	CannotLocateStderrStream {
-		err: bossy::Error,
-	}
+	CannotLocateStderrStream { err: bossy::Error },
 }
 
 impl Error {
@@ -97,7 +95,10 @@ impl Error {
 		}
 	}
 
-	pub(crate) fn output_errored_with_hint(debug_msg: impl std::fmt::Debug, help_hint: impl ToString) -> Self {
+	pub(crate) fn output_errored_with_hint(
+		debug_msg: impl std::fmt::Debug,
+		help_hint: impl ToString,
+	) -> Self {
 		Self::OutputErrored {
 			debug_msg: format!("{:#?}", debug_msg),
 			help_hint: Some(help_hint.to_string()),

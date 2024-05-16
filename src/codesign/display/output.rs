@@ -8,22 +8,16 @@ mod signed_keys;
 #[must_use = include_doc!(must_use_cmd_output)]
 pub enum DisplayOutput {
 	/// Considered an error case
-	NotSignedAtAll {
-		path: Utf8PathBuf,
-	},
+	NotSignedAtAll { path: Utf8PathBuf },
 
 	/// Successfully extracted key-value pairs from codesign -d
 	SignedKeys(signed_keys::SignedKeys),
 
 	#[doc = include_doc!(cmd_success)]
-	SuccessUnimplemented {
-		stdout: String,
-	},
+	SuccessUnimplemented { stdout: String },
 
 	#[doc = include_doc!(cmd_error)]
-	ErrorUnImplemented {
-		stderr: String,
-	},
+	ErrorUnImplemented { stderr: String },
 }
 
 impl CommandNomParsable for DisplayOutput {
