@@ -24,3 +24,5 @@ $nt | save --force "Cargo.toml"
 git commit -am $"feat\(v($nv)): Publishing changes"
 
 cargo publish
+
+git commit -am "chore: Cargo.lock update"
