@@ -72,7 +72,7 @@ impl XcRunSimctlInstance<'_> {
 	/// Not setting [LaunchConfig::console] to true will result in a warning,
 	/// since presumably you are calling this function over [Self::launch] to
 	/// see logs in the console.
-	#[instrument(ret, skip(self,))]
+	#[instrument(skip_all, ret, fields(?config, %simulator_name))]
 	pub fn launch_piped(
 		&self,
 		config: &LaunchConfig,

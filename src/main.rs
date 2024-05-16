@@ -27,8 +27,8 @@ fn to_raw_json<T: std::fmt::Debug>(
 	output: T,
 ) -> Result<Option<serde_json::Value>, color_eyre::Report> {
 	Ok(Some(json!({
-		"msg": "This value does not have a good JSON representation yet, so it is not returned in the JSON output. PRs welcome!",
-		"raw_output": format!("{:#?}", output),
+		"msg": "This value does not have a good JSON representation yet, so it is not returned in the JSON format. PRs welcome!",
+		"raw_output": format!("{:?}", output),
 	})))
 }
 
