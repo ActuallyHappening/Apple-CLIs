@@ -1,5 +1,10 @@
 # Apple CLIs
 
+## [0.0.13]
+- Added new error case for simctl boot, which helps me to solve a problem with the simulator not booting
+- Refactored a bunch of doc macros
+- Added support for parsing M1 apple device names
+
 ## [0.0.12]
 - Internally audited code
 - Logging through tracing is now better
