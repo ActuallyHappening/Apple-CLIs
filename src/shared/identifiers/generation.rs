@@ -73,6 +73,6 @@ mod test {
 	fn test_generation_hard_coded() {
 		let examples = ["(6th generation)", "(M2)"];
 
-		assert_nom_parses::<Generation>(examples, |p| true)
+		assert_nom_parses::<Generation>(examples, |_| true)
 	}
 }

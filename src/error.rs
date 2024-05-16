@@ -9,6 +9,7 @@ pub enum Error {
 	#[error("The output of a command did not succeed as expected")]
 	OutputErrored {
 		debug_msg: String,
+		help_hint: Option<String>,
 	},
 
 	/// TODO: propagate more information
@@ -92,6 +93,14 @@ impl Error {
 	pub(crate) fn output_errored(debug_msg: impl std::fmt::Debug) -> Self {
 		Self::OutputErrored {
 			debug_msg: format!("{:#?}", debug_msg),
+			help_hint: None,
+		}
+	}
+
+	pub(crate) fn output_errored_with_hint(debug_msg: impl std::fmt::Debug, help_hint: impl ToString) -> Self {
+		Self::OutputErrored {
+			debug_msg: format!("{:#?}", debug_msg),
+			help_hint: Some(help_hint.to_string()),
 		}
 	}
 }

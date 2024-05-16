@@ -22,9 +22,7 @@ impl ListOutput {
 	pub fn success(&self) -> Result<&ListJson> {
 		match self {
 			ListOutput::SuccessJson(output) => Ok(output),
-			_ => Err(Error::OutputErrored {
-				debug_msg: format!("{:#?}", self),
-			}),
+			_ => Err(Error::output_errored(self)),
 		}
 	}
 

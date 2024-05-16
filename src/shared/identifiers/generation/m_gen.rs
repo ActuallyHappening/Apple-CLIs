@@ -18,11 +18,6 @@ impl MGen {
 	}
 
 	#[cfg(test)]
-	fn default_testing() -> Self {
-		Self(NonZeroU8::new(1).unwrap())
-	}
-
-	#[cfg(test)]
 	pub(super) fn new_testing(num: NonZeroU8) -> Self {
 		Self::new(num)
 	}
@@ -41,7 +36,7 @@ impl Display for MGen {
 
 impl NomFromStr for MGen {
 	fn nom_from_str(input: &str) -> IResult<&str, Self> {
-		delimited(tag("(M"), map(NonZeroU8::nom_from_str, MGen::new), tag(")"))(input)
+		parse_m_status(input)
 	}
 }
 
