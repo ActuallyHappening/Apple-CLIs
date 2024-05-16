@@ -31,7 +31,7 @@ fn to_raw_json<T: std::fmt::Debug>(
 
 type CResult = std::result::Result<Option<serde_json::Value>, color_eyre::Report>;
 
-#[instrument]
+#[instrument(skip_all)]
 fn cmd_init(cmd: Init) -> CResult {
 	match cmd {
 		Init::NuShell { auto, raw_script } => match (auto, raw_script) {
@@ -109,7 +109,7 @@ fn cmd_init(cmd: Init) -> CResult {
 	}
 }
 
-#[instrument]
+#[instrument(skip_all)]
 fn cmd_ios_deploy(cmd: IosDeploy) -> CResult {
 	let ios_deploy_instance = IosDeployCLIInstance::new()?;
 	match cmd {
@@ -139,7 +139,7 @@ fn cmd_ios_deploy(cmd: IosDeploy) -> CResult {
 	}
 }
 
-#[instrument]
+#[instrument(skip_all)]
 fn cmd_security(cmd: Security) -> CResult {
 	let security_instance = security::SecurityCLIInstance::new()?;
 	match cmd {
@@ -166,7 +166,7 @@ fn cmd_security(cmd: Security) -> CResult {
 	}
 }
 
-#[instrument]
+#[instrument(skip_all)]
 fn cmd_spctl(cmd: Spctl) -> CResult {
 	let spctl_instance = spctl::SpctlCLIInstance::new()?;
 	match cmd {
@@ -178,6 +178,7 @@ fn cmd_spctl(cmd: Spctl) -> CResult {
 	}
 }
 
+#[instrument(skip_all)]
 fn cmd_code_sign(cmd: CodeSign) -> CResult {
 	let codesign_instance = codesign::CodesignCLIInstance::new()?;
 	match cmd {
@@ -200,7 +201,7 @@ fn cmd_code_sign(cmd: CodeSign) -> CResult {
 	}
 }
 
-#[instrument]
+#[instrument(skip_all)]
 fn cmd_xcrun(cmd: XcRun) -> CResult {
 	let xcrun_instance = XcRunInstance::new()?;
 	match cmd {
@@ -249,7 +250,7 @@ fn cmd_xcrun(cmd: XcRun) -> CResult {
 	}
 }
 
-#[instrument]
+#[instrument(skip_all)]
 fn cmd_open(cmd: cli::Open) -> CResult {
 	let open_instance = OpenCLIInstance::new()?;
 	let well_known = cmd.well_known;
@@ -258,7 +259,7 @@ fn cmd_open(cmd: cli::Open) -> CResult {
 	Ok(None)
 }
 
-#[instrument(skip_all, level = "debug")]
+#[instrument(skip_all, level = "info", ret)]
 pub fn run(
 	command: Commands,
 ) -> std::result::Result<Option<serde_json::Value>, color_eyre::Report> {
