@@ -1,7 +1,7 @@
 def save_data_json [name: string, data: any, --raw] {
 	let $file_name = $"($name).json"
 	if not $raw {
-		open $file_name | append $data | filter { |x| $x != null } | uniq | save -f $file_name
+		open $file_name | append $data | filter { |x| $x != null } | uniq | collect { save -f $file_name }
 	} else {
 		$data | save -f $file_name
 	}

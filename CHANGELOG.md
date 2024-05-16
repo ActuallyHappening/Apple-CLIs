@@ -1,5 +1,8 @@
 # Apple CLIs
 
+## [0.0.15]
+- Fixed a bug with deserializing from JSON
+
 ## [0.0.14]
 - Quality of life improvements, especially spans for logging
 
