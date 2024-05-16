@@ -2,6 +2,8 @@ use crate::prelude::*;
 
 use crate::{ios_deploy::detect::DetectDevicesConfig, open::well_known::WellKnown, xcrun::simctl};
 
+pub mod run;
+
 pub use app_path::AppPathArgs;
 mod app_path;
 pub use device_name::{DeviceSimulatorBootedArgs, DeviceSimulatorUnBootedArgs};
