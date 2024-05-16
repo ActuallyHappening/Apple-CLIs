@@ -91,9 +91,11 @@ As always, PRs are welcome!
 ## Example build script
 This example `.nu` script uses `cargo bundle`, which you can install with `cargo install cargo-bundle`, and nushell, as an example script to build an iOS app.
 ```sh
-# example Cargo.toml
+# example Cargo.toml, for `cargo bundle`
 # [package.metadata.bundle]
 # identifier = "com.example-id"
+
+# let APP_NAME = open Cargo.toml | get package.name | to text;
 let BUNDLE_ID = open Cargo.toml | get package.metadata.bundle.identifier | to text
 
 cargo bundle --target aarch64-apple-ios-sim
