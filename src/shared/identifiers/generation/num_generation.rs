@@ -32,16 +32,23 @@ impl NumGeneration {
 	}
 
 	#[cfg_attr(not(test), allow(dead_code))]
-	pub(crate) fn long(number: impl Into<u8>) -> Self {
+	pub(super) fn testing_new(num: NonZeroU8) -> Self {
 		Self {
-			num: NonZeroU8::new(number.into()).unwrap(),
+			num,
 			short: false,
 		}
 	}
 
-	fn short(num: impl Into<u8>) -> Self {
+	fn long(num: NonZeroU8) -> Self {
 		Self {
-			num: NonZeroU8::new(num.into()).unwrap(),
+			num,
+			short: false,
+		}
+	}
+
+	fn short(num: NonZeroU8) -> Self {
+		Self {
+			num,
 			short: true,
 		}
 	}
@@ -120,7 +127,7 @@ mod tests {
 	}
 
 	#[test]
-	fn test_parse_generation() {
+	fn hardcoded_num_generation() {
 		let examples = [
 			"(1st generation)",
 			"(2nd generation)",

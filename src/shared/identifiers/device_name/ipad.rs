@@ -1,7 +1,5 @@
 use crate::prelude::*;
 
-use self::identifiers::m_gen::{MGen, MaybeMGen};
-
 /// Loosely ordered from oldest to newest.
 /// newest > oldest
 #[derive(Debug, Clone, Copy, PartialEq, Eq, EnumDiscriminants, PartialOrd, Ord)]
@@ -46,43 +44,39 @@ impl NomFromStr for IPadVariant {
 
 		match discriminate {
 			IPadVariantDiscriminants::Air => {
-				let (remaining, generation) = NumGeneration::nom_from_str(remaining)?;
-				let (remaining, m_status) = ws(MaybeMGen::nom_from_str)(remaining)?;
+				let (remaining, generation) = Generation::nom_from_str(remaining)?;
 				Ok((
 					remaining,
 					IPadVariant::Air {
 						generation,
-						m_status,
 					},
 				))
 			}
 			IPadVariantDiscriminants::Mini => {
-				let (remaining, generation) = NumGeneration::nom_from_str(remaining)?;
+				let (remaining, generation) = Generation::nom_from_str(remaining)?;
 				Ok((remaining, IPadVariant::Mini { generation }))
 			}
 			IPadVariantDiscriminants::Plain => {
-				let (remaining, generation) = NumGeneration::nom_from_str(remaining)?;
+				let (remaining, generation) = Generation::nom_from_str(remaining)?;
 				Ok((remaining, IPadVariant::Plain { generation }))
 			}
 			IPadVariantDiscriminants::Pro => {
 				let (remaining, (size_before_generation, (size, generation))) = alt((
 					map(
-						pair(ws(ScreenSize::nom_from_str), ws(NumGeneration::nom_from_str)),
+						pair(ws(ScreenSize::nom_from_str), ws(Generation::nom_from_str)),
 						|v| (true, v),
 					),
 					map(
-						pair(ws(NumGeneration::nom_from_str), ws(ScreenSize::nom_from_str)),
+						pair(ws(Generation::nom_from_str), ws(ScreenSize::nom_from_str)),
 						|(gen, ss)| (false, (ss, gen)),
 					),
 				))(remaining)?;
-				let (remaining, m_status) = ws(MaybeMGen::nom_from_str)(remaining)?;
 				Ok((
 					remaining,
 					IPadVariant::Pro {
 						size,
 						generation,
 						size_before_generation,
-						m_status,
 					},
 				))
 			}
@@ -97,19 +91,16 @@ impl Display for IPadVariant {
 				size,
 				generation,
 				size_before_generation: true,
-				m_status,
-			} => write!(f, "iPad Pro {} {}{}", size, generation, m_status,),
+			} => write!(f, "iPad Pro {} {}", size, generation),
 			IPadVariant::Pro {
 				size,
 				generation,
 				size_before_generation: false,
-				m_status,
-			} => write!(f, "iPad Pro {} {}{}", generation, size, m_status,),
+			} => write!(f, "iPad Pro {} {}", generation, size,),
 			IPadVariant::Mini { generation } => write!(f, "iPad mini {}", generation),
 			IPadVariant::Air {
 				generation,
-				m_status,
-			} => write!(f, "iPad Air {}{}", generation, m_status),
+			} => write!(f, "iPad Air {}", generation),
 			IPadVariant::Plain { generation } => write!(f, "iPad {}", generation),
 		}
 	}
@@ -124,13 +115,12 @@ mod test {
 	#[test]
 	fn ipad_ordering() {
 		let old = IPadVariant::Plain {
-			generation: NumGeneration::long(NonZeroU8::new(1).unwrap()),
+			generation: Generation::testing_num(NonZeroU8::new(1).unwrap()),
 		};
 		let new = IPadVariant::Pro {
 			size: ScreenSize::long_brackets(12.9),
-			generation: NumGeneration::long(NonZeroU8::new(2).unwrap()),
+			generation: Generation::testing_num(NonZeroU8::new(2).unwrap()),
 			size_before_generation: false,
-			m_status: MaybeMGen::default_testing(),
 		};
 		assert!(new > old);
 	}

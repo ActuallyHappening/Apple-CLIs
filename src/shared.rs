@@ -19,7 +19,15 @@ where
 	delimited(multispace0, inner, multispace0)
 }
 
-#[cfg(test)]
+/// Simplify testing
+/// ```ignore
+/// use apple_clis::prelude::*;
+/// 
+/// let examples = ["123", "456"]
+/// let func = |parsed| parsed.not_unimplemented();
+/// assert_nom_parses<YourT>(examples, func);
+/// ```
+#[cfg(any(test, doctest))]
 fn assert_nom_parses<T: NomFromStr + std::fmt::Display + std::fmt::Debug>(
 	examples: impl IntoIterator<Item = &'static str>,
 	successfully_parsed: impl Fn(&T) -> bool,

@@ -1,12 +1,8 @@
 use crate::prelude::*;
 
+/// E.g. M1
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, PartialOrd, Ord)]
 pub struct MGen(NonZeroU8);
-
-/// Wrapper around `Option<MStatus>` to allow for convenient [Display] impl.
-/// *The [Display] impl has a prefix space!*
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, PartialOrd, Ord)]
-pub struct MaybeMGen(Option<MGen>);
 
 impl MGen {
 	pub fn get_u8(&self) -> u8 {
@@ -32,38 +28,9 @@ impl MGen {
 	}
 }
 
-impl Display for MaybeMGen {
-	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-		match self.0 {
-			Some(m) => write!(f, " {}", m),
-			None => Ok(()),
-		}
-	}
-}
-
-impl MaybeMGen {
-	#[allow(dead_code)]
-	pub fn get(&self) -> Option<&MGen> {
-		self.0.as_ref()
-	}
-
-	pub(crate) fn new(m: Option<MGen>) -> Self {
-		Self(m)
-	}
-
-	#[cfg(test)]
-	pub(crate) fn default_testing() -> Self {
-		Self::new(Some(MGen::default_testing()))
-	}
-}
-
 /// parses (M1) -> MStatus(NonZeroU8(1))
 fn parse_m_status(input: &str) -> IResult<&str, MGen> {
-	delimited(
-		tag("(M"),
-		map(NonZeroU8::nom_from_str, MGen::new),
-		tag(")"),
-	)(input)
+	delimited(tag("(M"), map(NonZeroU8::nom_from_str, MGen::new), tag(")"))(input)
 }
 
 impl Display for MGen {
@@ -72,12 +39,9 @@ impl Display for MGen {
 	}
 }
 
-impl NomFromStr for MaybeMGen {
+impl NomFromStr for MGen {
 	fn nom_from_str(input: &str) -> IResult<&str, Self> {
-		map(alt((
-			map(parse_m_status, Some),
-			value(None, tag("")),
-		)), MaybeMGen::new)(input)
+		delimited(tag("(M"), map(NonZeroU8::nom_from_str, MGen::new), tag(")"))(input)
 	}
 }
 
@@ -87,10 +51,7 @@ mod tests {
 
 	#[test]
 	fn test_parse_hard_coded() {
-		let examples = [
-			"(M1)",
-			"(M2)",
-		];
+		let examples = ["(M1)", "(M2)"];
 		for example in examples {
 			let (remaining, parsed) = parse_m_status(example).unwrap();
 			assert!(remaining.is_empty());
