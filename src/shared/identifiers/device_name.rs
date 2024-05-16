@@ -105,7 +105,16 @@ mod tests {
 	use super::*;
 
 	#[test]
-	fn test_parse_device_name() {
+	fn hardcoded_parse_device_names() {
+		let examples = [
+			"iPad Air 11-inch (M2)",
+			"iPad Pro (11-inch) (4th generation)",
+		];
+		assert_nom_parses::<DeviceName>(examples, |d| d.parsed_successfully());
+	}
+
+	#[test]
+	fn generated_parse_device_name() {
 		let examples = include!("../../../tests/device-names.json");
 		assert_nom_parses::<DeviceName>(examples, |d| d.parsed_successfully())
 	}

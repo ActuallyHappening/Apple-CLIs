@@ -5,6 +5,7 @@ use crate::prelude::*;
 #[derive(Debug, Clone, Copy, PartialEq, Eq, EnumDiscriminants, PartialOrd, Ord)]
 pub enum IPadVariant {
 	Air {
+		screen_size: MaybeScreenSize,
 		generation: Generation,
 	},
 	Mini {
@@ -44,10 +45,12 @@ impl NomFromStr for IPadVariant {
 
 		match discriminate {
 			IPadVariantDiscriminants::Air => {
+				let (remaining, screen_size) = MaybeScreenSize::nom_from_str(remaining)?;
 				let (remaining, generation) = Generation::nom_from_str(remaining)?;
 				Ok((
 					remaining,
 					IPadVariant::Air {
+						screen_size,
 						generation,
 					},
 				))
@@ -99,8 +102,9 @@ impl Display for IPadVariant {
 			} => write!(f, "iPad Pro {} {}", generation, size,),
 			IPadVariant::Mini { generation } => write!(f, "iPad mini {}", generation),
 			IPadVariant::Air {
+				screen_size,
 				generation,
-			} => write!(f, "iPad Air {}", generation),
+			} => write!(f, "iPad Air{} {}", screen_size, generation),
 			IPadVariant::Plain { generation } => write!(f, "iPad {}", generation),
 		}
 	}

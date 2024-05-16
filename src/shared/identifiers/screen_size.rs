@@ -2,6 +2,47 @@ use std::hash::Hash;
 
 use crate::prelude::*;
 
+pub use maybe::MaybeScreenSize;
+
+mod maybe {
+	use crate::prelude::*;
+
+	/// Wrapper around Option<[ScreenSize]> for easy of [Display] impl.
+	/// The display impl *includes a prefix space*.
+	#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
+	pub struct MaybeScreenSize(Option<ScreenSize>);
+
+	impl MaybeScreenSize {
+		pub fn as_ref(&self) -> Option<&ScreenSize> {
+			self.0.as_ref()
+		}
+
+		pub fn get(&self) -> Option<&ScreenSize> {
+			self.as_ref()
+		}
+	}
+
+	impl Display for MaybeScreenSize {
+		fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+			if let Some(screen_size) = self.0.as_ref() {
+				write!(f, " {}", screen_size)
+			} else {
+				Ok(())
+			}
+		}
+	}
+
+	impl NomFromStr for MaybeScreenSize {
+		fn nom_from_str(input: &str) -> IResult<&str, Self> {
+			map(opt(ScreenSize::nom_from_str), MaybeScreenSize)(input)
+		}
+	}
+
+	#[cfg(test)]
+	mod test {
+	}
+}
+
 #[derive(Debug, Clone, Copy, Eq, PartialOrd, Ord)]
 pub struct ScreenSize {
 	/// divide by 10 to get number of actual inches
@@ -30,7 +71,7 @@ impl ScreenSize {
 	/// Long format and brackets
 	/// ```rust
 	/// use apple_clis::prelude::*;
-	/// 
+	///
 	/// #[cfg(feature = "unstable-construction")]
 	/// {
 	/// 	let example = "(11-inch)";
@@ -52,7 +93,7 @@ impl ScreenSize {
 	/// Long format and no brackets
 	/// ```rust
 	/// use apple_clis::prelude::*;
-	/// 
+	///
 	/// #[cfg(feature = "unstable-construction")]
 	/// {
 	/// 	let example = "11-inch";
@@ -74,7 +115,7 @@ impl ScreenSize {
 	/// Short format and brackets
 	/// ```rust
 	/// use apple_clis::prelude::*;
-	/// 
+	///
 	/// #[cfg(feature = "unstable-construction")]
 	/// {
 	/// 	let example = "(13\")";
@@ -96,7 +137,7 @@ impl ScreenSize {
 	/// Short format and no brackets
 	/// ```rust
 	/// use apple_clis::prelude::*;
-	/// 
+	///
 	/// #[cfg(feature = "unstable-construction")]
 	/// {
 	/// 	let example = "13\"";
@@ -133,7 +174,11 @@ fn bracketless_long(input: &str) -> IResult<&str, ScreenSize> {
 }
 
 fn brackets_short(input: &str) -> IResult<&str, ScreenSize> {
-	delimited(ws(tag("(")), map(float, ScreenSize::short_brackets), ws(tag("\")")))(input)
+	delimited(
+		ws(tag("(")),
+		map(float, ScreenSize::short_brackets),
+		ws(tag("\")")),
+	)(input)
 }
 
 fn bracketless_short(input: &str) -> IResult<&str, ScreenSize> {
@@ -143,7 +188,12 @@ fn bracketless_short(input: &str) -> IResult<&str, ScreenSize> {
 impl NomFromStr for ScreenSize {
 	#[tracing::instrument(level = "trace", skip(input))]
 	fn nom_from_str(input: &str) -> IResult<&str, Self> {
-		alt((brackets_long, brackets_short, bracketless_long, bracketless_short))(input)
+		alt((
+			brackets_long,
+			brackets_short,
+			bracketless_long,
+			bracketless_short,
+		))(input)
 	}
 }
 

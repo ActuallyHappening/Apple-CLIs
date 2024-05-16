@@ -23,7 +23,6 @@ pub mod prelude {
 	pub(crate) use crate::include_doc;
 
 	// internal dep imports
-	pub(crate) use stability::unstable;
 	pub(crate) use bossy::{ExitStatus, Output};
 	pub(crate) use camino::{Utf8Path, Utf8PathBuf};
 	#[allow(unused_imports)]
@@ -31,7 +30,7 @@ pub mod prelude {
 		branch::{alt, permutation},
 		bytes::complete::{tag, take_till, take_till1, take_until, take_while},
 		character::complete::{alpha0, alpha1, digit1, multispace0, multispace1, space0, space1},
-		combinator::{all_consuming, cut, map, map_res, peek, rest, success, value},
+		combinator::{all_consuming, cut, map, map_res, peek, rest, success, value, opt},
 		multi::fold_many1,
 		number::complete::float,
 		sequence::{delimited, pair, preceded, terminated, tuple},

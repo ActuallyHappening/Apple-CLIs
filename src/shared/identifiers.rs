@@ -2,7 +2,7 @@ use crate::prelude::*;
 
 pub use device_name::{DeviceName, IPadVariant, IPhoneVariant};
 pub use generation::*;
-pub use screen_size::ScreenSize;
+pub use screen_size::{ScreenSize, MaybeScreenSize};
 pub use model_name::ModelName;
 
 mod device_name;
