@@ -1607,13 +1607,13 @@
       {
         "lastBootedAt": "2024-05-15T22:50:21Z",
         "dataPath": "/Users/ah/Library/Developer/CoreSimulator/Devices/082A3477-208B-474D-918D-7AFD64BD634E/data",
-        "dataPathSize": 1825165312,
+        "dataPathSize": 1949679616,
         "logPath": "/Users/ah/Library/Logs/CoreSimulator/082A3477-208B-474D-918D-7AFD64BD634E",
         "udid": "082A3477-208B-474D-918D-7AFD64BD634E",
         "isAvailable": true,
-        "logPathSize": 262144,
+        "logPathSize": 327680,
         "deviceTypeIdentifier": "com.apple.CoreSimulator.SimDeviceType.iPad-Pro-12-9-inch-6th-generation-8GB",
-        "state": "Booted",
+        "state": "Shutdown",
         "name": "iPad Pro (12.9-inch) (6th generation)"
       },
       {
@@ -1647,13 +1647,15 @@
         "name": "iPad Pro 11-inch (M4)"
       },
       {
+        "lastBootedAt": "2024-05-16T01:24:19Z",
         "dataPath": "/Users/ah/Library/Developer/CoreSimulator/Devices/01E399AA-455B-42D5-B7AA-477E1DB21EC9/data",
-        "dataPathSize": 18337792,
+        "dataPathSize": 1141882880,
         "logPath": "/Users/ah/Library/Logs/CoreSimulator/01E399AA-455B-42D5-B7AA-477E1DB21EC9",
         "udid": "01E399AA-455B-42D5-B7AA-477E1DB21EC9",
         "isAvailable": true,
+        "logPathSize": 86016,
         "deviceTypeIdentifier": "com.apple.CoreSimulator.SimDeviceType.iPad-Pro-13-inch-M4-8GB",
-        "state": "Shutdown",
+        "state": "Booted",
         "name": "iPad Pro 13-inch (M4)"
       }
     ]

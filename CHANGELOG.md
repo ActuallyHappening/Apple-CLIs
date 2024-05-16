@@ -1,5 +1,8 @@
 # Apple CLIs
 
+## [0.0.14]
+- Quality of life improvements, especially spans for logging
+
 ## [0.0.13]
 - Added new error case for simctl boot, which helps me to solve a problem with the simulator not booting
 - Refactored a bunch of doc macros
