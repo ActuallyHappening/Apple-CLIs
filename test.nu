@@ -9,3 +9,6 @@ nu test-bundle.nu
 cd ..
 
 cargo t
+
+# various regressions
+cargo r -- ios-deploy detect --wifi

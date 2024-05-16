@@ -82,5 +82,8 @@ macro_rules! include_doc {
 		(must_use_cmd_output) => {
 			include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/docs/inline/must_use_command_output.md"))
 		};
+		(todo) => {
+			include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/docs/inline/TODO.md"))
+		};
 }
 pub(crate) use include_doc;

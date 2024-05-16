@@ -5,7 +5,7 @@ use crate::prelude::*;
 #[derive(
 	Debug, Clone, PartialEq, derive_more::Display, derive_more::From, Serialize, Deserialize,
 )]
-#[serde(try_from = "&str")]
+#[serde(try_from = "String")]
 #[serde(into = "String")]
 pub enum ModelName {
 	IPhone(IPhoneVariant),
@@ -13,7 +13,7 @@ pub enum ModelName {
 	IPad(IPadVariant),
 
 	#[from(ignore)]
-	#[doc = include_str!(concat!(env!("CARGO_MANIFEST_DIR"), "/docs/inline/TODO.md"))]
+	#[doc = include_doc!(todo)]
 	UnImplemented(String),
 }
 
@@ -28,6 +28,14 @@ impl TryFrom<&str> for ModelName {
 	type Error = <Self as FromStr>::Err;
 
 	fn try_from(value: &str) -> std::prelude::v1::Result<Self, Self::Error> {
+		value.parse()
+	}
+}
+
+impl TryFrom<String> for ModelName {
+	type Error = <Self as FromStr>::Err;
+
+	fn try_from(value: String) -> std::prelude::v1::Result<Self, Self::Error> {
 		value.parse()
 	}
 }

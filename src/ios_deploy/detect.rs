@@ -25,10 +25,14 @@ impl IosDeployCLIInstance {
 			}
 		};
 
+		trace!(previous_output = %output, "Before processing ios-deploy JSON output");
+
 		// after every } close brace, adds a comma
 		// this is to handle { .. } \n { ... } even style messages
 		let output = format!("[{}]", output);
 		let output = output.replace("}{", "},{");
+
+		trace!(after_output = %output, "After processing ios-deploy JSON output");
 
 		#[derive(Debug, Deserialize)]
 		struct Event {
@@ -51,7 +55,13 @@ impl IosDeployCLIInstance {
 			model_name: ModelName,
 		}
 
-		let events = serde_json::from_str::<Vec<Event>>(&output)?;
+		let events = match serde_json::from_str::<Vec<Event>>(&output) {
+			Ok(events) => events,
+			Err(err) => {
+				error!(%output, "Failed to parse JSON output from ios-deploy");
+				Err(err)?
+			}
+		};
 		let devices = events
 			.into_iter()
 			.map(|event| Device {

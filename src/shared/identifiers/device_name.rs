@@ -4,7 +4,7 @@ use crate::prelude::*;
 #[derive(
 	Debug, Clone, PartialEq, derive_more::Display, derive_more::From, Serialize, Deserialize,
 )]
-#[serde(try_from = "&str")]
+#[serde(try_from = "String")]
 #[serde(into = "String")]
 pub enum DeviceName {
 	IPhone(IPhoneVariant),
@@ -27,6 +27,14 @@ impl TryFrom<&str> for DeviceName {
 	type Error = <Self as FromStr>::Err;
 
 	fn try_from(value: &str) -> std::result::Result<Self, Self::Error> {
+		value.parse()
+	}
+}
+
+impl TryFrom<String> for DeviceName {
+	type Error = <Self as FromStr>::Err;
+
+	fn try_from(value: String) -> std::result::Result<Self, Self::Error> {
 		value.parse()
 	}
 }
