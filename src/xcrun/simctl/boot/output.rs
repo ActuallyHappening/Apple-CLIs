@@ -42,7 +42,7 @@ impl CommandNomParsable for BootOutput {
 	}
 
 	fn errored_nom_from_str(input: &str) -> IResult<&str, Self> {
-		parse_already_booted(input)
+		alt((parse_already_booted, parse_launchd_failed))(input)
 	}
 }
 
@@ -61,6 +61,7 @@ impl PublicCommandOutput for BootOutput {
 	}
 }
 
+/// Parses [BootOutput::AlreadyBooted]
 fn parse_already_booted(input: &str) -> IResult<&str, BootOutput> {
 	let (remaining, _preamble) = ws(tag("An error was encountered processing the command"))(input)?;
 	let (remaining, domain) =
@@ -72,4 +73,20 @@ fn parse_already_booted(input: &str) -> IResult<&str, BootOutput> {
 	warn!(?domain, ?error_code, ?msg, "Parsed xcrun simctl boot error");
 
 	Ok(("", BootOutput::AlreadyBooted))
+}
+
+/// Parses [BootOutput::ErrorLaunchDFailed]
+/// An error was encountered processing the command (domain=NSPOSIXErrorDomain, code=60):
+/// Unable to boot the Simulator.
+/// launchd failed to respond.
+fn parse_launchd_failed(input: &str) -> IResult<&str, BootOutput> {
+	let (remaining, _preamble) = ws(tag("An error was encountered processing the command"))(input)?;
+	let (remaining, domain) =
+		delimited(tag("(domain="), take_till(|c| c == ','), tag(","))(remaining)?;
+	let (remaining, error_code) = delimited(ws(tag("code=")), digit1, ws(tag("):")))(remaining)?;
+	let (underlying_error, msg) = ws(tag("launchd failed to respond."))(remaining)?;
+
+	warn!(?domain, ?error_code, ?msg, ?underlying_error, "Parsed xcrun simctl boot error");
+
+	Ok(("", BootOutput::ErrorLaunchDFailed { stderr: input.into() }))
 }
