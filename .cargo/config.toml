@@ -1,2 +1,4 @@
 [alias]
 t = "test-all-features"
+rs = "run-script"
+ts = "rs test"

@@ -1820,7 +1820,7 @@
       {
         "lastBootedAt": "2024-05-16T02:29:35Z",
         "dataPath": "/Users/ah/Library/Developer/CoreSimulator/Devices/02B4F402-2753-48FC-9E84-72ACC559B7D3/data",
-        "dataPathSize": 1014448128,
+        "dataPathSize": 1011699712,
         "logPath": "/Users/ah/Library/Logs/CoreSimulator/02B4F402-2753-48FC-9E84-72ACC559B7D3",
         "udid": "02B4F402-2753-48FC-9E84-72ACC559B7D3",
         "isAvailable": true,
@@ -1946,13 +1946,13 @@
     "com.apple.CoreSimulator.SimRuntime.iOS-17-4":
     [
       {
-        "lastBootedAt": "2024-05-16T02:37:16Z",
+        "lastBootedAt": "2024-05-16T23:16:38Z",
         "dataPath": "/Users/ah/Library/Developer/CoreSimulator/Devices/89755AAA-1AA0-438A-B78E-6662DAFDAEC0/data",
-        "dataPathSize": 1300533248,
+        "dataPathSize": 1288847360,
         "logPath": "/Users/ah/Library/Logs/CoreSimulator/89755AAA-1AA0-438A-B78E-6662DAFDAEC0",
         "udid": "89755AAA-1AA0-438A-B78E-6662DAFDAEC0",
         "isAvailable": true,
-        "logPathSize": 65536,
+        "logPathSize": 69632,
         "deviceTypeIdentifier": "com.apple.CoreSimulator.SimDeviceType.iPhone-SE-3rd-generation",
         "state": "Shutdown",
         "name": "iPhone SE (3rd generation)"
@@ -2012,13 +2012,13 @@
         "name": "iPad Air (5th generation)"
       },
       {
-        "lastBootedAt": "2024-03-17T03:07:54Z",
+        "lastBootedAt": "2024-06-08T10:18:46Z",
         "dataPath": "/Users/ah/Library/Developer/CoreSimulator/Devices/E4BBA9F2-DEB7-4276-84AF-E85A6971018E/data",
-        "dataPathSize": 1395445760,
+        "dataPathSize": 1740775424,
         "logPath": "/Users/ah/Library/Logs/CoreSimulator/E4BBA9F2-DEB7-4276-84AF-E85A6971018E",
         "udid": "E4BBA9F2-DEB7-4276-84AF-E85A6971018E",
         "isAvailable": true,
-        "logPathSize": 114688,
+        "logPathSize": 122880,
         "deviceTypeIdentifier": "com.apple.CoreSimulator.SimDeviceType.iPad-10th-generation",
         "state": "Shutdown",
         "name": "iPad (10th generation)"
